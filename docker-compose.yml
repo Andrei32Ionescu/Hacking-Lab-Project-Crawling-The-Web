@@ -4,4 +4,4 @@ services:
     volumes:
       - ./output:/app/output
     environment:
-      - PYTHONUNBUFFERED=1
+      - GO111MODULE=on

@@ -1,12 +1,20 @@
-FROM python:3.9-slim
+FROM golang:1.21-alpine
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Install git for go mod download
+RUN apk add --no-cache git
 
+# Copy source code
 COPY . .
 
-RUN chmod +x run_crawler.sh
+# Download dependencies and verify
+RUN go mod tidy
 
-CMD ["./run_crawler.sh"]
+# Build the application
+RUN go build -o webcrawler .
+
+# Make run script executable
+RUN chmod +x run.sh
+
+ENTRYPOINT ["./run.sh"]
