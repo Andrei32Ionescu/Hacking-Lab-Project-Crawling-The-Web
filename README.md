@@ -4,5 +4,5 @@ Toy crawler initial implementation
 
 Run the crawler with Docker Compose:
 ```
-docker-compose up
+docker-compose up --build
 ```
