@@ -1,0 +1,7 @@
+services:
+  crawler:
+    build: .
+    volumes:
+      - ./output:/app/output
+    environment:
+      - PYTHONUNBUFFERED=1
