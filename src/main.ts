@@ -1,4 +1,4 @@
-import { PlaywrightCrawler } from 'crawlee';
+import { PlaywrightCrawler, ProxyConfiguration  } from 'crawlee';
 import { chromium, firefox } from 'playwright-extra';
 import stealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { BrowserName, DeviceCategory, OperatingSystemsName } from '@crawlee/browser-pool';
@@ -9,6 +9,13 @@ import fs from 'fs';
 // Certain plugins might have options you can pass in - read up on their documentation!
 chromium.use(stealthPlugin());
 
+const proxyConfiguration = new ProxyConfiguration({
+    proxyUrls: [
+        'http://102.222.161.143:3128',
+        'http://103.111.82.134:8080',
+    ]
+});
+
 // Create an instance of the PuppeteerCrawler class - a crawler
 // that automatically loads the URLs in headless Chrome / Puppeteer.
 const crawler = new PlaywrightCrawler({
@@ -17,6 +24,7 @@ const crawler = new PlaywrightCrawler({
             await handleCloudflareChallenge();
         },
     ],
+    proxyConfiguration,
     launchContext: {
         // !!! You need to specify this option to tell Crawlee to use puppeteer-extra as the launcher !!!
         launcher: firefox,
@@ -41,7 +49,7 @@ const crawler = new PlaywrightCrawler({
     },
 
     // Stop crawling after several pages
-    maxRequestsPerCrawl: 50,
+    maxRequestsPerCrawl: 10,
 
 
     // This function will be called for each URL to crawl.
