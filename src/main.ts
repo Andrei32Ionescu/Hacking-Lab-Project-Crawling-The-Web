@@ -15,7 +15,7 @@ const proxyConfiguration = new ProxyConfiguration({
         'http://103.111.82.134:8080',
     ]
 });
-
+var reached_url = 0
 // Create an instance of the PuppeteerCrawler class - a crawler
 // that automatically loads the URLs in headless Chrome / Puppeteer.
 const crawler = new PlaywrightCrawler({
@@ -30,6 +30,7 @@ const crawler = new PlaywrightCrawler({
         launcher: firefox,
         launchOptions: await launchOptions({
             headless: true,
+            blockAssets: ['image', 'font', 'media'],
         }),
     },
     browserPoolOptions: {
@@ -49,8 +50,7 @@ const crawler = new PlaywrightCrawler({
     },
 
     // Stop crawling after several pages
-    maxRequestsPerCrawl: 10,
-
+    maxRequestsPerCrawl: 1000,
 
     // This function will be called for each URL to crawl.
     // Here you can write the Puppeteer scripts you are familiar with,
@@ -59,8 +59,9 @@ const crawler = new PlaywrightCrawler({
     // - request: an instance of the Request class with information such as URL and HTTP method
     // - page: Puppeteer's Page object (see https://pptr.dev/#show=api-class-page)
     async requestHandler({ request, page, log }) {
+        reached_url = reached_url + 1
         const title = await page.title();
-        log.info(`Title of ${request.url} is ${title}`);
+        log.info(`${reached_url}) Title of ${request.url} is ${title}`);
 
         // // A function to be evaluated by Puppeteer within the browser context.
         // const data = await page.$$eval('.athing', ($posts) => {
