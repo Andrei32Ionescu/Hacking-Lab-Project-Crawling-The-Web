@@ -7,7 +7,7 @@ import fs from 'fs';
 
 // First, we tell puppeteer-extra to use the plugin (or plugins) we want.
 // Certain plugins might have options you can pass in - read up on their documentation!
-chromium.use(stealthPlugin());
+// chromium.use(stealthPlugin());
 
 const proxyConfiguration = new ProxyConfiguration({
     proxyUrls: [
@@ -38,7 +38,7 @@ const crawler = new PlaywrightCrawler({
             fingerprintGeneratorOptions: {
                 browsers: [
                     {
-                        name: BrowserName.edge,
+                        name: BrowserName.firefox,
                         minVersion: 96,
                     },
                 ],
@@ -108,7 +108,7 @@ urls.pop();
 
 const actualUrls = urls.map((url) => 'https://' + url.url);
 actualUrls[0] = 'https://cloudflare.com';
-actualUrls[1] = 'https://cdnjs.com';
+actualUrls[1] = 'https://www.scrapingcourse.com/antibot-challenge';
 actualUrls[2] = 'https://vimeo.com';
 actualUrls[3] = 'https://weebly.com';
 actualUrls[4] = 'https://w3.org';
