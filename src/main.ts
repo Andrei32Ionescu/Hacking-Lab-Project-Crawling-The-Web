@@ -24,7 +24,7 @@ const crawler = new PlaywrightCrawler({
             await handleCloudflareChallenge();
         },
     ],
-    proxyConfiguration,
+    // proxyConfiguration,
     launchContext: {
         // !!! You need to specify this option to tell Crawlee to use puppeteer-extra as the launcher !!!
         launcher: firefox,
@@ -50,7 +50,7 @@ const crawler = new PlaywrightCrawler({
     },
 
     // Stop crawling after several pages
-    maxRequestsPerCrawl: 1000,
+    maxRequestsPerCrawl: 100,
 
     // This function will be called for each URL to crawl.
     // Here you can write the Puppeteer scripts you are familiar with,
