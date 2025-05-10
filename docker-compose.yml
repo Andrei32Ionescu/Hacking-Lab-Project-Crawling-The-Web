@@ -2,6 +2,8 @@ services:
   crawler:
     build: .
     volumes:
-      - ./output:/app/output
+      - ./output:/app/output        # same host-folder bind mount
     environment:
-      - GO111MODULE=on
+      - PYTHONUNBUFFERED=1          # keeps logs flushing in real time
+    # (optional) override command if you removed run.sh
+    # command: ["python", "main.py"]
