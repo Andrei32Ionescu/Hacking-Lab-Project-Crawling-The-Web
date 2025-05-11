@@ -41,10 +41,19 @@ const crawler = new PlaywrightCrawler({
                     {
                         name: BrowserName.firefox,
                         minVersion: 96,
+                        maxVersion: 116
                     },
                 ],
-                devices: [DeviceCategory.desktop],
-                operatingSystems: [OperatingSystemsName.windows],
+                devices: [
+                    DeviceCategory.desktop,
+                    DeviceCategory.mobile
+
+                ],
+                operatingSystems: [
+                    OperatingSystemsName.windows,
+                    OperatingSystemsName.macos,
+                    OperatingSystemsName.linux
+                ],
             },
         },
     },
