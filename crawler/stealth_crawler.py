@@ -1,9 +1,11 @@
-import asyncio, random
+import asyncio, random, os
 from playwright.async_api import async_playwright, Browser, BrowserContext, Page
 from playwright_stealth import stealth_async
 from fake_useragent import UserAgent
 
-async def grab(url: str, outfile: str = "page.png") -> None:
+SCREENSHOT_DIR = "screenshots"
+
+async def grab(url: str, outfile: str) -> None:
     ua = UserAgent().random
     async with async_playwright() as p:
         browser: Browser = await p.firefox.launch(
@@ -25,17 +27,28 @@ async def grab(url: str, outfile: str = "page.png") -> None:
         await stealth_async(page)
         try:
             await page.goto(url, wait_until="networkidle")
+            await page.screenshot(path=outfile, full_page=True)
+            print(f"Captured {url} in {outfile}")
         except Exception as e:
-            print(e)
-        await page.screenshot(path=outfile, full_page=True)
-        print(f"Captured {url} in {outfile}")
+            print(f"Failed to grab {url}: {e}")
         await browser.close()
 
-with open("urls.txt", "r") as f:
-    urls = f.readlines()
-    for url in urls:
-        url = url.strip()
-        if url:
-            asyncio.run(grab("https://www." + url, f"{url}.png"))
-        else:
-            print("Empty URL found, skipping...")
+async def main():
+    os.makedirs(SCREENSHOT_DIR, exist_ok=True)
+
+    tasks = []
+    with open("urls.txt", "r") as f:
+        urls = f.readlines()
+        for raw_url in urls:
+            raw_url = raw_url.strip()
+            if raw_url:
+                full_url = "https://www." + raw_url
+                outfile = os.path.join(SCREENSHOT_DIR, f"{raw_url}.png")
+                tasks.append(grab(full_url, outfile))
+            else:
+                print("Empty URL found, skipping...")
+
+    await asyncio.gather(*tasks)
+
+if __name__ == "__main__":
+    asyncio.run(main())
