@@ -1,8 +1,9 @@
 # Hacking-Lab-Project-Crawling-The-Web
 
-Toy crawler initial implementation
+Web crawler implementation attempt using the Colly library
 
-Run the crawler with Docker Compose:
+Reads the domains from the provided csv file.
+
 ```
-docker-compose up --build
+go run .
 ```
