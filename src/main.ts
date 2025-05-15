@@ -25,12 +25,24 @@ const crawler = new PlaywrightCrawler({
         },
     ],
     // proxyConfiguration,
+    maxConcurrency: 10, // Process 10 pages in parallel
+    minConcurrency: 5,  // At least 5 parallel processes
     launchContext: {
         // !!! You need to specify this option to tell Crawlee to use puppeteer-extra as the launcher !!!
         launcher: firefox,
         launchOptions: await launchOptions({
             headless: true,
-            blockAssets: ['image', 'font', 'media'],
+            blockAssets: ['image', 'font', 'media', 'stylesheet', 'script'],
+            args: [
+                '--disable-gpu',
+                '--disable-dev-shm-usage',
+                '--disable-setuid-sandbox',
+                '--no-sandbox',
+                '--disable-accelerated-2d-canvas',
+                '--no-first-run',
+                '--no-zygote',
+                '--disable-extensions',
+            ],
         }),
     },
     browserPoolOptions: {
