@@ -5,9 +5,16 @@ import { BrowserName, DeviceCategory, OperatingSystemsName } from '@crawlee/brow
 import { launchOptions } from 'camoufox-js';
 import fs from 'fs';
 
-// First, we tell puppeteer-extra to use the plugin (or plugins) we want.
-// Certain plugins might have options you can pass in - read up on their documentation!
-// chromium.use(stealthPlugin());
+const benchmarkStats = {
+    totalRequests: 0,
+    successfulRequests: 0,
+    failedRequests: 0,
+    totalTime: 0,
+    startTime: Date.now(),
+    endTime: 0
+};
+
+const timings = new Map<string, { startTime: number, endTime: number | null }>();
 
 const proxyConfiguration = new ProxyConfiguration({
     proxyUrls: [
@@ -19,6 +26,17 @@ var reached_url = 0
 // Create an instance of the PuppeteerCrawler class - a crawler
 // that automatically loads the URLs in headless Chrome / Puppeteer.
 const crawler = new PlaywrightCrawler({
+    // Track when each request starts
+    preNavigationHooks: [
+        async ({ request }) => {
+            // Start timing for this request
+            timings.set(request.url, {
+                startTime: Date.now(),
+                endTime: null
+            });
+            benchmarkStats.totalRequests++;
+        },
+    ],
     postNavigationHooks: [
         async ({ handleCloudflareChallenge }) => {
             await handleCloudflareChallenge();
@@ -84,36 +102,29 @@ const crawler = new PlaywrightCrawler({
         const title = await page.title();
         log.info(`${reached_url}) Title of ${request.url} is ${title}`);
 
-        // // A function to be evaluated by Puppeteer within the browser context.
-        // const data = await page.$$eval('.athing', ($posts) => {
-        //     const scrapedData: { title: string; rank: string; href: string }[] = [];
-
-        //     // We're getting the title, rank and URL of each post on Hacker News.
-        //     $posts.forEach(($post) => {
-        //         scrapedData.push({
-        //             title: $post.querySelector('.title a').innerText,
-        //             rank: $post.querySelector('.rank').innerText,
-        //             href: $post.querySelector('.title a').href,
-        //         });
-        //     });
-
-        //     return scrapedData;
-        // });
-
-        // // Store the results to the default dataset.
-        // await pushData(data);
-
-        // // Find a link to the next page and enqueue it if it exists.
-        // const infos = await enqueueLinks({
-        //     selector: '.morelink',
-        // });
-
-        // if (infos.processedRequests.length === 0) log.info(`${request.url} is the last page!`);
+        // Record successful request timing
+        benchmarkStats.successfulRequests++;
+        const timing = timings.get(request.url);
+        if (timing) {
+            timing.endTime = Date.now();
+            if (timing.endTime && timing.startTime) {
+                benchmarkStats.totalTime += (timing.endTime - timing.startTime);
+            }
+        }
     },
 
     // This function is called if the page processing failed more than maxRequestRetries+1 times.
     failedRequestHandler({ request, log }) {
         log.error(`Request ${request.url} failed too many times.`);
+        
+        // Record unsuccessful request timing
+        const timing = timings.get(request.url);
+        if (timing) {
+            timing.endTime = Date.now();
+            if (timing.endTime && timing.startTime) {
+                benchmarkStats.totalTime += (timing.endTime - timing.startTime);
+            }
+        }
     },
 });
 
@@ -141,5 +152,25 @@ await crawler.addRequests(actualUrls);
 
 // Start the crawler
 await crawler.run();
+
+benchmarkStats.endTime = Date.now();
+
+// Calculate and output benchmark summary
+const totalCrawlTime = benchmarkStats.endTime - benchmarkStats.startTime;
+const averageRequestTime = benchmarkStats.totalRequests > 0 ? benchmarkStats.totalTime / benchmarkStats.totalRequests : 0;
+
+benchmarkStats.failedRequests = benchmarkStats.totalRequests - benchmarkStats.successfulRequests;
+
+const successRate = benchmarkStats.totalRequests > 0 ? (benchmarkStats.successfulRequests / benchmarkStats.totalRequests) * 100 : 0;
+
+console.log('\n=== CRAWLER BENCHMARK SUMMARY ===');
+console.log(`Total Requests: ${benchmarkStats.totalRequests}`);
+console.log(`Successful Requests: ${benchmarkStats.successfulRequests}`);
+console.log(`Failed Requests: ${benchmarkStats.failedRequests}`);
+console.log(`Success Rate: ${successRate.toFixed(2)}%`);
+console.log(`Total Crawl Time: ${totalCrawlTime}ms (${(totalCrawlTime / 1000).toFixed(2)}s)`);
+console.log(`Average Request Time: ${averageRequestTime.toFixed(2)}ms (${(averageRequestTime / 1000).toFixed(2)}s)`);
+console.log(`Requests Per Second: ${(totalCrawlTime > 0 ? (benchmarkStats.totalRequests / (totalCrawlTime / 1000)) : 0).toFixed(2)}`);
+console.log('=================================');
 
 console.log('Crawler finished.');
