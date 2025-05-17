@@ -2,7 +2,7 @@
 
 Web crawler implementation attempt using the Colly library
 
-Reads the domains from the `top-1m.csv` file
+Reads the domains from the `top-1m.csv` file and saves the results in the `results` file
 
 ```sh
 go run crawler.go
