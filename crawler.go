@@ -31,6 +31,7 @@ func main() {
 	logToConsole := flag.Bool("console", false, "Also log results to console")
 	concurrency := flag.Int("concurrency", 1, "Number of sites to crawl in parallel")
 	debug := flag.Bool("debug", false, "Show detailed crawl/debug logs")
+	indexed := flag.Bool("indexed", false, "CSV has an index column; domain is in the second column")
 	flag.Parse()
 
 	// Open results file for writing
@@ -105,7 +106,15 @@ func main() {
 		if len(row) == 0 {
 			continue
 		}
-		domain := strings.TrimSpace(row[1])
+		var domain string
+		if *indexed {
+			if len(row) < 2 {
+				continue // skip if not enough columns
+			}
+			domain = strings.TrimSpace(row[1])
+		} else {
+			domain = strings.TrimSpace(row[0])
+		}
 		if domain == "" {
 			continue
 		}

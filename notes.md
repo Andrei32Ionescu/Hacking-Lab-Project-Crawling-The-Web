@@ -30,7 +30,7 @@ for (const src of scriptSrcs) {
 
 ## Go (Colly)
 
-- 2000 domains 22dps (1m33s) with concurrency 32, 1000x 0 error, 400-x 200 codes + others
+- Alexa 2000 domains 22dps (1m33s) with concurrency 32, 1000x 0 error, 400-x 200 codes + others
     - Status code breakdown:
         - 0: 1242
             - 408 dns lookup
@@ -50,7 +50,7 @@ for (const src of scriptSrcs) {
         - 501: 1
         - 502: 10
         - 503: 19
-- 2000 domains 1dps (33m58s) with concurrency 1
+- Alexa 2000 domains 1dps (33m58s) with concurrency 1
     - Status code breakdown:
         - 0: 691
         - 200: 551
@@ -69,9 +69,27 @@ for (const src of scriptSrcs) {
         - 501: 1
         - 502: 10
         - 503: 20
+- Cloudflare 2000 domains 1.6dps (20m50s) with concurrency 2
+    - Status code breakdown:
+        - 403: 31
+        - 429: 1
+        - 404: 44
+        - 520: 2
+        - 502: 3
+        - 202: 1
+        - 200: 918
+        - 204: 3
+        - 500: 2
+        - 401: 2
+        - 400: 4
+        - 0: 986
+        - 498: 2
+        - 522: 1
+        - 301: 1
 
 ## CVE 
  - it is hard to find websites with vulns
  - it is hard to find good vulns (CVEs)
  - should we make our own servers to test it?
  - can we look for random data on the website and just say how much JS we can see etc?
+ - https://chatgpt.com/share/6828e5f0-2e8c-800c-9d6d-bd261b9d4cb6
