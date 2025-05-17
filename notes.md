@@ -33,6 +33,7 @@ for (const src of scriptSrcs) {
 - 2000 domains 22dps (1m33s) with concurrency 32, 1000x 0 error, 400-x 200 codes + others
     - Status code breakdown:
         - 0: 1242
+            - 408 dns lookup
         - 200: 586
         - 204: 21
         - 301: 1
