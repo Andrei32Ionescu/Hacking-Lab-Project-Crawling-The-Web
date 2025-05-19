@@ -17,6 +17,16 @@ class SessionError(RuntimeError):
 IsPageBool = Callable[[Page], Awaitable[bool]]
 ClickCb   = Callable[[Page, Dict[str, float]], Awaitable[None]]
 
+async def safe_eval(page: Page, js: str, *, retries=2):
+    for _ in range(retries):
+        try:
+            return await page.evaluate(js)
+        except Exception as e:
+            # if "context was destroyed" not in
+            await page.wait_for_load_state("domcontentloaded")
+
+    return None
+
 async def handle_cloudflare_challenge(
     page: Page,
     url: str,
@@ -72,7 +82,7 @@ async def handle_cloudflare_challenge(
     # ------------------------------------------------------------------
     if is_blocked_callback is None:
         async def is_blocked_callback(page: Page) -> bool:  # type: ignore[assignment]
-            return await page.evaluate("""
+            return await safe_eval(page, """
                 () => {
                     const h1 = document.querySelector('h1');
                     return !!h1 && h1.textContent.trim().includes('Sorry, you have been blocked');
@@ -81,7 +91,7 @@ async def handle_cloudflare_challenge(
 
     if is_challenge_callback is None:
         async def is_challenge_callback(page: Page) -> bool:  # type: ignore[assignment]
-            return await page.evaluate("""
+            return await safe_eval(page, """
                 () => !!document.querySelector('.footer > .footer-inner > .diagnostic-wrapper > .ray-id')
             """)
 
@@ -115,7 +125,7 @@ async def handle_cloudflare_challenge(
     # ------------------------------------------------------------------
     # 5)  Find checkbox bounding box (.main-content div)
     # ------------------------------------------------------------------
-    bb = await page.evaluate("""
+    bb = await safe_eval(page, """
         () => {
             const div = document.querySelector('.main-content div');
             return div ? div.getBoundingClientRect() : null;
