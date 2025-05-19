@@ -1,20 +1,14 @@
-FROM golang:1.21-alpine
+FROM golang:1.23
 
-WORKDIR /app
+WORKDIR /go/src/hakrawler
 
-# Install git for go mod download
-RUN apk add --no-cache git
+# Install Chrome dependencies
+RUN apt-get update && apt-get install -y \
+    chromium \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy source code
 COPY . .
+RUN go mod download
+RUN go build -o /go/bin/hakrawler .
 
-# Download dependencies and verify
-RUN go mod tidy
-
-# Build the application
-RUN go build -o webcrawler .
-
-# Make run script executable
-RUN chmod +x run.sh
-
-ENTRYPOINT ["./run.sh"]
+ENTRYPOINT ["/go/bin/hakrawler"]
