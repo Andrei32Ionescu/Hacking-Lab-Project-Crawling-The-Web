@@ -24,6 +24,21 @@ import (
 
 )
 
+type Metrics struct {
+    sync.Mutex
+    StartTime       time.Time
+    TotalRequests   int
+    SuccessRequests int
+    FailedRequests  int
+    Redirects       int
+    PagesCrawled    int
+    LinksFound      int
+    TotalBytes      int64
+    RequestTimes    []time.Duration
+}
+
+var metrics Metrics
+
 type Result struct {
 	Source string
 	URL    string
@@ -34,6 +49,11 @@ var headers map[string]string
 var sm sync.Map
 
 func main() {
+
+	metrics = Metrics{
+		StartTime: time.Now(),
+	}
+
 	inside := flag.Bool("i", false, "Only crawl inside path")
 	threads := flag.Int("t", 8, "Number of threads to utilise.")
 	depth := flag.Int("d", 2, "Depth to crawl.")
@@ -104,7 +124,7 @@ func main() {
 	}()
 
 	// Worker pool
-	sem := make(chan struct{}, *threads)
+	sem := make(chan struct{}, *threads * 2)
 	for _, domain := range domains {
 		sem <- struct{}{}
 		wg.Add(1)
@@ -118,6 +138,8 @@ func main() {
 	}
 
 	wg.Wait()
+
+	printMetrics()
 	close(results)
 }
 
@@ -180,7 +202,12 @@ func crawlDomain(
 		})
 	}
 
-	c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 2})
+	// c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 2})
+	c.Limit(&colly.LimitRule{
+		DomainGlob:  "*",
+		Parallelism: 6, // Increased from 2
+		Delay:       300 * time.Millisecond, // Small delay between requests
+	})
 
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
 		link := e.Attr("href")
@@ -204,19 +231,59 @@ func crawlDomain(
 	})
 
 	c.OnRequest(func(r *colly.Request) {
+		r.Ctx.Put("start_time", time.Now().Format(time.RFC3339Nano))
+		
+		metrics.Lock()
+		metrics.TotalRequests++
+		metrics.Unlock()
+		
 		for header, val := range headers {
 			r.Headers.Set(header, val)
 		}
 	})
 
 	c.OnResponse(func(r *colly.Response) {
+		metrics.Lock()
+		metrics.SuccessRequests++
+		metrics.PagesCrawled++
+		metrics.TotalBytes += int64(len(r.Body))
+		metrics.Unlock()
+		
 		log.Printf("Visited: %s [%d]", r.Request.URL.String(), r.StatusCode)
 	})
-	
+
 	c.OnError(func(r *colly.Response, err error) {
+		metrics.Lock()
+		if r != nil {
+			if r.StatusCode >= 300 && r.StatusCode < 400 {
+				metrics.Redirects++
+			} else {
+				metrics.FailedRequests++
+			}
+		} else {
+			metrics.FailedRequests++
+		}
+		metrics.Unlock()
+		
 		log.Printf("Error visiting %s: %v", r.Request.URL.String(), err)
 	})
-	
+
+	c.OnScraped(func(r *colly.Response) {
+		startStr := r.Ctx.Get("start_time")
+		if startStr == "" {
+			return
+		}
+		
+		startTime, err := time.Parse(time.RFC3339Nano, startStr)
+		if err != nil {
+			log.Printf("Error parsing start time: %v", err)
+			return
+		}
+		
+		metrics.Lock()
+		metrics.RequestTimes = append(metrics.RequestTimes, time.Since(startTime))
+		metrics.Unlock()
+	})
 
 	// tr := &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: insecure}}
 	// if proxyURL != nil {
@@ -273,6 +340,12 @@ func extractHostname(urlString string) (string, error) {
 }
 
 func printResult(link, source string, showSource, showWhere, showJson bool, results chan string, e *colly.HTMLElement) {
+
+	metrics.Lock()
+    metrics.LinksFound++
+    metrics.Unlock()
+
+
 	result := e.Request.AbsoluteURL(link)
 	where := e.Request.URL.String()
 	if result != "" {
@@ -320,7 +393,7 @@ func loadDomains(filePath string, limit int) ([]string, error) {
 		}
 		domain := strings.TrimSpace(record[1])
 		if domain != "" {
-			domains = append(domains, "http://"+domain)
+			domains = append(domains, "https://"+domain, "http://"+domain)
 		}
 	}
 	return domains, nil
@@ -408,4 +481,53 @@ func detectSuspiciousPatterns(scripts, resources []string) []string {
 	}
 
 	return suspicious
+}
+
+func printMetrics() {
+    metrics.Lock()
+    defer metrics.Unlock()
+    
+    duration := time.Since(metrics.StartTime)
+    reqPerSec := float64(metrics.TotalRequests) / duration.Seconds()
+    avgReqTime := calculateAverage(metrics.RequestTimes)
+    bytesPerSec := float64(metrics.TotalBytes) / duration.Seconds()
+    
+    fmt.Println("\n=== Crawling Metrics ===")
+    fmt.Printf("Total runtime: %v\n", duration.Round(time.Second))
+    fmt.Printf("Total domains processed: %d\n", metrics.PagesCrawled)
+    fmt.Printf("Total requests made: %d\n", metrics.TotalRequests)
+    fmt.Printf("Successful requests: %d (%.1f%%)\n", metrics.SuccessRequests, 
+        float64(metrics.SuccessRequests)/float64(metrics.TotalRequests)*100)
+    fmt.Printf("Failed requests: %d (%.1f%%)\n", metrics.FailedRequests,
+        float64(metrics.FailedRequests)/float64(metrics.TotalRequests)*100)
+    fmt.Printf("Redirects handled: %d\n", metrics.Redirects)
+    fmt.Printf("Total links found: %d\n", metrics.LinksFound)
+    fmt.Printf("Total data downloaded: %s\n", formatBytes(metrics.TotalBytes))
+    fmt.Printf("Requests per second: %.2f\n", reqPerSec)
+    fmt.Printf("Average request time: %v\n", avgReqTime.Round(time.Millisecond))
+    fmt.Printf("Data rate: %s/s\n", formatBytes(int64(bytesPerSec)))
+}
+
+func calculateAverage(durations []time.Duration) time.Duration {
+    if len(durations) == 0 {
+        return 0
+    }
+    var sum time.Duration
+    for _, d := range durations {
+        sum += d
+    }
+    return sum / time.Duration(len(durations))
+}
+
+func formatBytes(b int64) string {
+    const unit = 1024
+    if b < unit {
+        return fmt.Sprintf("%d B", b)
+    }
+    div, exp := int64(unit), 0
+    for n := b / unit; n >= unit; n /= unit {
+        div *= unit
+        exp++
+    }
+    return fmt.Sprintf("%.1f %cB", float64(b)/float64(div), "KMGTPE"[exp])
 }
