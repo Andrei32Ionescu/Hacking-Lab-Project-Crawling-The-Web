@@ -1,3 +1,12 @@
-playwright
-playwright-stealth
-fake-useragent
+playwright==1.41.2
+playwright-stealth==1.0.6
+fake-useragent==2.2.0
+camoufox==0.4.11
+browserforge==1.2.3
+aiofiles==23.2.1
+python-dotenv==1.0.1
+requests==2.32.3
+urllib3==2.4.0
+certifi==2025.4.26
+charset-normalizer==3.4.2
+idna==3.10
