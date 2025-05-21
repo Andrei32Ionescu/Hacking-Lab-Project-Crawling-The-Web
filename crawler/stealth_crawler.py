@@ -1,10 +1,11 @@
-import asyncio, random, os
-from utils import handle_cloudflare_challenge
+import asyncio, os, time
+from playwright.async_api import async_playwright, TimeoutError as PWTimeout
 from camoufox.async_api import AsyncCamoufox
-from browserforge.injectors.playwright import AsyncNewContext
-from playwright.async_api import async_playwright
-import multiprocessing, time
 
+CONTEXTS   = 4        # browsers tabs kept open
+WORKERS    = 16       # concurrent coroutines pulling from the queue
+NAV_TO     = 30_000   # ms
+SHOT_TO    = 30_000   # ms
 SCREENSHOT_DIR = "screenshots"
 
 async def grab(url: str, outfile: str, browser) -> None:
