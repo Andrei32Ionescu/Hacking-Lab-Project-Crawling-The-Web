@@ -255,7 +255,7 @@ func crawlForTitle(currenturl string, maxdepth int, writeResult func(string, ...
 
 func crawlForWordPress(currenturl string, maxdepth int, writeResult func(string, ...interface{}), proxyFunc colly.ProxyFunc, debug bool, statusCounts *sync.Map, status0Errors *sync.Map) bool {
 	// Step 1: Check {currenturl}/wp-login.php
-	loginURL := strings.TrimRight(currenturl, "/") + "/wp-login.php"
+	loginURL := strings.TrimRight(currenturl, "/")// + "/wp-login.php"
 	client := &http.Client{
 		Timeout: 5 * time.Second, // Lowered timeout for faster skipping of dead sites
 		Transport: &http.Transport{
