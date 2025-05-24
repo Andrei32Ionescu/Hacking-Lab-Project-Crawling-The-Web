@@ -32,10 +32,12 @@ func main() {
 	concurrency := flag.Int("concurrency", 1, "Number of sites to crawl in parallel")
 	debug := flag.Bool("debug", false, "Show detailed crawl/debug logs")
 	indexed := flag.Bool("indexed", false, "CSV has an index column; domain is in the second column")
+	resultsFileN := flag.String("results", "results", "File to write results to (default: 'results')")
 	flag.Parse()
 
 	// Open results file for writing
-	resultsFile, err := os.Create("results")
+	resultsFileName := *resultsFileN
+	resultsFile, err := os.Create(resultsFileName)
 	if err != nil {
 		fmt.Println("Failed to create results file:", err)
 		return
@@ -453,12 +455,18 @@ func newCollectorWithConfig(maxdepth int, proxyFunc colly.ProxyFunc, debug bool,
 		c.SetProxyFunc(proxyFunc)
 	}
 	c.WithTransport(&http.Transport{
-		TLSHandshakeTimeout:   2 * time.Second,
-		ResponseHeaderTimeout: 30 * time.Second,
-		IdleConnTimeout:       5 * time.Second,
-		DisableKeepAlives:     false,
-	})
-	c.SetRequestTimeout(5 * time.Second)
+			MaxIdleConns:        1000,
+			MaxIdleConnsPerHost: 1000,
+			TLSHandshakeTimeout:   2 * time.Second,
+			ResponseHeaderTimeout: 30 * time.Second,
+			IdleConnTimeout:       5 * time.Second,
+			DisableKeepAlives:     false,
+			DialContext: (&net.Dialer{
+				Timeout:   5 * time.Second,
+				KeepAlive: 30 * time.Second,
+			}).DialContext,
+		},)
+	c.SetRequestTimeout(50 * time.Second)
 	cookiesJar, _ := cookiejar.New(nil)
 	c.SetCookieJar(cookiesJar)
 	c.OnRequest(func(r *colly.Request) {

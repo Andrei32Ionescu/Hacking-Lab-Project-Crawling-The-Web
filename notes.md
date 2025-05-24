@@ -30,63 +30,6 @@ for (const src of scriptSrcs) {
 
 ## Go (Colly)
 
-- Alexa 2000 domains 22dps (1m33s) with concurrency 32, 1000x 0 error, 400-x 200 codes + others
-    - Status code breakdown:
-        - 0: 1242
-            - 408 dns lookup
-        - 200: 586
-        - 204: 21
-        - 301: 1
-        - 400: 113
-        - 401: 12
-        - 403: 130
-        - 404: 531
-        - 405: 5
-        - 410: 1
-        - 417: 1
-        - 426: 1
-        - 499: 2
-        - 500: 16
-        - 501: 1
-        - 502: 10
-        - 503: 19
-- Alexa 2000 domains 1dps (33m58s) with concurrency 1
-    - Status code breakdown:
-        - 0: 691
-        - 200: 551
-        - 204: 19
-        - 301: 1
-        - 400: 75
-        - 401: 12
-        - 403: 119
-        - 404: 486
-        - 405: 5
-        - 410: 1
-        - 417: 1
-        - 426: 1
-        - 499: 2
-        - 500: 5
-        - 501: 1
-        - 502: 10
-        - 503: 20
-- Cloudflare 2000 domains 1.6dps (20m50s) with concurrency 2
-    - Status code breakdown:
-        - 403: 31
-        - 429: 1
-        - 404: 44
-        - 520: 2
-        - 502: 3
-        - 202: 1
-        - 200: 918
-        - 204: 3
-        - 500: 2
-        - 401: 2
-        - 400: 4
-        - 0: 986
-        - 498: 2
-        - 522: 1
-        - 301: 1
-
 - Alexa 30000 domains
     - Scraping completed in 30m24.8176113s
     - Scraped 0 urls
@@ -161,9 +104,28 @@ for (const src of scriptSrcs) {
         - ...and 1557 more
     - Status 0 errors: 10881 (48.9% of all failed responses)
 
+### Running at different concurrencies
+- files `results_c{x}` show the output of running the script `go run crawler.go -mode=title -concurrency={x} -file="cloudflare2000.csv" -depth=1 -results="results_c{x}"` 
+- concurrency = 20 seems to perform the best on my machine
+
+### Running 2 instances at the same time
+- files res1 and res2 show what happens when 2 instances are run at the same time
+    - res1 from `go run crawler.go -mode=title -concurrency=20 -file="cloudflare2000.csv" -depth=1 -results="res1"`
+    - res2 from `go run crawler.go -mode=title -concurrency=20 -file="top-2k.csv" -depth=1 -indexed -results="res2"`
+- performance drops significantly
+
+### Running on Naxos
+- performance drops for no obbious reason. 5 requests per second instead of 20 requests per second
+
 ## CVE 
  - it is hard to find websites with vulns
  - it is hard to find good vulns (CVEs)
  - should we make our own servers to test it?
  - can we look for random data on the website and just say how much JS we can see etc?
  - https://chatgpt.com/share/6828e5f0-2e8c-800c-9d6d-bd261b9d4cb6
+
+## Python DNS checker
+- given a debug output from the go-colly crawler, the `python/dns_checker.py` can check if all the domains are actually non-existent or what records the DNS has about them
+- from Alexe 30k there were over 5000 bad domains with most of the records there being NS and TXT
+    - this can be seen in `python/dns_results.txt`
+
