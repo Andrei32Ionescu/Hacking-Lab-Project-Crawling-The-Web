@@ -1,11 +1,11 @@
 package main
 
 import (
-	"bufio"
 	"encoding/csv"
 	"flag"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/http/cookiejar"
 	"os"
@@ -58,6 +58,7 @@ func main() {
 	var successCount int64
 	var failCount int64
 	var statusCounts sync.Map // map[int]int64
+	var status0Errors sync.Map // map[string]int, grouped error type -> count
 
 	// Load CSV file
 	file, err := os.Open(*csvfile)
@@ -132,9 +133,11 @@ func main() {
 			}()
 			var gotValid bool
 			if *mode == "title" {
-				gotValid = crawlForTitle(url, *depth, writeResult, proxyFunc, *debug, &statusCounts)
+				gotValid = crawlForTitle(url, *depth, writeResult, proxyFunc, *debug, &statusCounts, &status0Errors)
 			} else if *mode == "jssearch" {
-				gotValid = crawlForJS(url, *depth, *keyword, writeResult, proxyFunc, *debug, &statusCounts)
+				gotValid = crawlForJS(url, *depth, *keyword, writeResult, proxyFunc, *debug, &statusCounts, &status0Errors)
+			} else if *mode == "wordpress" {
+				gotValid = crawlForWordPress(url, *depth, writeResult, proxyFunc, *debug, &statusCounts, &status0Errors)
 			} else {
 				if *debug {
 					writeResult("Unknown mode: %s\n", *mode)
@@ -168,46 +171,16 @@ func main() {
 		return true
 	})
 	// Add summary for status 0 errors (grouped by error type)
-	var status0Errors = make(map[string]int)
 	var status0Total int
-	statusCounts.Range(func(key, _ any) bool {
-		if code, ok := key.(int); ok && code == 0 {
-			resultsFile.Sync() // flush to disk
-			file, err := os.Open("results")
-			if err == nil {
-				defer file.Close()
-				scanner := bufio.NewScanner(file)
-				for scanner.Scan() {
-					line := scanner.Text()
-					if strings.Contains(line, "failed with status: 0 ") {
-						// Extract error message in parentheses
-						start := strings.Index(line, "(")
-						end := strings.LastIndex(line, ")")
-						if start != -1 && end > start {
-							errMsg := line[start+1 : end]
-							// Group by error type (strip domain)
-							grouped := groupStatus0Error(errMsg)
-							status0Errors[grouped]++
-							status0Total++
-						}
-					}
-				}
-			}
-		}
+	var errList []struct{ msg string; count int }
+	status0Errors.Range(func(key, value any) bool {
+		errList = append(errList, struct{ msg string; count int }{key.(string), value.(int)})
+		status0Total += value.(int)
 		return true
 	})
-	if len(status0Errors) > 0 {
-		writeResult("Status 0 error breakdown (grouped network errors):\n")
-		// Sort by count descending
-		type errCount struct {
-			msg   string
-			count int
-		}
-		var errList []errCount
-		for msg, count := range status0Errors {
-			errList = append(errList, errCount{msg, count})
-		}
+	if len(errList) > 0 {
 		sort.Slice(errList, func(i, j int) bool { return errList[i].count > errList[j].count })
+		writeResult("Status 0 error breakdown (grouped network errors):\n")
 		for i, ec := range errList {
 			if i >= 10 {
 				writeResult("  ...and %d more\n", len(errList)-10)
@@ -231,58 +204,17 @@ func ensureHTTPS(domain string) string {
 
 // crawlForTitle crawls the site and prints titles up to the given depth
 // Returns true if a valid (2xx) response was received, false otherwise
-func crawlForTitle(currenturl string, maxdepth int, writeResult func(string, ...interface{}), proxyFunc colly.ProxyFunc, debug bool, statusCounts *sync.Map) bool {
-	c := colly.NewCollector(
-		colly.MaxDepth(maxdepth),
-		colly.Async(true),
-	)
-	if proxyFunc != nil {
-		c.SetProxyFunc(proxyFunc)
-	}
-	c.Limit(&colly.LimitRule{
-		DomainGlob:  "*",
-		Parallelism: 5,
-	})
-	c.WithTransport(&http.Transport{
-		TLSHandshakeTimeout:   10 * time.Second,
-		ResponseHeaderTimeout: 15 * time.Second,
-		IdleConnTimeout:       30 * time.Second,
-		DisableKeepAlives:     false,
-	})
-	c.SetRequestTimeout(20 * time.Second)
+func crawlForTitle(currenturl string, maxdepth int, writeResult func(string, ...interface{}), proxyFunc colly.ProxyFunc, debug bool, statusCounts *sync.Map, status0Errors *sync.Map) bool {
+	c := newCollectorWithConfig(maxdepth, proxyFunc, debug, writeResult)
 	var gotValid bool
-	c.OnRequest(func(r *colly.Request) {
-		// Rotate headers to evade bot detection
-		r.Headers.Set("User-Agent", userAgents[int(time.Now().UnixNano())%len(userAgents)])
-		r.Headers.Set("Accept-Language", acceptLanguages[int(time.Now().UnixNano())%len(acceptLanguages)])
-		r.Headers.Set("Accept", acceptHeaders[int(time.Now().UnixNano())%len(acceptHeaders)])
-		r.Headers.Set("sec-ch-ua", secChUA[int(time.Now().UnixNano())%len(secChUA)])
-		r.Headers.Set("sec-ch-ua-platform", secChUAPlatform[int(time.Now().UnixNano())%len(secChUAPlatform)])
-		r.Headers.Set("sec-fetch-site", secFetchSite[int(time.Now().UnixNano())%len(secFetchSite)])
-		r.Headers.Set("sec-fetch-mode", secFetchMode[0])
-		r.Headers.Set("sec-fetch-user", secFetchUser[0])
-		r.Headers.Set("sec-fetch-dest", secFetchDest[0])
-		if debug {
-			writeResult("Crawling %s\n", r.URL)
-		}
-	})
 	c.OnResponse(func(r *colly.Response) {
 		status := r.StatusCode
 		if status >= 200 && status < 300 {
 			gotValid = true
 		}
-		// Update statusCounts
 		val, _ := statusCounts.LoadOrStore(status, int64(0))
 		statusCounts.Store(status, val.(int64)+1)
 	})
-	if debug {
-		c.OnRequest(func(r *colly.Request) {
-			r.Headers.Set("User-Agent", "Mozilla/5.0 (compatible; Colly/2.1; +https://github.com/gocolly/colly)")
-			writeResult("Crawling %s\n", r.URL)
-		})
-	}
-	cookiesJar, _ := cookiejar.New(nil)
-	c.SetCookieJar(cookiesJar)
 	c.OnHTML("title", func(e *colly.HTMLElement) {
 		writeResult("Page Title: %s\n", e.Text)
 	})
@@ -290,8 +222,17 @@ func crawlForTitle(currenturl string, maxdepth int, writeResult func(string, ...
 		status := r.StatusCode
 		val, _ := statusCounts.LoadOrStore(status, int64(0))
 		statusCounts.Store(status, val.(int64)+1)
+		if status == 0 {
+			grouped := groupStatus0Error(err.Error())
+			cnt, _ := status0Errors.LoadOrStore(grouped, 0)
+			status0Errors.Store(grouped, cnt.(int)+1)
+		}
 		if debug {
-			writeResult("Request URL: %s failed with status: %d %s\n", r.Request.URL, r.StatusCode, http.StatusText(r.StatusCode))
+			if status == 0 {
+				writeResult("Request URL: %s failed with status: %d %s (%v)\n", r.Request.URL, r.StatusCode, http.StatusText(r.StatusCode), err)
+			} else {
+				writeResult("Request URL: %s failed with status: %d %s\n", r.Request.URL, r.StatusCode, http.StatusText(r.StatusCode))
+			}
 			if len(r.Body) > 0 {
 				snippet := string(r.Body)
 				if len(snippet) > 200 {
@@ -300,12 +241,6 @@ func crawlForTitle(currenturl string, maxdepth int, writeResult func(string, ...
 				writeResult("Response body (truncated): %s\n", snippet)
 			}
 			writeResult("Error: %v\n", err)
-		} else {
-			if status == 0 {
-				writeResult("Request URL: %s failed with status: %d %s (%v)\n", r.Request.URL, r.StatusCode, http.StatusText(r.StatusCode), err)
-			} else {
-				writeResult("Request URL: %s failed with status: %d %s\n", r.Request.URL, r.StatusCode, http.StatusText(r.StatusCode))
-			}
 		}
 	})
 	err := c.Visit(currenturl)
@@ -316,43 +251,46 @@ func crawlForTitle(currenturl string, maxdepth int, writeResult func(string, ...
 	return gotValid
 }
 
-// crawlForJS crawls the site, downloads JS files, and searches for a keyword
-// Returns true if a valid (2xx) response was received, false otherwise
-func crawlForJS(currenturl string, maxdepth int, keyword string, writeResult func(string, ...interface{}), proxyFunc colly.ProxyFunc, debug bool, statusCounts *sync.Map) bool {
-	c := colly.NewCollector(
-		colly.MaxDepth(maxdepth),
-		colly.Async(true),
-	)
-	if proxyFunc != nil {
-		c.SetProxyFunc(proxyFunc)
+func crawlForWordPress(currenturl string, maxdepth int, writeResult func(string, ...interface{}), proxyFunc colly.ProxyFunc, debug bool, statusCounts *sync.Map, status0Errors *sync.Map) bool {
+	// Step 1: Check {currenturl}/wp-login.php
+	loginURL := strings.TrimRight(currenturl, "/") + "/wp-login.php"
+	client := &http.Client{
+		Timeout: 5 * time.Second, // Lowered timeout for faster skipping of dead sites
+		Transport: &http.Transport{
+			MaxIdleConns:        1000,
+			MaxIdleConnsPerHost: 1000,
+			TLSHandshakeTimeout:   2 * time.Second,
+			ResponseHeaderTimeout: 30 * time.Second,
+			IdleConnTimeout:       5 * time.Second,
+			DisableKeepAlives:     false,
+			DialContext: (&net.Dialer{
+				Timeout:   5 * time.Second,
+				KeepAlive: 30 * time.Second,
+			}).DialContext,
+		},
 	}
-	c.Limit(&colly.LimitRule{
-		DomainGlob:  "*",
-		Parallelism: 5,
-	})
-	c.WithTransport(&http.Transport{
-		TLSHandshakeTimeout:   10 * time.Second,
-		ResponseHeaderTimeout: 15 * time.Second,
-		IdleConnTimeout:       30 * time.Second,
-		DisableKeepAlives:     false,
-	})
-	c.SetRequestTimeout(20 * time.Second)
-	var gotValid bool
-	c.OnRequest(func(r *colly.Request) {
-		// Rotate headers to evade bot detection
-		r.Headers.Set("User-Agent", userAgents[int(time.Now().UnixNano())%len(userAgents)])
-		r.Headers.Set("Accept-Language", acceptLanguages[int(time.Now().UnixNano())%len(acceptLanguages)])
-		r.Headers.Set("Accept", acceptHeaders[int(time.Now().UnixNano())%len(acceptHeaders)])
-		r.Headers.Set("sec-ch-ua", secChUA[int(time.Now().UnixNano())%len(secChUA)])
-		r.Headers.Set("sec-ch-ua-platform", secChUAPlatform[int(time.Now().UnixNano())%len(secChUAPlatform)])
-		r.Headers.Set("sec-fetch-site", secFetchSite[int(time.Now().UnixNano())%len(secFetchSite)])
-		r.Headers.Set("sec-fetch-mode", secFetchMode[0])
-		r.Headers.Set("sec-fetch-user", secFetchUser[0])
-		r.Headers.Set("sec-fetch-dest", secFetchDest[0])
+	resp, err := client.Get(loginURL)
+	if err != nil {
 		if debug {
-			writeResult("Crawling %s\n", r.URL)
+			writeResult("Failed to fetch wp-login.php: %v\n", err)
 		}
-	})
+		return false
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		if debug {
+			writeResult("wp-login.php returned status: %d\n", resp.StatusCode)
+		}
+		return false
+	}
+
+	// Step 2: Visit main page and extract info
+	c := newCollectorWithConfig(maxdepth, proxyFunc, debug, writeResult)
+	var gotValid bool
+	var pageTitle string
+	var themeName string
+	pluginSet := make(map[string]struct{})
+
 	c.OnResponse(func(r *colly.Response) {
 		status := r.StatusCode
 		if status >= 200 && status < 300 {
@@ -361,14 +299,102 @@ func crawlForJS(currenturl string, maxdepth int, keyword string, writeResult fun
 		val, _ := statusCounts.LoadOrStore(status, int64(0))
 		statusCounts.Store(status, val.(int64)+1)
 	})
-	if debug {
-		c.OnRequest(func(r *colly.Request) {
-			r.Headers.Set("User-Agent", "Mozilla/5.0 (compatible; Colly/2.1; +https://github.com/gocolly/colly)")
-			writeResult("Crawling %s\n", r.URL)
-		})
+	c.OnHTML("title", func(e *colly.HTMLElement) {
+		pageTitle = e.Text
+	})
+	c.OnHTML("link[href], script[src], img[src]", func(e *colly.HTMLElement) {
+		attrs := []string{"href", "src"}
+		for _, attr := range attrs {
+			val := e.Attr(attr)
+			if val == "" {
+				continue
+			}
+			if themeName == "" {
+				if idx := strings.Index(val, "/wp-content/themes/"); idx != -1 {
+					rest := val[idx+len("/wp-content/themes/") :]
+					parts := strings.SplitN(rest, "/", 2)
+					if len(parts) > 0 && parts[0] != "" {
+						themeName = parts[0]
+					}
+				}
+			}
+			if idx := strings.Index(val, "/wp-content/plugins/"); idx != -1 {
+				rest := val[idx+len("/wp-content/plugins/") :]
+				parts := strings.SplitN(rest, "/", 2)
+				if len(parts) > 0 && parts[0] != "" {
+					pluginSet[parts[0]] = struct{}{}
+				}
+			}
+		}
+	})
+	c.OnError(func(r *colly.Response, err error) {
+		status := r.StatusCode
+		val, _ := statusCounts.LoadOrStore(status, int64(0))
+		statusCounts.Store(status, val.(int64)+1)
+		if status == 0 {
+			grouped := groupStatus0Error(err.Error())
+			cnt, _ := status0Errors.LoadOrStore(grouped, 0)
+			status0Errors.Store(grouped, cnt.(int)+1)
+		}
+		if debug {
+			if status == 0 {
+				writeResult("Request URL: %s failed with status: %d %s (%v)\n", r.Request.URL, r.StatusCode, http.StatusText(r.StatusCode), err)
+			} else {
+				writeResult("Request URL: %s failed with status: %d %s\n", r.Request.URL, r.StatusCode, http.StatusText(r.StatusCode))
+			}
+			if len(r.Body) > 0 {
+				snippet := string(r.Body)
+				if len(snippet) > 200 {
+					snippet = snippet[:200] + "..."
+				}
+				writeResult("Response body (truncated): %s\n", snippet)
+			}
+			writeResult("Error: %v\n", err)
+		}
+	})
+
+	err = c.Visit(currenturl)
+	if err != nil && debug {
+		fmt.Println("Error visiting main page:", err)
 	}
-	cookiesJar, _ := cookiejar.New(nil)
-	c.SetCookieJar(cookiesJar)
+	c.Wait()
+
+	// Print results
+	if gotValid && themeName != "" {
+		plugins := make([]string, 0, len(pluginSet))
+		for p := range pluginSet {
+			plugins = append(plugins, p)
+		}
+		sort.Strings(plugins)
+		writeResult("******* Page Title: %s *******\n", pageTitle)
+		writeResult("Page URL: %s\n", currenturl)
+		if themeName != "" {
+			writeResult("Theme: %s\n", themeName)
+		} else {
+			writeResult("Theme: (not found)\n")
+		}
+		if len(plugins) > 0 {
+			writeResult("Plugins: %s\n", strings.Join(plugins, ", "))
+		} else {
+			writeResult("Plugins: (none found)\n")
+		}
+	}
+	return gotValid
+}
+
+// crawlForJS crawls the site, downloads JS files, and searches for a keyword
+// Returns true if a valid (2xx) response was received, false otherwise
+func crawlForJS(currenturl string, maxdepth int, keyword string, writeResult func(string, ...interface{}), proxyFunc colly.ProxyFunc, debug bool, statusCounts *sync.Map, status0Errors *sync.Map) bool {
+	c := newCollectorWithConfig(maxdepth, proxyFunc, debug, writeResult)
+	var gotValid bool
+	c.OnResponse(func(r *colly.Response) {
+		status := r.StatusCode
+		if status >= 200 && status < 300 {
+			gotValid = true
+		}
+		val, _ := statusCounts.LoadOrStore(status, int64(0))
+		statusCounts.Store(status, val.(int64)+1)
+	})
 	c.OnHTML("script[src]", func(e *colly.HTMLElement) {
 		jsURL := e.Request.AbsoluteURL(e.Attr("src"))
 		if jsURL != "" {
@@ -389,8 +415,17 @@ func crawlForJS(currenturl string, maxdepth int, keyword string, writeResult fun
 		status := r.StatusCode
 		val, _ := statusCounts.LoadOrStore(status, int64(0))
 		statusCounts.Store(status, val.(int64)+1)
+		if status == 0 {
+			grouped := groupStatus0Error(err.Error())
+			cnt, _ := status0Errors.LoadOrStore(grouped, 0)
+			status0Errors.Store(grouped, cnt.(int)+1)
+		}
 		if debug {
-			writeResult("Request URL: %s failed with status: %d %s\n", r.Request.URL, r.StatusCode, http.StatusText(r.StatusCode))
+			if status == 0 {
+				writeResult("Request URL: %s failed with status: %d %s (%v)\n", r.Request.URL, r.StatusCode, http.StatusText(r.StatusCode), err)
+			} else {
+				writeResult("Request URL: %s failed with status: %d %s\n", r.Request.URL, r.StatusCode, http.StatusText(r.StatusCode))
+			}
 			if len(r.Body) > 0 {
 				snippet := string(r.Body)
 				if len(snippet) > 200 {
@@ -399,12 +434,6 @@ func crawlForJS(currenturl string, maxdepth int, keyword string, writeResult fun
 				writeResult("Response body (truncated): %s\n", snippet)
 			}
 			writeResult("Error: %v\n", err)
-		} else {
-			if status == 0 {
-				writeResult("Request URL: %s failed with status: %d %s (%v)\n", r.Request.URL, r.StatusCode, http.StatusText(r.StatusCode), err)
-			} else {
-				writeResult("Request URL: %s failed with status: %d %s\n", r.Request.URL, r.StatusCode, http.StatusText(r.StatusCode))
-			}
 		}
 	})
 	err := c.Visit(currenturl)
@@ -413,6 +442,46 @@ func crawlForJS(currenturl string, maxdepth int, keyword string, writeResult fun
 	}
 	c.Wait()
 	return gotValid
+}
+
+func newCollectorWithConfig(maxdepth int, proxyFunc colly.ProxyFunc, debug bool, writeResult func(string, ...interface{})) *colly.Collector {
+	c := colly.NewCollector(
+		colly.MaxDepth(maxdepth),
+		colly.Async(true),
+	)
+	if proxyFunc != nil {
+		c.SetProxyFunc(proxyFunc)
+	}
+	c.WithTransport(&http.Transport{
+		TLSHandshakeTimeout:   2 * time.Second,
+		ResponseHeaderTimeout: 30 * time.Second,
+		IdleConnTimeout:       5 * time.Second,
+		DisableKeepAlives:     false,
+	})
+	c.SetRequestTimeout(5 * time.Second)
+	cookiesJar, _ := cookiejar.New(nil)
+	c.SetCookieJar(cookiesJar)
+	c.OnRequest(func(r *colly.Request) {
+		r.Headers.Set("User-Agent", userAgents[int(time.Now().UnixNano())%len(userAgents)])
+		r.Headers.Set("Accept-Language", acceptLanguages[int(time.Now().UnixNano())%len(acceptLanguages)])
+		r.Headers.Set("Accept", acceptHeaders[int(time.Now().UnixNano())%len(acceptHeaders)])
+		r.Headers.Set("sec-ch-ua", secChUA[int(time.Now().UnixNano())%len(secChUA)])
+		r.Headers.Set("sec-ch-ua-platform", secChUAPlatform[int(time.Now().UnixNano())%len(secChUAPlatform)])
+		r.Headers.Set("sec-fetch-site", secFetchSite[int(time.Now().UnixNano())%len(secFetchSite)])
+		r.Headers.Set("sec-fetch-mode", secFetchMode[0])
+		r.Headers.Set("sec-fetch-user", secFetchUser[0])
+		r.Headers.Set("sec-fetch-dest", secFetchDest[0])
+		if debug {
+			writeResult("Crawling %s\n", r.URL)
+		}
+	})
+	if debug {
+		c.OnRequest(func(r *colly.Request) {
+			r.Headers.Set("User-Agent", "Mozilla/5.0 (compatible; Colly/2.1; +https://github.com/gocolly/colly)")
+			writeResult("Crawling %s\n", r.URL)
+		})
+	}
+	return c
 }
 
 // List of common browser user agents (rotated per request)

@@ -1,0 +1,201 @@
+PS nslookup 0000.cz
+Server:  one.one.one.one
+Address:  1.1.1.1
+
+Non-authoritative answer:
+Name:    0000.cz
+Address:  46.8.8.200
+
+PS nslookup 0019x.com
+Server:  one.one.one.one
+Address:  1.1.1.1
+
+Non-authoritative answer:
+Name:    0019x.com
+Address:  139.45.197.247
+
+PS C:\Users\Matyas> nslookup office.net
+Server:  one.one.one.one
+Address:  1.1.1.1
+
+Name:    office.net
+
+PS nslookup https://edge.microsoft.com
+Server:  one.one.one.one
+Address:  1.1.1.1
+
+*** one.one.one.one can't find https://edge.microsoft.com: Non-existent domain
+PS  nslookup hedge.microsoft.com
+Server:  one.one.one.one
+Address:  1.1.1.1
+
+*** one.one.one.one can't find hedge.microsoft.com: Non-existent domain
+PS  nslookup edge.microsoft.com
+Server:  one.one.one.one
+Address:  1.1.1.1
+
+Non-authoritative answer:
+Name:    ax-0002.ax-msedge.net
+Addresses:  2620:1ec:33:1::11
+          2620:1ec:33::11
+          150.171.27.11
+          150.171.28.11
+Aliases:  edge.microsoft.com
+          edge-microsoft-com.ax-0002.ax-msedge.net
+
+PS  nslookup cdn-apple.com
+Server:  one.one.one.one
+Address:  1.1.1.1
+
+Name:    cdn-apple.com
+
+PS  nslookup cdn-apple.comx
+Server:  one.one.one.one
+Address:  1.1.1.1
+
+*** one.one.one.one can't find cdn-apple.comx: Non-existent domain
+PS C:\Users\Matyas> nslookup cdn-apple.com
+Server:  one.one.one.one
+Address:  1.1.1.1
+
+Name:    cdn-apple.com
+
+PS C:\Users\Matyas> nslookup -type=A cdn-apple.com
+Server:  one.one.one.one
+Address:  1.1.1.1
+
+Name:    cdn-apple.com
+
+$ dig cdn-apple.com ANY
+
+; <<>> DiG 9.18.30-0ubuntu0.22.04.2-Ubuntu <<>> cdn-apple.com ANY
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 48233
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 512
+;; QUESTION SECTION:
+;cdn-apple.com.                 IN      ANY
+
+;; ANSWER SECTION:
+cdn-apple.com.          3600    IN      MX      10 mail.cdn-apple.com.
+
+;; Query time: 70 msec
+;; SERVER: 10.255.255.254#53(10.255.255.254) (TCP)
+;; WHEN: Fri May 23 14:56:27 CEST 2025
+;; MSG SIZE  rcvd: 63
+
+$ dig v.aaplimg.com
+
+; <<>> DiG 9.18.30-0ubuntu0.22.04.2-Ubuntu <<>> v.aaplimg.com
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 19830
+;; flags: qr rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+;; QUESTION SECTION:
+;v.aaplimg.com.                 IN      A
+
+;; AUTHORITY SECTION:
+v.aaplimg.com.          63      IN      SOA     a.gslb.aaplimg.com. hostmaster.apple.com. 1715903653 1800 300 60480 300
+
+;; Query time: 30 msec
+;; SERVER: 10.255.255.254#53(10.255.255.254) (UDP)
+;; WHEN: Fri May 23 14:57:22 CEST 2025
+;; MSG SIZE  rcvd: 102
+
+$ dig v.aaplimg.com ANY
+
+; <<>> DiG 9.18.30-0ubuntu0.22.04.2-Ubuntu <<>> v.aaplimg.com ANY
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 31911
+;; flags: qr rd ra; QUERY: 1, ANSWER: 7, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 512
+;; QUESTION SECTION:
+;v.aaplimg.com.                 IN      ANY
+
+;; ANSWER SECTION:
+v.aaplimg.com.          21600   IN      NS      b.gslb.aaplimg.com.
+v.aaplimg.com.          21600   IN      NS      ns1.g.aaplimg.com.
+v.aaplimg.com.          21600   IN      NS      ns4.g.aaplimg.com.
+v.aaplimg.com.          21600   IN      NS      a.gslb.aaplimg.com.
+v.aaplimg.com.          21600   IN      NS      ns2.g.aaplimg.com.
+v.aaplimg.com.          21600   IN      NS      ns3.g.aaplimg.com.
+v.aaplimg.com.          300     IN      SOA     a.gslb.aaplimg.com. hostmaster.apple.com. 1720030817 1800 300 60480 300
+
+;; Query time: 100 msec
+;; SERVER: 10.255.255.254#53(10.255.255.254) (TCP)
+;; WHEN: Fri May 23 14:57:55 CEST 2025
+;; MSG SIZE  rcvd: 206
+
+$ dig https://origin-apple.com.akadns.net ANY
+;; communications error to 10.255.255.254#53: timed out
+^Ckoli@DESKTOP-Delft:/mnt/c/Users/Matyas$ dig origin-apple.com.akadns.net ANY
+
+; <<>> DiG 9.18.30-0ubuntu0.22.04.2-Ubuntu <<>> origin-apple.com.akadns.net ANY
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 63219
+;; flags: qr rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 512
+;; QUESTION SECTION:
+;origin-apple.com.akadns.net.   IN      ANY
+
+;; AUTHORITY SECTION:
+akadns.net.             180     IN      SOA     internal.akadns.net. hostmaster.akamai.com. 1741200000 90000 90000 90000 180
+
+;; Query time: 130 msec
+;; SERVER: 10.255.255.254#53(10.255.255.254) (TCP)
+;; WHEN: Fri May 23 15:00:02 CEST 2025
+;; MSG SIZE  rcvd: 122
+
+$ dig init-cdn-lb.ess-apple.com.akadns.net ANY
+
+; <<>> DiG 9.18.30-0ubuntu0.22.04.2-Ubuntu <<>> init-cdn-lb.ess-apple.com.akadns.net ANY
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 696
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 512
+;; QUESTION SECTION:
+;init-cdn-lb.ess-apple.com.akadns.net. IN ANY
+
+;; ANSWER SECTION:
+init-cdn-lb.ess-apple.com.akadns.net. 30 IN CNAME init.ess.g.aaplimg.com.
+
+;; Query time: 80 msec
+;; SERVER: 10.255.255.254#53(10.255.255.254) (TCP)
+;; WHEN: Fri May 23 15:01:37 CEST 2025
+;; MSG SIZE  rcvd: 101
+
+$ dig init.ess.g.aaplimg.com ANY
+
+; <<>> DiG 9.18.30-0ubuntu0.22.04.2-Ubuntu <<>> init.ess.g.aaplimg.com ANY
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 57924
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 512
+;; QUESTION SECTION:
+;init.ess.g.aaplimg.com.                IN      ANY
+
+;; ANSWER SECTION:
+init.ess.g.aaplimg.com. 300     IN      HINFO   "rfc8482" ""
+
+;; Query time: 110 msec
+;; SERVER: 10.255.255.254#53(10.255.255.254) (TCP)
+;; WHEN: Fri May 23 15:02:32 CEST 2025
+;; MSG SIZE  rcvd: 72
