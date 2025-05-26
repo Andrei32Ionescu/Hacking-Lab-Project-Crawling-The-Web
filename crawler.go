@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/cookiejar"
+	"net/url"
 	"os"
 	"sort"
 	"strings"
@@ -59,7 +60,7 @@ func main() {
 	var crawlWG sync.WaitGroup
 	var successCount int64
 	var failCount int64
-	var statusCounts sync.Map // map[int]int64
+	var statusCounts sync.Map  // map[int]int64
 	var status0Errors sync.Map // map[string]int, grouped error type -> count
 
 	// Load CSV file
@@ -174,9 +175,15 @@ func main() {
 	})
 	// Add summary for status 0 errors (grouped by error type)
 	var status0Total int
-	var errList []struct{ msg string; count int }
+	var errList []struct {
+		msg   string
+		count int
+	}
 	status0Errors.Range(func(key, value any) bool {
-		errList = append(errList, struct{ msg string; count int }{key.(string), value.(int)})
+		errList = append(errList, struct {
+			msg   string
+			count int
+		}{key.(string), value.(int)})
 		status0Total += value.(int)
 		return true
 	})
@@ -255,12 +262,12 @@ func crawlForTitle(currenturl string, maxdepth int, writeResult func(string, ...
 
 func crawlForWordPress(currenturl string, maxdepth int, writeResult func(string, ...interface{}), proxyFunc colly.ProxyFunc, debug bool, statusCounts *sync.Map, status0Errors *sync.Map) bool {
 	// Step 1: Check {currenturl}/wp-login.php
-	loginURL := strings.TrimRight(currenturl, "/")// + "/wp-login.php"
+	loginURL := strings.TrimRight(currenturl, "/") // + "/wp-login.php"
 	client := &http.Client{
 		Timeout: 5 * time.Second, // Lowered timeout for faster skipping of dead sites
 		Transport: &http.Transport{
-			MaxIdleConns:        1000,
-			MaxIdleConnsPerHost: 1000,
+			MaxIdleConns:          1000,
+			MaxIdleConnsPerHost:   1000,
 			TLSHandshakeTimeout:   2 * time.Second,
 			ResponseHeaderTimeout: 30 * time.Second,
 			IdleConnTimeout:       5 * time.Second,
@@ -311,20 +318,37 @@ func crawlForWordPress(currenturl string, maxdepth int, writeResult func(string,
 			if val == "" {
 				continue
 			}
+
+			u, err := url.Parse(val)
+			if err != nil {
+				continue
+			}
+
+			version := u.Query().Get("ver")
+
 			if themeName == "" {
-				if idx := strings.Index(val, "/wp-content/themes/"); idx != -1 {
-					rest := val[idx+len("/wp-content/themes/") :]
+				if idx := strings.Index(u.Path, "/wp-content/themes/"); idx != -1 {
+					rest := u.Path[idx+len("/wp-content/themes/"):]
 					parts := strings.SplitN(rest, "/", 2)
 					if len(parts) > 0 && parts[0] != "" {
-						themeName = parts[0]
+						name := parts[0]
+						if version != "" {
+							name += "@" + version
+						}
+						themeName = name
 					}
 				}
 			}
-			if idx := strings.Index(val, "/wp-content/plugins/"); idx != -1 {
-				rest := val[idx+len("/wp-content/plugins/") :]
+
+			if idx := strings.Index(u.Path, "/wp-content/plugins/"); idx != -1 {
+				rest := u.Path[idx+len("/wp-content/plugins/"):]
 				parts := strings.SplitN(rest, "/", 2)
 				if len(parts) > 0 && parts[0] != "" {
-					pluginSet[parts[0]] = struct{}{}
+					name := parts[0]
+					if version != "" {
+						name += "@" + version
+					}
+					pluginSet[name] = struct{}{}
 				}
 			}
 		}
@@ -455,17 +479,17 @@ func newCollectorWithConfig(maxdepth int, proxyFunc colly.ProxyFunc, debug bool,
 		c.SetProxyFunc(proxyFunc)
 	}
 	c.WithTransport(&http.Transport{
-			MaxIdleConns:        1000,
-			MaxIdleConnsPerHost: 1000,
-			TLSHandshakeTimeout:   2 * time.Second,
-			ResponseHeaderTimeout: 30 * time.Second,
-			IdleConnTimeout:       5 * time.Second,
-			DisableKeepAlives:     false,
-			DialContext: (&net.Dialer{
-				Timeout:   5 * time.Second,
-				KeepAlive: 30 * time.Second,
-			}).DialContext,
-		},)
+		MaxIdleConns:          1000,
+		MaxIdleConnsPerHost:   1000,
+		TLSHandshakeTimeout:   2 * time.Second,
+		ResponseHeaderTimeout: 30 * time.Second,
+		IdleConnTimeout:       5 * time.Second,
+		DisableKeepAlives:     false,
+		DialContext: (&net.Dialer{
+			Timeout:   5 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+	})
 	c.SetRequestTimeout(50 * time.Second)
 	cookiesJar, _ := cookiejar.New(nil)
 	c.SetCookieJar(cookiesJar)
