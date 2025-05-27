@@ -10,6 +10,7 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"os"
+	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -25,7 +26,7 @@ var visitedurls = make(map[string]bool)
 
 func main() {
 	// Command-line flags
-	mode := flag.String("mode", "title", "Mode: 'title' or 'jssearch'")
+	mode := flag.String("mode", "title", "Mode: 'title', 'jssearch', 'wordpress', or 'tomcat'") // Added tomcat
 	keyword := flag.String("keyword", "", "Keyword to search for in JS files (jssearch mode)")
 	depth := flag.Int("depth", 1, "Crawl depth (1 = only main page)")
 	csvfile := flag.String("file", "top-1m.csv", "CSV file with domains")
@@ -141,6 +142,8 @@ func main() {
 				gotValid = crawlForJS(url, *depth, *keyword, writeResult, proxyFunc, *debug, &statusCounts, &status0Errors)
 			} else if *mode == "wordpress" {
 				gotValid = crawlForWordPress(url, *depth, writeResult, proxyFunc, *debug, &statusCounts, &status0Errors)
+			} else if *mode == "tomcat" { // Added tomcat mode
+				gotValid = crawlForTomcat(url, writeResult, proxyFunc, *debug, &statusCounts, &status0Errors)
 			} else {
 				if *debug {
 					writeResult("Unknown mode: %s\n", *mode)
@@ -468,6 +471,197 @@ func crawlForJS(currenturl string, maxdepth int, keyword string, writeResult fun
 	}
 	c.Wait()
 	return gotValid
+}
+
+// crawlForTomcat attempts to detect if a site is running Tomcat and its version.
+// Returns true if the primary URL returns a 2xx status, for consistency in success/fail counts.
+func crawlForTomcat(currenturl string, writeResult func(string, ...interface{}), proxyFunc colly.ProxyFunc, debug bool, statusCounts *sync.Map, status0Errors *sync.Map) bool {
+	var isTomcat bool
+	var tomcatVersion string
+	var detectionSource string
+
+	var primaryUrlResponded bool = false         // True if primary URL gave any HTTP response (not network error)
+	var primaryUrlOkForSuccessCount bool = false // True if primary URL gave a 2xx response
+
+	// Configure http.Client
+	transport := &http.Transport{
+		MaxIdleConns:          100,
+		MaxIdleConnsPerHost:   10,
+		TLSHandshakeTimeout:   5 * time.Second,
+		ResponseHeaderTimeout: 10 * time.Second,
+		IdleConnTimeout:       30 * time.Second,
+		DisableKeepAlives:     false,
+		DialContext: (&net.Dialer{
+			Timeout:   5 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+	}
+	if proxyFunc != nil {
+		transport.Proxy = proxyFunc
+	}
+	httpClient := &http.Client{
+		Timeout:   15 * time.Second,
+		Transport: transport,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse // Do not follow redirects automatically
+		},
+	}
+
+	// --- Primary Check: Request the root URL itself ---
+	reqRoot, _ := http.NewRequest("GET", currenturl, nil)
+	reqRoot.Header.Set("User-Agent", userAgents[int(time.Now().UnixNano())%len(userAgents)])
+	reqRoot.Header.Set("Accept", acceptHeaders[int(time.Now().UnixNano())%len(acceptHeaders)])
+
+	var respRoot *http.Response // Declare here to access its StatusCode in debug logging later
+	var errRoot error
+
+	respRoot, errRoot = httpClient.Do(reqRoot)
+
+	if errRoot == nil {
+		fmt.Println("Root URL responded", respRoot.StatusCode)
+		defer respRoot.Body.Close()
+		primaryUrlResponded = true
+		val, _ := statusCounts.LoadOrStore(respRoot.StatusCode, int64(0))
+		statusCounts.Store(respRoot.StatusCode, val.(int64)+1)
+
+		if respRoot.StatusCode >= 200 && respRoot.StatusCode < 300 {
+			primaryUrlOkForSuccessCount = true
+		}
+
+		serverHeader := respRoot.Header.Get("Server")
+		if strings.Contains(serverHeader, "Apache-Coyote") || strings.Contains(serverHeader, "Tomcat") {
+			isTomcat = true
+			detectionSource = "Server Header (root URL)"
+			// Regex for "Apache Tomcat/X.Y.Z" or "Apache-Coyote/X.Y"
+			reVer := regexp.MustCompile(`(?:Apache Tomcat/([\d\.]+[A-Za-z\d\.-]*)|Apache-Coyote/([\d\.]+))`)
+			matchesVer := reVer.FindStringSubmatch(serverHeader)
+			if len(matchesVer) > 1 && matchesVer[1] != "" { // Apache Tomcat/VERSION
+				tomcatVersion = matchesVer[1]
+			} else if len(matchesVer) > 2 && matchesVer[2] != "" { // Apache-Coyote/VERSION (less specific for Tomcat version itself)
+				// tomcatVersion could be "Coyote " + matchesVer[2] if needed, but usually doesn't map directly to Tomcat server version
+			}
+		}
+		xPoweredByHeader := respRoot.Header.Get("X-Powered-By")
+		if strings.Contains(xPoweredByHeader, "Servlet") || strings.Contains(xPoweredByHeader, "JSP") {
+			if !isTomcat {
+				isTomcat = true
+				detectionSource = "X-Powered-By Header (root URL)"
+			} else if detectionSource == "Server Header (root URL)" && tomcatVersion == "" {
+				detectionSource += ", X-Powered-By Header"
+			}
+		}
+		io.Copy(io.Discard, respRoot.Body) // Ensure body is consumed
+
+	} else {
+		fmt.Println("Error fetching root URL", errRoot)
+		if debug {
+			writeResult("Error fetching root URL %s: %v\n", currenturl, errRoot)
+		}
+		grouped := groupStatus0Error(errRoot.Error())
+		cnt, _ := status0Errors.LoadOrStore(grouped, 0)
+		status0Errors.Store(grouped, cnt.(int)+1)
+		val, _ := statusCounts.LoadOrStore(0, int64(0))
+		statusCounts.Store(0, val.(int64)+1)
+		return false // Early exit if primary URL is unreachable due to network error
+	}
+
+	// --- Strategy 1: Check for Tomcat 404 error page (if not already confirmed with version) ---
+	if primaryUrlResponded && (!isTomcat || tomcatVersion == "") {
+		fmt.Println("Checking 404 page")
+		nonExistentURL := strings.TrimRight(currenturl, "/") + "/ThisPageShouldNotExist" + fmt.Sprintf("%d", time.Now().UnixNano())
+		req404, _ := http.NewRequest("GET", nonExistentURL, nil)
+		req404.Header.Set("User-Agent", userAgents[int(time.Now().UnixNano())%len(userAgents)])
+
+		resp404, err404 := httpClient.Do(req404)
+		if err404 == nil {
+			defer resp404.Body.Close()
+			val, _ := statusCounts.LoadOrStore(resp404.StatusCode, int64(0)) // Record status for this check
+			statusCounts.Store(resp404.StatusCode, val.(int64)+1)
+
+			if resp404.StatusCode == http.StatusNotFound {
+				bodyBytes, _ := io.ReadAll(resp404.Body)
+				bodyString := string(bodyBytes)
+				// Regex for "Apache Tomcat/X.Y.Z" or "Apache Tomcat Version X.Y.Z"
+				re := regexp.MustCompile(`Apache Tomcat/(?:Version )?([\d\.]+[A-Za-z\d\.-]*)`)
+				matches := re.FindStringSubmatch(bodyString)
+				if len(matches) > 1 {
+					isTomcat = true
+					tomcatVersion = matches[1]
+					detectionSource = "404 Error Page"
+				} else if !isTomcat && (strings.Contains(bodyString, "Apache Tomcat") || (strings.Contains(bodyString, "Error report") && (strings.Contains(bodyString, "Apache") || strings.Contains(bodyString, "tomcat")))) {
+					isTomcat = true
+					detectionSource = "404 Error Page (signature)"
+				}
+			}
+			io.Copy(io.Discard, resp404.Body)
+		} else if debug {
+			writeResult("Error checking 404 page for %s (%s): %v\n", currenturl, nonExistentURL, err404)
+			grouped := groupStatus0Error(err404.Error())
+			cnt, _ := status0Errors.LoadOrStore(grouped, 0)
+			status0Errors.Store(grouped, cnt.(int)+1)
+			val, _ := statusCounts.LoadOrStore(0, int64(0))
+			statusCounts.Store(0, val.(int64)+1)
+		}
+	}
+
+	// --- Strategy 2: Check RELEASE-NOTES.txt (if Tomcat indicated but version still missing, or to confirm/refine) ---
+	if primaryUrlResponded && isTomcat && tomcatVersion == "" {
+		fmt.Println("Checking RELEASE-NOTES.txt")
+		releaseNotesURL := strings.TrimRight(currenturl, "/") + "/RELEASE-NOTES.txt"
+		reqRN, _ := http.NewRequest("GET", releaseNotesURL, nil)
+		reqRN.Header.Set("User-Agent", userAgents[int(time.Now().UnixNano())%len(userAgents)])
+
+		respRN, errRN := httpClient.Do(reqRN)
+		if errRN == nil {
+			defer respRN.Body.Close()
+			val, _ := statusCounts.LoadOrStore(respRN.StatusCode, int64(0)) // Record status
+			statusCounts.Store(respRN.StatusCode, val.(int64)+1)
+
+			if respRN.StatusCode == http.StatusOK {
+				bodyBytes, _ := io.ReadAll(respRN.Body)
+				bodyString := string(bodyBytes)
+				// Example: "Apache Tomcat Version 9.0.65 Release Notes"
+				re := regexp.MustCompile(`Apache Tomcat Version ([\d\.]+[A-Za-z\d\.-]*)`)
+				matches := re.FindStringSubmatch(bodyString)
+				if len(matches) > 1 {
+					newVersion := matches[1]
+					// Prioritize 404 error page for version, then RELEASE-NOTES, then headers
+					if tomcatVersion == "" || detectionSource == "Server Header (root URL)" || detectionSource == "X-Powered-By Header (root URL)" || detectionSource == "404 Error Page (signature)" {
+						tomcatVersion = newVersion
+						detectionSource = "RELEASE-NOTES.txt"
+					} else if detectionSource == "404 Error Page" && tomcatVersion != newVersion && debug {
+						writeResult("Version mismatch for %s: 404 Page ('%s') vs RELEASE-NOTES.txt ('%s')\n", currenturl, tomcatVersion, newVersion)
+						// Sticking with 404 page version if it was specific.
+					}
+				}
+			}
+			io.Copy(io.Discard, respRN.Body)
+		} else if debug {
+			writeResult("Error checking RELEASE-NOTES.txt for %s (%s): %v\n", currenturl, releaseNotesURL, errRN)
+			grouped := groupStatus0Error(errRN.Error())
+			cnt, _ := status0Errors.LoadOrStore(grouped, 0)
+			status0Errors.Store(grouped, cnt.(int)+1)
+			val, _ := statusCounts.LoadOrStore(0, int64(0))
+			statusCounts.Store(0, val.(int64)+1)
+		}
+	}
+
+	if isTomcat {
+		writeResult("URL: %s\n", currenturl)
+		writeResult("  Tomcat Detected: Yes\n")
+		if tomcatVersion != "" {
+			writeResult("  Tomcat Version: %s (Source: %s)\n", tomcatVersion, detectionSource)
+		} else {
+			writeResult("  Tomcat Version: Unknown (Detected via: %s)\n", detectionSource)
+		}
+	} else if debug {
+		if primaryUrlResponded {
+			writeResult("URL: %s - Tomcat Not Detected (primary URL status: %d)\n", currenturl, respRoot.StatusCode)
+		} else {
+			writeResult("URL: %s - Tomcat Not Detected (primary URL failed to respond with network error)\n", currenturl)
+		}
+	}
+	return primaryUrlOkForSuccessCount
 }
 
 func newCollectorWithConfig(maxdepth int, proxyFunc colly.ProxyFunc, debug bool, writeResult func(string, ...interface{})) *colly.Collector {
