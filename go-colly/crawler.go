@@ -260,39 +260,6 @@ func crawlForTitle(currenturl string, maxdepth int, writeResult func(string, ...
 }
 
 func crawlForWordPress(currenturl string, maxdepth int, writeResult func(string, ...interface{}), proxyFunc colly.ProxyFunc, debug bool, statusCounts *sync.Map, status0Errors *sync.Map) bool {
-	// Step 1: Check {currenturl}/wp-login.php
-	loginURL := strings.TrimRight(currenturl, "/") // + "/wp-login.php"
-	client := &http.Client{
-		Timeout: 5 * time.Second, // Lowered timeout for faster skipping of dead sites
-		Transport: &http.Transport{
-			MaxIdleConns:          1000,
-			MaxIdleConnsPerHost:   1000,
-			TLSHandshakeTimeout:   2 * time.Second,
-			ResponseHeaderTimeout: 30 * time.Second,
-			IdleConnTimeout:       5 * time.Second,
-			DisableKeepAlives:     false,
-			DialContext: (&net.Dialer{
-				Timeout:   5 * time.Second,
-				KeepAlive: 30 * time.Second,
-			}).DialContext,
-		},
-	}
-	resp, err := client.Get(loginURL)
-	if err != nil {
-		if debug {
-			writeResult("Failed to fetch wp-login.php: %v\n", err)
-		}
-		return false
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
-		if debug {
-			writeResult("wp-login.php returned status: %d\n", resp.StatusCode)
-		}
-		return false
-	}
-
-	// Step 2: Visit main page and extract info
 	c := newCollectorWithConfig(maxdepth, proxyFunc, debug, writeResult)
 	var gotValid bool
 	var pageTitle string
@@ -354,7 +321,7 @@ func crawlForWordPress(currenturl string, maxdepth int, writeResult func(string,
 	})
 	addErrorHandler(c, writeResult, statusCounts, status0Errors, debug)
 
-	err = c.Visit(currenturl)
+	err := c.Visit(currenturl)
 	if err != nil && debug {
 		fmt.Println("Error visiting main page:", err)
 	}
