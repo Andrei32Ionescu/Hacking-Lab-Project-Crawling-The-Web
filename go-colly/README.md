@@ -34,6 +34,10 @@ docker run --rm go-colly-crawler
 
 # Pass arguments (example)
 docker run --rm go-colly-crawler -mode=title -concurrency=16 -file="datasets/cloudflare2000.csv" -depth=1
+
+# Or, in two separate terminals:
+docker run --rm go-colly-crawler -mode=wordpress -concurrency=20 -file="cloudflare2000.csv" -console
+docker run --rm go-colly-crawler -mode=wordpress -concurrency=20 -file="top-2k.csv" -indexed -console
 ```
 
 The `datasets` folder and `top-1m.csv` are included in the image by default. If you want to use your own input/output files, you can mount a local folder:
