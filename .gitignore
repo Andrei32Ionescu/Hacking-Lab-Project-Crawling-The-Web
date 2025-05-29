@@ -6,4 +6,4 @@ dist
 
 coverage
 
-python/Lib
+go-colly/python/Lib

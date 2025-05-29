@@ -23,6 +23,12 @@ import (
 // initialize a map to store visited URLs
 var visitedurls = make(map[string]bool)
 
+// Counter for 403 Cloudflare errors
+var cloudflare403Count int64
+
+// Set to track domains with Cloudflare 403 errors
+var cloudflareDomains sync.Map
+
 func main() {
 	// Command-line flags
 	mode := flag.String("mode", "title", "Mode: 'title' or 'jssearch'")
@@ -35,6 +41,9 @@ func main() {
 	indexed := flag.Bool("indexed", false, "CSV has an index column; domain is in the second column")
 	resultsFileN := flag.String("results", "results", "File to write results to (default: 'results')")
 	flag.Parse()
+
+	// Always load the CSV file from the datasets folder
+	csvFilePath := "datasets/" + *csvfile
 
 	// Open results file for writing
 	resultsFileName := *resultsFileN
@@ -60,11 +69,11 @@ func main() {
 	var crawlWG sync.WaitGroup
 	var successCount int64
 	var failCount int64
-	var statusCounts sync.Map  // map[int]int64
-	var status0Errors sync.Map // map[string]int, grouped error type -> count
+	var statusCounts sync.Map
+	var status0Errors sync.Map
 
 	// Load CSV file
-	file, err := os.Open(*csvfile)
+	file, err := os.Open(csvFilePath)
 	if err != nil {
 		writeResult("Failed to open domains file: %v\n", err)
 		return
@@ -157,6 +166,16 @@ func main() {
 
 	crawlWG.Wait()
 
+	// Write all unique Cloudflare 403 domains to file (overwrite previous content)
+	cfFile, cfErr := os.Create("cloudflare-protected-domains.csv")
+	if cfErr == nil {
+		cloudflareDomains.Range(func(key, _ any) bool {
+			cfFile.WriteString(fmt.Sprintf("%s\n", key.(string)))
+			return true
+		})
+		cfFile.Close()
+	}
+
 	elapsed := time.Since(start)
 	writeResult("\nScraping completed in %s\n", elapsed)
 	writeResult("Scraped %v urls\n", len(visitedurls))
@@ -202,6 +221,10 @@ func main() {
 			writeResult("Status 0 errors: %d (%.1f%% of all failed responses)\n", status0Total, float64(status0Total)/float64(failCount)*100)
 		}
 	}
+	// Print Cloudflare 403 Forbidden error count
+	if cloudflare403Count > 0 {
+		writeResult("Cloudflare 403 Forbidden errors: %d\n", cloudflare403Count)
+	}
 }
 
 func ensureHTTPS(domain string) string {
@@ -227,31 +250,7 @@ func crawlForTitle(currenturl string, maxdepth int, writeResult func(string, ...
 	c.OnHTML("title", func(e *colly.HTMLElement) {
 		writeResult("Page Title: %s\n", e.Text)
 	})
-	c.OnError(func(r *colly.Response, err error) {
-		status := r.StatusCode
-		val, _ := statusCounts.LoadOrStore(status, int64(0))
-		statusCounts.Store(status, val.(int64)+1)
-		if status == 0 {
-			grouped := groupStatus0Error(err.Error())
-			cnt, _ := status0Errors.LoadOrStore(grouped, 0)
-			status0Errors.Store(grouped, cnt.(int)+1)
-		}
-		if debug {
-			if status == 0 {
-				writeResult("Request URL: %s failed with status: %d %s (%v)\n", r.Request.URL, r.StatusCode, http.StatusText(r.StatusCode), err)
-			} else {
-				writeResult("Request URL: %s failed with status: %d %s\n", r.Request.URL, r.StatusCode, http.StatusText(r.StatusCode))
-			}
-			if len(r.Body) > 0 {
-				snippet := string(r.Body)
-				if len(snippet) > 200 {
-					snippet = snippet[:200] + "..."
-				}
-				writeResult("Response body (truncated): %s\n", snippet)
-			}
-			writeResult("Error: %v\n", err)
-		}
-	})
+	addErrorHandler(c, writeResult, statusCounts, status0Errors, debug)
 	err := c.Visit(currenturl)
 	if err != nil && debug {
 		fmt.Println("Error visiting page:", err)
@@ -353,31 +352,7 @@ func crawlForWordPress(currenturl string, maxdepth int, writeResult func(string,
 			}
 		}
 	})
-	c.OnError(func(r *colly.Response, err error) {
-		status := r.StatusCode
-		val, _ := statusCounts.LoadOrStore(status, int64(0))
-		statusCounts.Store(status, val.(int64)+1)
-		if status == 0 {
-			grouped := groupStatus0Error(err.Error())
-			cnt, _ := status0Errors.LoadOrStore(grouped, 0)
-			status0Errors.Store(grouped, cnt.(int)+1)
-		}
-		if debug {
-			if status == 0 {
-				writeResult("Request URL: %s failed with status: %d %s (%v)\n", r.Request.URL, r.StatusCode, http.StatusText(r.StatusCode), err)
-			} else {
-				writeResult("Request URL: %s failed with status: %d %s\n", r.Request.URL, r.StatusCode, http.StatusText(r.StatusCode))
-			}
-			if len(r.Body) > 0 {
-				snippet := string(r.Body)
-				if len(snippet) > 200 {
-					snippet = snippet[:200] + "..."
-				}
-				writeResult("Response body (truncated): %s\n", snippet)
-			}
-			writeResult("Error: %v\n", err)
-		}
-	})
+	addErrorHandler(c, writeResult, statusCounts, status0Errors, debug)
 
 	err = c.Visit(currenturl)
 	if err != nil && debug {
@@ -437,31 +412,7 @@ func crawlForJS(currenturl string, maxdepth int, keyword string, writeResult fun
 			}
 		}
 	})
-	c.OnError(func(r *colly.Response, err error) {
-		status := r.StatusCode
-		val, _ := statusCounts.LoadOrStore(status, int64(0))
-		statusCounts.Store(status, val.(int64)+1)
-		if status == 0 {
-			grouped := groupStatus0Error(err.Error())
-			cnt, _ := status0Errors.LoadOrStore(grouped, 0)
-			status0Errors.Store(grouped, cnt.(int)+1)
-		}
-		if debug {
-			if status == 0 {
-				writeResult("Request URL: %s failed with status: %d %s (%v)\n", r.Request.URL, r.StatusCode, http.StatusText(r.StatusCode), err)
-			} else {
-				writeResult("Request URL: %s failed with status: %d %s\n", r.Request.URL, r.StatusCode, http.StatusText(r.StatusCode))
-			}
-			if len(r.Body) > 0 {
-				snippet := string(r.Body)
-				if len(snippet) > 200 {
-					snippet = snippet[:200] + "..."
-				}
-				writeResult("Response body (truncated): %s\n", snippet)
-			}
-			writeResult("Error: %v\n", err)
-		}
-	})
+	addErrorHandler(c, writeResult, statusCounts, status0Errors, debug)
 	err := c.Visit(currenturl)
 	if err != nil && debug {
 		fmt.Println("Error visiting page:", err)
@@ -514,6 +465,47 @@ func newCollectorWithConfig(maxdepth int, proxyFunc colly.ProxyFunc, debug bool,
 		})
 	}
 	return c
+}
+
+func addErrorHandler(c *colly.Collector, writeResult func(string, ...interface{}), statusCounts *sync.Map, status0Errors *sync.Map, debug bool) {
+	c.OnError(func(r *colly.Response, err error) {
+		status := r.StatusCode
+		val, _ := statusCounts.LoadOrStore(status, int64(0))
+		statusCounts.Store(status, val.(int64)+1)
+		if status == 0 {
+			grouped := groupStatus0Error(err.Error())
+			cnt, _ := status0Errors.LoadOrStore(grouped, 0)
+			status0Errors.Store(grouped, cnt.(int)+1)
+		}
+		// Count Cloudflare 403 Forbidden errors and store domain (in memory only)
+		if status == 403 && r.Body != nil && len(r.Body) > 0 {
+			if strings.Contains(strings.ToLower(string(r.Body)), "cloudflare") || strings.Contains(strings.ToLower(string(r.Body)), "_cf_chl_opt") {
+				atomic.AddInt64(&cloudflare403Count, 1)
+				// Extract domain from URL
+				if r.Request != nil && r.Request.URL != nil {
+					domain := r.Request.URL.Hostname()
+					if domain != "" {
+						cloudflareDomains.LoadOrStore(domain, true)
+					}
+				}
+			}
+		}
+		if debug {
+			if status == 0 {
+				writeResult("Request URL: %s failed with status: %d %s (%v)\n", r.Request.URL, r.StatusCode, http.StatusText(r.StatusCode), err)
+			} else {
+				writeResult("Request URL: %s failed with status: %d %s\n", r.Request.URL, r.StatusCode, http.StatusText(r.StatusCode))
+			}
+			if len(r.Body) > 0 {
+				snippet := string(r.Body)
+				if len(snippet) > 200 {
+					snippet = snippet[:200] + "..."
+				}
+				writeResult("Response body (truncated): %s\n", snippet)
+			}
+			writeResult("Error: %v\n", err)
+		}
+	})
 }
 
 // List of common browser user agents (rotated per request)
