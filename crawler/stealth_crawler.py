@@ -1,11 +1,10 @@
-import asyncio, os, time
-from playwright.async_api import async_playwright, TimeoutError as PWTimeout
+import asyncio, random, os
+from utils import handle_cloudflare_challenge
 from camoufox.async_api import AsyncCamoufox
+from browserforge.injectors.playwright import AsyncNewContext
+from playwright.async_api import async_playwright
+import multiprocessing, time
 
-CONTEXTS   = 4        # browsers tabs kept open
-WORKERS    = 16       # concurrent coroutines pulling from the queue
-NAV_TO     = 30_000   # ms
-SHOT_TO    = 30_000   # ms
 SCREENSHOT_DIR = "screenshots"
 
 async def grab(url: str, outfile: str, browser) -> None:
@@ -16,7 +15,7 @@ async def grab(url: str, outfile: str, browser) -> None:
             page = await browser.new_page()
             try:
                 await page.goto(url, wait_until="domcontentloaded", timeout=10000)
-                # await asyncio.sleep(0.5)
+                await asyncio.sleep(0.5)
             except Exception as e:
                 print(f"Timeout error for site: {url}")
                 return
@@ -29,6 +28,7 @@ def main():
     os.makedirs(SCREENSHOT_DIR, exist_ok=True)
 
     num_cores = multiprocessing.cpu_count()
+    num_cores = 1
     print(f"Running on {num_cores} cores")
     tasks = []
     with open("urls.txt", "r") as f:
@@ -52,5 +52,3 @@ if __name__ == "__main__":
     main()
     print(f"Total time: {time.time() - timer}")
     print(f"Time per site: {(time.time() - timer) / numlines:.2f} seconds")
-
-
