@@ -110,9 +110,6 @@ async def handle_cloudflare_challenge(
         await retry_blocked()
         return
 
-    # ------------------------------------------------------------------
-    # 4)  Log what we’re about to do
-    # ------------------------------------------------------------------
     lvl = logging.INFO if verbose else logging.DEBUG
     log.log(
         lvl,
