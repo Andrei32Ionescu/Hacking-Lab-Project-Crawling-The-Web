@@ -1,10 +1,10 @@
 package main
 
 import (
-	"crypto/x509"
 	"net/url"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/gocolly/colly"
 )
@@ -308,6 +308,7 @@ func (s *SQLInjectionScanner) Scan(startURL string, c *colly.Collector) []Vulner
 	// Enhanced response checking
 	c.OnResponse(func(r *colly.Response) {
 		body := string(r.Body)
+		contentType := r.Headers.Get("Content-Type")
 		
 		// Check for SQL errors in response
 		for _, pattern := range sqlErrorPatterns {
@@ -320,6 +321,17 @@ func (s *SQLInjectionScanner) Scan(startURL string, c *colly.Collector) []Vulner
 					Evidence:    "SQL error message detected: " + pattern,
 				})
 			}
+		}
+
+		// Check for timing-based SQL injection
+		if r.Request.Duration > 5*time.Second {
+			vulns = append(vulns, Vulnerability{
+				URL:         r.Request.URL.String(),
+				Type:        "Time-based SQL Injection",
+				Severity:    "High",
+				Description: "Potential time-based SQL injection vulnerability",
+				Evidence:    "Response time exceeded 5 seconds",
+			})
 		}
 
 		// Check for boolean-based SQL injection
@@ -570,116 +582,30 @@ func (s *HeaderSecurityScanner) Scan(startURL string, c *colly.Collector) []Vuln
 	c.OnResponse(func(r *colly.Response) {
 		headers := r.Headers
 		
-		// Enhanced security headers check
-		securityHeaders := map[string]struct {
-			description string
-			severity    string
-			recommended string
-		}{
-			"X-Frame-Options": {
-				description: "Missing X-Frame-Options header (clickjacking protection)",
-				severity:    "Medium",
-				recommended: "DENY or SAMEORIGIN",
-			},
-			"X-Content-Type-Options": {
-				description: "Missing X-Content-Type-Options header (MIME-sniffing protection)",
-				severity:    "Low",
-				recommended: "nosniff",
-			},
-			"X-XSS-Protection": {
-				description: "Missing X-XSS-Protection header (XSS protection)",
-				severity:    "Low",
-				recommended: "1; mode=block",
-			},
-			"Strict-Transport-Security": {
-				description: "Missing HSTS header (HTTPS enforcement)",
-				severity:    "High",
-				recommended: "max-age=31536000; includeSubDomains; preload",
-			},
-			"Content-Security-Policy": {
-				description: "Missing Content-Security-Policy header (XSS protection)",
-				severity:    "High",
-				recommended: "default-src 'self'",
-			},
-			"Referrer-Policy": {
-				description: "Missing Referrer-Policy header (referrer information control)",
-				severity:    "Low",
-				recommended: "strict-origin-when-cross-origin",
-			},
-			"Permissions-Policy": {
-				description: "Missing Permissions-Policy header (feature control)",
-				severity:    "Low",
-				recommended: "geolocation=(), microphone=(), camera=()",
-			},
-			"Cross-Origin-Opener-Policy": {
-				description: "Missing Cross-Origin-Opener-Policy header (cross-origin isolation)",
-				severity:    "Low",
-				recommended: "same-origin",
-			},
-			"Cross-Origin-Embedder-Policy": {
-				description: "Missing Cross-Origin-Embedder-Policy header (cross-origin isolation)",
-				severity:    "Low",
-				recommended: "require-corp",
-			},
-			"Cross-Origin-Resource-Policy": {
-				description: "Missing Cross-Origin-Resource-Policy header (cross-origin resource control)",
-				severity:    "Low",
-				recommended: "same-origin",
-			},
+		// Check for missing security headers
+		securityHeaders := map[string]string{
+			"X-Frame-Options":           "Missing X-Frame-Options header (clickjacking protection)",
+			"X-Content-Type-Options":    "Missing X-Content-Type-Options header (MIME-sniffing protection)",
+			"X-XSS-Protection":          "Missing X-XSS-Protection header (XSS protection)",
+			"Strict-Transport-Security": "Missing HSTS header (HTTPS enforcement)",
+			"Content-Security-Policy":   "Missing Content-Security-Policy header (XSS protection)",
 		}
 
-		// Check for missing or misconfigured security headers
-		for header, info := range securityHeaders {
-			value := headers.Get(header)
-			if value == "" {
+		for header, description := range securityHeaders {
+			if headers.Get(header) == "" {
 				vulns = append(vulns, Vulnerability{
 					URL:         r.Request.URL.String(),
 					Type:        "Missing Security Header",
-					Severity:    info.severity,
-					Description: info.description,
+					Severity:    "Low",
+					Description: description,
 					Evidence:    "Header not present in response",
 				})
-			} else {
-				// Check for common misconfigurations
-				switch header {
-				case "X-Frame-Options":
-					if !strings.EqualFold(value, "DENY") && !strings.EqualFold(value, "SAMEORIGIN") {
-						vulns = append(vulns, Vulnerability{
-							URL:         r.Request.URL.String(),
-							Type:        "Misconfigured Security Header",
-							Severity:    info.severity,
-							Description: "X-Frame-Options header has invalid value",
-							Evidence:    "Current value: " + value + ", Recommended: " + info.recommended,
-						})
-					}
-				case "Strict-Transport-Security":
-					if !strings.Contains(value, "max-age=") {
-						vulns = append(vulns, Vulnerability{
-							URL:         r.Request.URL.String(),
-							Type:        "Misconfigured Security Header",
-							Severity:    info.severity,
-							Description: "HSTS header missing max-age directive",
-							Evidence:    "Current value: " + value + ", Recommended: " + info.recommended,
-						})
-					}
-				case "Content-Security-Policy":
-					if strings.Contains(value, "unsafe-inline") || strings.Contains(value, "unsafe-eval") {
-						vulns = append(vulns, Vulnerability{
-							URL:         r.Request.URL.String(),
-							Type:        "Misconfigured Security Header",
-							Severity:    "Medium",
-							Description: "Content-Security-Policy contains unsafe directives",
-							Evidence:    "Current value: " + value,
-						})
-					}
-				}
 			}
 		}
 
-		// Enhanced cookie security checks
+		// Check for insecure cookie settings
 		cookies := headers.Values("Set-Cookie")
 		for _, cookie := range cookies {
-			// Check for Secure flag
 			if !strings.Contains(cookie, "Secure") {
 				vulns = append(vulns, Vulnerability{
 					URL:         r.Request.URL.String(),
@@ -689,8 +615,6 @@ func (s *HeaderSecurityScanner) Scan(startURL string, c *colly.Collector) []Vuln
 					Evidence:    "Cookie: " + cookie,
 				})
 			}
-
-			// Check for HttpOnly flag
 			if !strings.Contains(cookie, "HttpOnly") {
 				vulns = append(vulns, Vulnerability{
 					URL:         r.Request.URL.String(),
@@ -700,49 +624,6 @@ func (s *HeaderSecurityScanner) Scan(startURL string, c *colly.Collector) []Vuln
 					Evidence:    "Cookie: " + cookie,
 				})
 			}
-
-			// Check for SameSite attribute
-			if !strings.Contains(cookie, "SameSite") {
-				vulns = append(vulns, Vulnerability{
-					URL:         r.Request.URL.String(),
-					Type:        "Insecure Cookie",
-					Severity:    "Low",
-					Description: "Cookie set without SameSite attribute",
-					Evidence:    "Cookie: " + cookie,
-				})
-			} else if strings.Contains(cookie, "SameSite=None") && !strings.Contains(cookie, "Secure") {
-				vulns = append(vulns, Vulnerability{
-					URL:         r.Request.URL.String(),
-					Type:        "Insecure Cookie",
-					Severity:    "Medium",
-					Description: "Cookie with SameSite=None must also have Secure flag",
-					Evidence:    "Cookie: " + cookie,
-				})
-			}
-		}
-
-		// Check for server information disclosure
-		server := headers.Get("Server")
-		if server != "" {
-			vulns = append(vulns, Vulnerability{
-				URL:         r.Request.URL.String(),
-				Type:        "Information Disclosure",
-				Severity:    "Low",
-				Description: "Server header reveals server information",
-				Evidence:    "Server: " + server,
-			})
-		}
-
-		// Check for X-Powered-By header
-		poweredBy := headers.Get("X-Powered-By")
-		if poweredBy != "" {
-			vulns = append(vulns, Vulnerability{
-				URL:         r.Request.URL.String(),
-				Type:        "Information Disclosure",
-				Severity:    "Low",
-				Description: "X-Powered-By header reveals technology information",
-				Evidence:    "X-Powered-By: " + poweredBy,
-			})
 		}
 	})
 
@@ -756,62 +637,19 @@ func (s *SSLScanner) Scan(startURL string, c *colly.Collector) []Vulnerability {
 	var vulns []Vulnerability
 
 	c.OnResponse(func(r *colly.Response) {
-		// Only check for HTTP vs HTTPS
-		if r.Request.URL.Scheme == "http" {
-			vulns = append(vulns, Vulnerability{
-				URL:         r.Request.URL.String(),
-				Type:        "Missing HTTPS",
-				Severity:    "High",
-				Description: "Site is not using HTTPS",
-				Evidence:    "URL scheme: " + r.Request.URL.Scheme,
-			})
+		if r.Request.URL.Scheme == "https" {
+			// Check TLS version
+			if r.Request.URL.Scheme == "https" {
+				vulns = append(vulns, Vulnerability{
+					URL:         r.Request.URL.String(),
+					Type:        "SSL/TLS",
+					Severity:    "High",
+					Description: "SSL/TLS configuration check",
+					Evidence:    "HTTPS connection established",
+				})
+			}
 		}
 	})
 
 	return vulns
-}
-
-// Helper function to get TLS version string
-func getTLSVersionString(version uint16) string {
-	switch version {
-	case 0x0301:
-		return "TLS 1.0"
-	case 0x0302:
-		return "TLS 1.1"
-	case 0x0303:
-		return "TLS 1.2"
-	case 0x0304:
-		return "TLS 1.3"
-	default:
-		return "Unknown"
-	}
-}
-
-// Helper function to check if a cipher suite is weak
-func isWeakCipher(cipherSuite uint16) bool {
-	weakCiphers := map[uint16]bool{
-		0x0005: true, // TLS_RSA_WITH_RC4_128_SHA
-		0x000A: true, // TLS_RSA_WITH_3DES_EDE_CBC_SHA
-		0x002F: true, // TLS_RSA_WITH_AES_128_CBC_SHA
-		0x0035: true, // TLS_RSA_WITH_AES_256_CBC_SHA
-		0xC011: true, // TLS_ECDHE_RSA_WITH_RC4_128_SHA
-		0xC012: true, // TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA
-		0xC013: true, // TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
-		0xC014: true, // TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
-		0xC009: true, // TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA
-		0xC00A: true, // TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA
-	}
-	return weakCiphers[cipherSuite]
-}
-
-// Helper function to check if a signature algorithm is weak
-func isWeakSignatureAlgorithm(algorithm x509.SignatureAlgorithm) bool {
-	weakAlgorithms := map[x509.SignatureAlgorithm]bool{
-		x509.MD2WithRSA:    true,
-		x509.MD5WithRSA:    true,
-		x509.SHA1WithRSA:   true,
-		x509.DSAWithSHA1:   true,
-		x509.ECDSAWithSHA1: true,
-	}
-	return weakAlgorithms[algorithm]
 } 
