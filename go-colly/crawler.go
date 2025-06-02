@@ -29,6 +29,31 @@ var cloudflare403Count int64
 // Set to track domains with Cloudflare 403 errors
 var cloudflareDomains sync.Map
 
+// CSP stats counters
+var totalCSPChecked int64
+var hasCSPHeaderCount int64
+var hasMetaCSPCount int64
+var inlineScriptCount int64
+var inlineStyleCount int64
+var externalScriptCount int64
+var evalUsageCount int64
+var crossOriginScriptsCount int64
+var sameOriginScriptsCount int64
+var modernFrameworkCount int64
+var sensitiveFormsCount int64
+var hdrCTOCount int64
+var cookieHttpOnlyCount int64
+var outputEncodingCount int64
+var inputValidationCount int64
+var sandboxedIframesCount int64
+var unsafeInlineEventHandlersCount int64
+var jsonpEndpointsCount int64
+var postMessageUsageCount int64
+var riskHighCount int64
+var riskMediumCount int64
+var riskLowCount int64
+var riskMinimalCount int64
+
 func main() {
 	// Command-line flags
 	mode := flag.String("mode", "title", "Mode: 'title' or 'jssearch'")
@@ -150,6 +175,8 @@ func main() {
 				gotValid = crawlForJS(url, *depth, *keyword, writeResult, proxyFunc, *debug, &statusCounts, &status0Errors)
 			} else if *mode == "wordpress" {
 				gotValid = crawlForWordPress(url, *depth, writeResult, proxyFunc, *debug, &statusCounts, &status0Errors)
+			} else if *mode == "csp" {
+				gotValid = crawlForCSP(url, *depth, writeResult, proxyFunc, *debug, &statusCounts, &status0Errors)
 			} else {
 				if *debug {
 					writeResult("Unknown mode: %s\n", *mode)
@@ -225,6 +252,44 @@ func main() {
 	if cloudflare403Count > 0 {
 		writeResult("Cloudflare 403 Forbidden errors: %d\n", cloudflare403Count)
 	}
+
+	if *mode == "csp" {
+		headerCount := atomic.LoadInt64(&hasCSPHeaderCount)
+		metaCount := atomic.LoadInt64(&hasMetaCSPCount)
+		
+		writeResult("\nCSP and XSS Protection Analysis over %d domains:\n", totalCrawled)
+		writeResult("CSP Implementation:\n")
+		writeResult("  Has CSP header: %d (%.1f%%)\n", headerCount, (float64(headerCount)/float64(successCount))*100)
+		writeResult("  Has meta CSP: %d (%.1f%%)\n", metaCount, (float64(metaCount)/float64(successCount))*100)
+		
+		writeResult("\nXSS Risk Indicators (average per url):\n")
+		writeResult("  Inline scripts: %.2f\n", float64(atomic.LoadInt64(&inlineScriptCount))/float64(successCount))
+		writeResult("  Inline event handlers: %.2f\n", float64(atomic.LoadInt64(&unsafeInlineEventHandlersCount))/float64(successCount))
+		writeResult("  Inline styles: %.2f\n", float64(atomic.LoadInt64(&inlineStyleCount))/float64(successCount))
+		writeResult("  eval() usage: %.2f\n", float64(atomic.LoadInt64(&evalUsageCount))/float64(successCount))
+		writeResult("  postMessage usage: %.2f\n", float64(atomic.LoadInt64(&postMessageUsageCount))/float64(successCount))
+		writeResult("  JSONP endpoints: %.2f\n", float64(atomic.LoadInt64(&jsonpEndpointsCount))/float64(successCount))
+		
+		writeResult("\nScript Loading Patterns (average per url):\n")
+		writeResult("  External scripts: %.2f\n", float64(atomic.LoadInt64(&externalScriptCount))/float64(successCount))
+		writeResult("  Cross-origin scripts: %.2f\n", float64(atomic.LoadInt64(&crossOriginScriptsCount))/float64(successCount))
+		writeResult("  Same-origin scripts: %.2f\n", float64(atomic.LoadInt64(&sameOriginScriptsCount))/float64(successCount))
+		
+		writeResult("\nXSS Protection Measures:\n")
+		writeResult("  Modern frameworks: %d (%.1f%%)\n", atomic.LoadInt64(&modernFrameworkCount), (float64(atomic.LoadInt64(&modernFrameworkCount))/float64(successCount))*100)
+		writeResult("  X-Content-Type-Options: %d (%.1f%%)\n", atomic.LoadInt64(&hdrCTOCount), (float64(atomic.LoadInt64(&hdrCTOCount))/float64(successCount))*100)
+		writeResult("  Output encoding: %d (%.1f%%)\n", atomic.LoadInt64(&outputEncodingCount), (float64(atomic.LoadInt64(&outputEncodingCount))/float64(successCount))*100)
+		writeResult("  Input validation: %d (%.1f%%)\n", atomic.LoadInt64(&inputValidationCount), (float64(atomic.LoadInt64(&inputValidationCount))/float64(successCount))*100)
+		writeResult("  Sandboxed iframes: %d (%.1f%%)\n", atomic.LoadInt64(&sandboxedIframesCount), (float64(atomic.LoadInt64(&sandboxedIframesCount))/float64(successCount))*100)
+		writeResult("  HttpOnly cookies: %d (%.1f%%)\n", atomic.LoadInt64(&cookieHttpOnlyCount), (float64(atomic.LoadInt64(&cookieHttpOnlyCount))/float64(successCount))*100)
+		writeResult("  Sensitive forms: %d (%.1f%%)\n", atomic.LoadInt64(&sensitiveFormsCount), (float64(atomic.LoadInt64(&sensitiveFormsCount))/float64(successCount))*100)
+		
+		writeResult("\nXSS Risk Assessment (sites without CSP):\n")
+		writeResult("  High risk: %d (%.1f%%)\n", atomic.LoadInt64(&riskHighCount), (float64(atomic.LoadInt64(&riskHighCount))/float64(successCount))*100)
+		writeResult("  Medium risk: %d (%.1f%%)\n", atomic.LoadInt64(&riskMediumCount), (float64(atomic.LoadInt64(&riskMediumCount))/float64(successCount))*100)
+		writeResult("  Low risk: %d (%.1f%%)\n", atomic.LoadInt64(&riskLowCount), (float64(atomic.LoadInt64(&riskLowCount))/float64(successCount))*100)
+		writeResult("  Minimal risk: %d (%.1f%%)\n", atomic.LoadInt64(&riskMinimalCount), (float64(atomic.LoadInt64(&riskMinimalCount))/float64(successCount))*100)
+	}
 }
 
 func ensureHTTPS(domain string) string {
@@ -232,6 +297,329 @@ func ensureHTTPS(domain string) string {
 		return domain
 	}
 	return "https://" + domain
+}
+
+func crawlForCSP(currenturl string, maxdepth int, writeResult func(string, ...interface{}), proxyFunc colly.ProxyFunc, debug bool, statusCounts *sync.Map, status0Errors *sync.Map) bool {
+	c := newCollectorWithConfig(maxdepth, proxyFunc, debug, writeResult)
+	var gotValid bool
+	var hasCSPHeader bool
+	var hasMetaCSP bool
+	var hasInlineScript bool
+	var hasInlineStyle bool
+	var hasInlineEventHandlers bool
+	var hasHTTPScripts bool
+	var hasEvalUsage bool
+	var hasCrossOriginScripts bool
+	var hasModernFramework bool
+	var hasSensitiveForms bool
+	var hasOutputEncoding bool
+	var hasInputValidation bool
+	var hasXCTO bool
+	var hasSandboxedIframes bool
+	var hasPostMessage bool
+	var hasJSONP bool
+	var sameOriginScripts int
+	var crossOriginScripts int
+	var externalDomains = make(map[string]bool)
+	
+	// Parse the current domain for comparison
+	currentURL, _ := url.Parse(currenturl)
+	currentDomain := currentURL.Hostname()
+	
+	c.OnResponse(func(r *colly.Response) {
+		status := r.StatusCode
+		if status >= 200 && status < 300 {
+			gotValid = true
+		}
+		// count status codes
+		val, _ := statusCounts.LoadOrStore(status, int64(0))
+		statusCounts.Store(status, val.(int64)+1)
+
+		atomic.AddInt64(&totalCSPChecked, 1)
+		hdrs := r.Headers
+		
+		// Check for CSP header
+		if hdrs.Get("Content-Security-Policy") != "" {
+			hasCSPHeader = true
+			atomic.AddInt64(&hasCSPHeaderCount, 1)
+		}
+		
+		// Check for X-Content-Type-Options
+		if hdrs.Get("X-Content-Type-Options") == "nosniff" {
+			hasXCTO = true
+			atomic.AddInt64(&hdrCTOCount, 1)
+		}
+	})
+
+	// Check for inline scripts
+	c.OnHTML("script:not([src])", func(e *colly.HTMLElement) {
+		content := strings.ToLower(e.Text)
+		if len(strings.TrimSpace(content)) > 0 {
+			hasInlineScript = true
+			atomic.AddInt64(&inlineScriptCount, 1)
+		}
+		
+		// Check for eval usage
+		evalPatterns := []string{
+			"eval(", "eval ", "new function(", "settimeout(\"", "setinterval(\"",
+			"execscript(", "document.write(", "document.writeln(", "innerhtml",
+			"outerhtml", ".html(", "dangerouslysetinnerhtml",
+		}
+		for _, pattern := range evalPatterns {
+			if strings.Contains(content, pattern) {
+				hasEvalUsage = true
+				atomic.AddInt64(&evalUsageCount, 1)
+				break
+			}
+		}
+		
+		// Check for modern frameworks
+		frameworkPatterns := []string{
+			"react", "angular", "vue.", "svelte", "ember",
+			"_react", "_angular", "_vue", "ng-app", "v-app",
+			"reactdom", "angularjs", "vuejs", "next.js", "nuxt",
+		}
+		for _, pattern := range frameworkPatterns {
+			if strings.Contains(content, pattern) {
+				hasModernFramework = true
+				atomic.AddInt64(&modernFrameworkCount, 1)
+				break
+			}
+		}
+		
+		// Check for output encoding
+		encodingPatterns := []string{
+			"escapehtml", "escape_html", "htmlescape", "encodeuricomponent",
+			"_.escape", "handlebars.escapeexpression", "dompurify", "sanitize",
+			"textcontent", "innertext", "createtextnode", "he.encode", "html-entities",
+			"escape-html", "sanitize-html", "xss-filters",
+		}
+		for _, pattern := range encodingPatterns {
+			if strings.Contains(content, pattern) {
+				hasOutputEncoding = true
+				atomic.AddInt64(&outputEncodingCount, 1)
+				break
+			}
+		}
+		
+		// Check for postMessage usage
+		if strings.Contains(content, "postmessage") || strings.Contains(content, "addeventlistener('message'") || strings.Contains(content, "onmessage") {
+			hasPostMessage = true
+			atomic.AddInt64(&postMessageUsageCount, 1)
+		}
+		
+		// Check for JSONP patterns
+		jsonpPatterns := []string{
+			"callback=", "jsonp", "?callback", "&callback", "jsonpcallback",
+			"window[", "window.", "eval(", "new function(",
+		}
+		patternCount := 0
+		for _, pattern := range jsonpPatterns {
+			if strings.Contains(content, pattern) {
+				patternCount++
+			}
+		}
+		if patternCount >= 2 {
+			hasJSONP = true
+			atomic.AddInt64(&jsonpEndpointsCount, 1)
+		}
+	})
+	
+	// Check for inline event handlers
+	eventHandlers := []string{"onclick", "onload", "onerror", "onmouseover", "onmouseout", "onchange", "onsubmit", "onfocus", "onblur", "onkeyup", "onkeydown", "onkeypress"}
+	for _, handler := range eventHandlers {
+		c.OnHTML("[" + handler + "]", func(e *colly.HTMLElement) {
+			hasInlineEventHandlers = true
+			atomic.AddInt64(&unsafeInlineEventHandlersCount, 1)
+		})
+	}
+	
+	// Check for inline styles
+	c.OnHTML("style", func(e *colly.HTMLElement) {
+		if len(strings.TrimSpace(e.Text)) > 0 {
+			hasInlineStyle = true
+			atomic.AddInt64(&inlineStyleCount, 1)
+		}
+	})
+	
+	// Check for elements with style attribute
+	c.OnHTML("[style]", func(e *colly.HTMLElement) {
+		if e.Attr("style") != "" {
+			hasInlineStyle = true
+		}
+	})
+	
+	// Check for external scripts
+	c.OnHTML("script[src]", func(e *colly.HTMLElement) {
+		src := strings.TrimSpace(e.Attr("src"))
+		if src == "" {
+			return
+		}
+		
+		scriptURL, err := url.Parse(src)
+		if err != nil {
+			return
+		}
+		
+		if scriptURL.Host == "" {
+			scriptURL = e.Request.URL.ResolveReference(scriptURL)
+		}
+		
+		atomic.AddInt64(&externalScriptCount, 1)
+		
+		// Check if it's cross-origin or same-origin
+		if scriptURL.Host == currentDomain {
+			sameOriginScripts++
+			atomic.AddInt64(&sameOriginScriptsCount, 1)
+		} else {
+			crossOriginScripts++
+			hasCrossOriginScripts = true
+			atomic.AddInt64(&crossOriginScriptsCount, 1)
+			externalDomains[scriptURL.Host] = true
+		}
+	})
+	
+	// Check for meta CSP
+	c.OnHTML("meta[http-equiv=Content-Security-Policy]", func(e *colly.HTMLElement) {
+		hasMetaCSP = true
+		atomic.AddInt64(&hasMetaCSPCount, 1)
+	})
+	
+	// Check for forms with sensitive data
+	c.OnHTML("form", func(e *colly.HTMLElement) {
+		// Check for password, email, credit card, etc..
+		e.ForEach("input", func(_ int, el *colly.HTMLElement) {
+			inputType := strings.ToLower(el.Attr("type"))
+			inputName := strings.ToLower(el.Attr("name"))
+			inputId := strings.ToLower(el.Attr("id"))
+			
+			sensitiveTypes := []string{"password", "email", "tel", "ssn", "creditcard"}
+			sensitivePatterns := []string{"pass", "pwd", "email", "card", "cvv", "ssn", "social", "tax", "bank", "account", "routing"}
+			
+			for _, t := range sensitiveTypes {
+				if inputType == t {
+					hasSensitiveForms = true
+					atomic.AddInt64(&sensitiveFormsCount, 1)
+					return
+				}
+			}
+			
+			for _, p := range sensitivePatterns {
+				if strings.Contains(inputName, p) || strings.Contains(inputId, p) {
+					hasSensitiveForms = true
+					atomic.AddInt64(&sensitiveFormsCount, 1)
+					return
+				}
+			}
+		})
+	})
+	
+	// Check for input validation
+	c.OnHTML("input[pattern], input[required], input[minlength], input[maxlength], select[required], textarea[required]", func(e *colly.HTMLElement) {
+		hasInputValidation = true
+		atomic.AddInt64(&inputValidationCount, 1)
+	})
+	
+	// Check for sandboxed iframes
+	c.OnHTML("iframe[sandbox]", func(e *colly.HTMLElement) {
+		hasSandboxedIframes = true
+		atomic.AddInt64(&sandboxedIframesCount, 1)
+	})
+	
+	// Check cookies
+	c.OnResponse(func(r *colly.Response) {
+		for _, cookie := range r.Headers.Values("Set-Cookie") {
+			cookieLower := strings.ToLower(cookie)
+			if strings.Contains(cookieLower, "httponly") {
+				atomic.AddInt64(&cookieHttpOnlyCount, 1)
+			}
+		}
+	})
+
+	addErrorHandler(c, writeResult, statusCounts, status0Errors, debug)
+	err := c.Visit(currenturl)
+	if err != nil && debug {
+		fmt.Println("Error visiting page:", err)
+	}
+
+	c.Wait()
+
+	// Risk assessment based on findings
+	if gotValid {
+		// Only assess risk if no CSP is present
+		if !hasCSPHeader && !hasMetaCSP {
+			var riskCount, mitigationCount int
+
+			// Risk indicators
+			if hasInlineScript {
+				riskCount++
+			}
+			if hasInlineEventHandlers {
+				riskCount++
+			}
+			if hasInlineStyle {
+				riskCount++
+			}
+			if hasEvalUsage {
+				riskCount++
+			}
+			if hasHTTPScripts {
+				riskCount++
+			}
+			if hasCrossOriginScripts {
+				riskCount++
+			}
+			if len(externalDomains) > 1 {
+				riskCount++
+			}
+			if hasSensitiveForms {
+				riskCount++
+			}
+			if hasPostMessage {
+				riskCount++
+			}
+			if hasJSONP {
+				riskCount++
+			}
+
+			// Mitigation indicators
+			if hasModernFramework {
+				mitigationCount++
+			}
+			if hasOutputEncoding {
+				mitigationCount++
+			}
+			if hasInputValidation {
+				mitigationCount++
+			}
+			if hasXCTO {
+				mitigationCount++
+			}
+			if hasSandboxedIframes {
+				mitigationCount++
+			}
+			// If majority of scripts are same-origin
+			if sameOriginScripts > crossOriginScripts {
+				mitigationCount++
+			}
+
+			netScore := riskCount - mitigationCount
+
+			// Classify risk
+			switch {
+			case netScore >= 4:
+				atomic.AddInt64(&riskHighCount, 1)
+			case netScore >= 3:
+				atomic.AddInt64(&riskMediumCount, 1)
+			case netScore >=2:
+				atomic.AddInt64(&riskLowCount, 1)
+			default:
+				atomic.AddInt64(&riskMinimalCount, 1)
+			}
+		}
+	}
+
+	return gotValid
 }
 
 // crawlForTitle crawls the site and prints titles up to the given depth

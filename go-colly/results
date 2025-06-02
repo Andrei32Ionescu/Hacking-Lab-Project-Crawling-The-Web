@@ -1,0 +1,77 @@
+
+Scraping completed in 1m45.1407918s
+Scraped 0 urls
+Scraped 2001 root domains
+Scraped 0 urls per second
+Root domains per second: 19.03
+Concurrency: 16
+Mode: csp
+Depth: 1
+Valid responses: 1064
+Failed responses: 937
+Status code breakdown:
+  522: 2
+  404: 63
+  200: 1063
+  503: 3
+  504: 1
+  429: 3
+  400: 3
+  403: 52
+  401: 2
+  520: 2
+  0: 791
+  498: 2
+  502: 2
+  500: 2
+  301: 2
+  202: 1
+  204: 6
+Status 0 error breakdown (grouped network errors):
+  dial tcp: lookup ...: no such host: 594
+  tls: failed to verify certificate: x509: certificate is valid for ..., not ...: 45
+  read tcp ... wsarecv: An existing connection was forcibly closed by the remote host.: 8
+  EOF: 5
+  tls: failed to verify certificate: x509: certificate signed by unknown authority: 4
+  Get "https://gcloudcs.com": dial tcp: lookup gcloudcs.com: getaddrinfow: The requested name is valid, but no data of the requested type was found.: 1
+  Get "https://h30495.www3.hp.com/": tls: failed to verify certificate: x509: certificate has expired or is not yet valid: : 1
+  Get "https://wbx2.com": dial tcp 13.59.223.206:443: i/o timeout: 1
+  Get "https://godaddy.com": net/http: TLS handshake timeout: 1
+  Get "https://bfmio.com": dial tcp 54.225.90.171:443: i/o timeout: 1
+  ...and 129 more
+Total status 0 (network) errors: 790
+Status 0 errors: 790 (84.3% of all failed responses)
+Cloudflare 403 Forbidden errors: 9
+
+CSP and XSS Protection Analysis over 2001 domains:
+CSP Implementation:
+  Has CSP header: 388 (36.5%)
+  Has meta CSP: 26 (2.4%)
+
+XSS Risk Indicators (average per url):
+  Inline scripts: 11.91
+  Inline event handlers: 3.09
+  Inline styles: 10.81
+  eval() usage: 0.75
+  postMessage usage: 0.17
+  JSONP endpoints: 0.28
+
+Script Loading Patterns (average per url):
+  External scripts: 12.04
+  Cross-origin scripts: 10.16
+  Same-origin scripts: 1.88
+
+XSS Protection Measures:
+  Modern frameworks: 621 (58.4%)
+  X-Content-Type-Options: 523 (49.2%)
+  Output encoding: 687 (64.6%)
+  Input validation: 401 (37.7%)
+  Sandboxed iframes: 9 (0.8%)
+  HttpOnly cookies: 626 (58.8%)
+  Sensitive forms: 256 (24.1%)
+
+XSS Risk Assessment (sites without CSP):
+  High risk: 276 (25.9%)
+  Medium risk: 150 (14.1%)
+  Low risk: 101 (9.5%)
+  Minimal risk: 135 (12.7%)
