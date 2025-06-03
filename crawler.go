@@ -26,7 +26,7 @@ var visitedurls = make(map[string]bool)
 
 func main() {
 	// Command-line flags
-	mode := flag.String("mode", "title", "Mode: 'title', 'jssearch', 'wordpress', or 'tomcat'") // Added tomcat
+	mode := flag.String("mode", "title", "Mode: 'title', 'jssearch', 'wordpress', 'tomcat', or 'apache'")
 	keyword := flag.String("keyword", "", "Keyword to search for in JS files (jssearch mode)")
 	depth := flag.Int("depth", 1, "Crawl depth (1 = only main page)")
 	csvfile := flag.String("file", "top-1m.csv", "CSV file with domains")
@@ -144,6 +144,8 @@ func main() {
 				gotValid = crawlForWordPress(url, *depth, writeResult, proxyFunc, *debug, &statusCounts, &status0Errors)
 			} else if *mode == "tomcat" { // Added tomcat mode
 				gotValid = crawlForTomcat(url, writeResult, proxyFunc, *debug, &statusCounts, &status0Errors)
+			} else if *mode == "apache" { // Added apache mode
+				gotValid = crawlForApache(url, writeResult, proxyFunc, *debug, &statusCounts, &status0Errors)
 			} else {
 				if *debug {
 					writeResult("Unknown mode: %s\n", *mode)
@@ -661,6 +663,181 @@ func crawlForTomcat(currenturl string, writeResult func(string, ...interface{}),
 			writeResult("URL: %s - Tomcat Not Detected (primary URL failed to respond with network error)\n", currenturl)
 		}
 	}
+	return primaryUrlOkForSuccessCount
+}
+
+// crawlForApache attempts to detect if a site is running Apache HTTP Server and its version.
+// Returns true if the primary URL returns a 2xx status for success/fail counts.
+func crawlForApache(currenturl string, writeResult func(string, ...interface{}), proxyFunc colly.ProxyFunc, debug bool, statusCounts *sync.Map, status0Errors *sync.Map) bool {
+	var isApache bool
+	var apacheVersion string
+	var apacheComment string // e.g., (Ubuntu)
+	var detectionSource string
+
+	startTime := time.Now()
+	var requestCount int32
+	trackRequest := func() { atomic.AddInt32(&requestCount, 1) }
+
+	var primaryUrlResponded bool = false
+	var primaryUrlOkForSuccessCount bool = false
+
+	// Configure http.Client
+	transport := &http.Transport{
+		MaxIdleConns:          100,
+		MaxIdleConnsPerHost:   10,
+		TLSHandshakeTimeout:   5 * time.Second,
+		ResponseHeaderTimeout: 10 * time.Second,
+		IdleConnTimeout:       30 * time.Second,
+		DisableKeepAlives:     false,
+		DialContext: (&net.Dialer{
+			Timeout:   5 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+	}
+	if proxyFunc != nil {
+		transport.Proxy = proxyFunc
+	}
+	httpClient := &http.Client{
+		Timeout:   15 * time.Second,
+		Transport: transport,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse // Do not follow redirects
+		},
+	}
+
+	var rootRespStatus int
+	// --- Primary Check: Request the root URL itself ---
+	reqRoot, _ := http.NewRequest("GET", currenturl, nil)
+	reqRoot.Header.Set("User-Agent", userAgents[int(time.Now().UnixNano())%len(userAgents)])
+	reqRoot.Header.Set("Accept", acceptHeaders[int(time.Now().UnixNano())%len(acceptHeaders)])
+
+	respRoot, errRoot := httpClient.Do(reqRoot)
+	trackRequest()
+
+	if errRoot == nil {
+		defer respRoot.Body.Close()
+		primaryUrlResponded = true
+		rootRespStatus = respRoot.StatusCode
+		val, _ := statusCounts.LoadOrStore(respRoot.StatusCode, int64(0))
+		statusCounts.Store(respRoot.StatusCode, val.(int64)+1)
+
+		if respRoot.StatusCode >= 200 && respRoot.StatusCode < 300 {
+			primaryUrlOkForSuccessCount = true
+		}
+
+		serverHeader := respRoot.Header.Get("Server")
+		// Regex for "Apache/X.Y.Z (Comment)" or "Apache (Comment)" or "Apache/X.Y.Z" or "Apache"
+		reVerHeader := regexp.MustCompile(`^Apache(?:/([\d\.]+))?(?:\s+\(([^)]+)\))?`)
+		matchesVer := reVerHeader.FindStringSubmatch(serverHeader)
+
+		if len(matchesVer) > 0 { // Found "Apache" at the start of Server header
+			isApache = true
+			detectionSource = "Server Header"
+			if len(matchesVer) > 1 && matchesVer[1] != "" { // Version found
+				apacheVersion = matchesVer[1]
+			}
+			if len(matchesVer) > 2 && matchesVer[2] != "" { // Comment found
+				apacheComment = matchesVer[2]
+			}
+		}
+		io.Copy(io.Discard, respRoot.Body) // Ensure body is consumed
+	} else {
+		if debug {
+			writeResult("Error fetching root URL %s: %v\n", currenturl, errRoot)
+		}
+		grouped := groupStatus0Error(errRoot.Error())
+		cnt, _ := status0Errors.LoadOrStore(grouped, 0)
+		status0Errors.Store(grouped, cnt.(int)+1)
+		val, _ := statusCounts.LoadOrStore(0, int64(0)) // 0 for network error
+		statusCounts.Store(0, val.(int64)+1)
+		return false // Early exit if primary URL is unreachable
+	}
+
+	// --- Strategy: Check for Apache error page (if version not found in Server header, or to confirm) ---
+	// Only proceed if the primary URL responded, and either Apache wasn't detected or version is missing.
+	if primaryUrlResponded && (!isApache || apacheVersion == "") {
+		nonExistentURL := strings.TrimRight(currenturl, "/") + "/ThisPageShouldNotExistAndLeadTo404-" + fmt.Sprintf("%d", time.Now().UnixNano())
+		reqErrPage, _ := http.NewRequest("GET", nonExistentURL, nil)
+		reqErrPage.Header.Set("User-Agent", userAgents[int(time.Now().UnixNano())%len(userAgents)])
+
+		respErrPage, errErrPage := httpClient.Do(reqErrPage)
+		trackRequest()
+
+		if errErrPage == nil {
+			defer respErrPage.Body.Close()
+			val, _ := statusCounts.LoadOrStore(respErrPage.StatusCode, int64(0)) // Record status for this check
+			statusCounts.Store(respErrPage.StatusCode, val.(int64)+1)
+
+			// Check common Apache error codes
+			if respErrPage.StatusCode == http.StatusNotFound || respErrPage.StatusCode == http.StatusForbidden || respErrPage.StatusCode == http.StatusInternalServerError {
+				bodyBytes, _ := io.ReadAll(respErrPage.Body) // Limit read for performance?
+				bodyString := string(bodyBytes)
+
+				// Regex for "Apache/X.Y.Z (Comment) Server at" or "Apache Server at" in body
+				reErrPage := regexp.MustCompile(`Apache(?:/([\d\.]+))?(?:\s+\(([^)]+)\))?\s+Server at`)
+				matchesErrPage := reErrPage.FindStringSubmatch(bodyString)
+
+				if len(matchesErrPage) > 0 {
+					isApache = true // Confirm or set isApache
+					// Prioritize error page version if Server header had no version
+					if apacheVersion == "" && len(matchesErrPage) > 1 && matchesErrPage[1] != "" {
+						apacheVersion = matchesErrPage[1]
+						detectionSource = "Error Page (" + http.StatusText(respErrPage.StatusCode) + ")"
+						if len(matchesErrPage) > 2 && matchesErrPage[2] != "" {
+							apacheComment = matchesErrPage[2] // Update comment if found here
+						}
+					} else if detectionSource != "Server Header" { // If not already set by a more specific Server header version
+						detectionSource = "Error Page (" + http.StatusText(respErrPage.StatusCode) + " signature)"
+					}
+				} else if !isApache && strings.Contains(bodyString, "<address>Apache") {
+					// Fallback for less specific signature on error pages
+					isApache = true
+					detectionSource = "Error Page (" + http.StatusText(respErrPage.StatusCode) + " signature)"
+				}
+			}
+			io.Copy(io.Discard, respErrPage.Body)
+		} else if debug {
+			writeResult("Error checking error page for %s (%s): %v\n", currenturl, nonExistentURL, errErrPage)
+			grouped := groupStatus0Error(errErrPage.Error())
+			cnt, _ := status0Errors.LoadOrStore(grouped, 0)
+			status0Errors.Store(grouped, cnt.(int)+1)
+			val, _ := statusCounts.LoadOrStore(0, int64(0))
+			statusCounts.Store(0, val.(int64)+1)
+		}
+	}
+
+	duration := time.Since(startTime)
+	rps := 0.0
+	if duration.Seconds() > 0 {
+		rps = float64(requestCount) / duration.Seconds()
+	}
+
+	if isApache {
+		writeResult("URL: %s\n", currenturl)
+		writeResult("  Apache Detected: Yes\n")
+		if apacheVersion != "" {
+			versionStr := apacheVersion
+			if apacheComment != "" {
+				versionStr += " (" + apacheComment + ")"
+			}
+			writeResult("  Apache Version: %s (Source: %s)\n", versionStr, detectionSource)
+		} else {
+			versionStr := "Unknown"
+			if apacheComment != "" { // e.g. Server: Apache (Debian)
+				versionStr += " (OS/Distro Info: " + apacheComment + ")"
+			}
+			writeResult("  Apache Version: %s (Detected via: %s)\n", versionStr, detectionSource)
+		}
+		writeResult("  Requests Made: %d, Time: %.2fs, RPS: %.2f\n", requestCount, duration.Seconds(), rps)
+	} else if debug {
+		if primaryUrlResponded {
+			writeResult("URL: %s - Apache Not Detected (primary URL status: %d)\n", currenturl, rootRespStatus)
+		} else {
+			writeResult("URL: %s - Apache Not Detected (primary URL failed to respond)\n", currenturl)
+		}
+		writeResult("  Requests Made: %d, Time: %.2fs, RPS: %.2f\n", requestCount, duration.Seconds(), rps)
+	}
+
 	return primaryUrlOkForSuccessCount
 }
 
