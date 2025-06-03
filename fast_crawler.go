@@ -197,7 +197,7 @@ type Resolver struct {
 func NewResolver(server string) *Resolver {
 	return &Resolver{
 		dialer: &net.Dialer{
-			Timeout: 500 * time.Millisecond,  // Reduced from 1s to 500ms
+			Timeout: 2 * time.Second,  // Increased from 500ms for more reliable DNS
 		},
 		server: server,
 	}
@@ -257,19 +257,21 @@ func (r *Resolver) Resolve(domain string) ([]string, error) {
 func newHTTPClient() *http.Client {
 	return &http.Client{
 		Transport: &http.Transport{
-			MaxIdleConns:        200,          // Increased from 100
-			MaxIdleConnsPerHost: 20,           // Increased from 10
-			MaxConnsPerHost:     20,           // Increased from 10
-			IdleConnTimeout:     20 * time.Second,
-			TLSHandshakeTimeout: 2 * time.Second,  // Reduced from 3s
-			DisableCompression:  true,             // Added to reduce CPU usage
+			MaxIdleConns:        500,          // Increased for better connection reuse
+			MaxIdleConnsPerHost: 50,           // Increased to allow more concurrent connections per host
+			MaxConnsPerHost:     50,           // Increased to match idle connections
+			IdleConnTimeout:     30 * time.Second,
+			TLSHandshakeTimeout: 3 * time.Second,  // More lenient timeout
+			DisableCompression:  true,             // Reduce CPU usage
+			DisableKeepAlives:   false,           // Enable connection reuse
+			ForceAttemptHTTP2:   true,            // Enable HTTP/2 for better multiplexing
 			DialContext: (&net.Dialer{
-				Timeout:   3 * time.Second,
+				Timeout:   5 * time.Second,    // More lenient timeout
 				KeepAlive: 30 * time.Second,
 				DualStack: true,
 			}).DialContext,
 		},
-		Timeout: 5 * time.Second,  // Reduced from 10s
+		Timeout: 10 * time.Second,  // More lenient global timeout
 	}
 }
 
@@ -336,6 +338,11 @@ const (
 	VulnTypeWPPlugin        VulnType = "wordpress_plugin"
 	VulnTypeWPTheme         VulnType = "wordpress_theme"
 	VulnTypeWPCore          VulnType = "wordpress_core"
+	VulnTypeSecHeader       VulnType = "security_header"
+	VulnTypeInfra           VulnType = "infrastructure"
+	VulnTypeSourceCode      VulnType = "source_code"
+	VulnTypeAPIExposure     VulnType = "api_exposure"
+	VulnTypeDevTools        VulnType = "dev_tools"
 )
 
 // Add test payloads
@@ -1087,21 +1094,22 @@ func saveResults(filename string) error {
 }
 
 func main() {
-	concurrency := flag.Int("concurrency", 200, "Number of concurrent checkers")  // Increased from 100
-	maxDomains := flag.Int("max", 100, "Maximum number of domains to process")
+	concurrency := flag.Int("concurrency", 20, "Number of concurrent checkers")
+	maxDomains := flag.Int("max", 200, "Maximum number of domains to process")
 	csvFile := flag.String("file", "top-1m.csv", "CSV file with domains")
 	resultsFile := flag.String("output", "vulnerability_scan_results.json", "Output JSON file for results")
+	metricsFile := flag.String("metrics", "security_metrics.json", "Output JSON file for security metrics")
 	flag.Parse()
 
 	startTime = time.Now()
 
-	// Initialize resolvers with a smaller pool
+	// Initialize resolvers with all available servers for better distribution
 	var resolvers []*Resolver
-	for _, server := range dnsResolvers[:4] { // Use only first 4 resolvers for faster DNS
+	for _, server := range dnsResolvers {
 		resolvers = append(resolvers, NewResolver(server))
 	}
 
-	// Create HTTP client pool
+	// Create HTTP client pool with optimized settings
 	client := newHTTPClient()
 
 	// Read domains
@@ -1114,16 +1122,57 @@ func main() {
 
 	reader := csv.NewReader(file)
 	domains := make([]string, 0, *maxDomains)
-	for i := 0; i < *maxDomains; i++ {
+
+	// Read first row to determine format
+	header, err := reader.Read()
+	if err != nil {
+		fmt.Printf("Failed to read header: %v\n", err)
+		return
+	}
+
+	// Determine file format and domain column
+	var domainCol int
+	if len(header) == 1 {
+		// Single column format (domain only)
+		domainCol = 0
+		// Check if it's a header row or data
+		if strings.ToLower(header[0]) != "domain" {
+			// First row is data, not header
+			domains = append(domains, strings.TrimSpace(header[0]))
+		}
+	} else if len(header) >= 2 {
+		// Two or more columns (rank,domain format)
+		domainCol = 1
+		// Check if it's a header row
+		if strings.ToLower(header[1]) != "domain" {
+			// First row is data, not header
+			domains = append(domains, strings.TrimSpace(header[1]))
+		}
+	} else {
+		fmt.Printf("Invalid CSV format\n")
+		return
+	}
+
+	fmt.Printf("Reading domains from %s (domain column: %d)\n", *csvFile, domainCol)
+
+	// Read remaining rows
+	for i := len(domains); i < *maxDomains; i++ {
 		record, err := reader.Read()
 		if err == io.EOF {
 			break
 		}
-		if err != nil || len(record) < 2 {
+		if err != nil {
 			continue
 		}
-		domains = append(domains, strings.TrimSpace(record[1]))
+		if len(record) > domainCol {
+			domain := strings.TrimSpace(record[domainCol])
+			if domain != "" {
+				domains = append(domains, domain)
+			}
+		}
 	}
+
+	fmt.Printf("Loaded %d domains\n", len(domains))
 
 	// Process domains with increased buffer sizes
 	resultChan := make(chan string, *concurrency*2)
@@ -1208,6 +1257,29 @@ func main() {
 	} else {
 		fmt.Printf("\nResults saved to: %s\n", *resultsFile)
 	}
+
+	// Analyze and save metrics
+	metrics, err := AnalyzeResults(*resultsFile)
+	if err != nil {
+		fmt.Printf("Error analyzing results: %v\n", err)
+		return
+	}
+
+	// Print metrics to console
+	PrintMetrics(metrics)
+
+	// Save metrics to JSON file
+	metricsJSON, err := json.MarshalIndent(metrics, "", "  ")
+	if err != nil {
+		fmt.Printf("Error marshaling metrics: %v\n", err)
+		return
+	}
+
+	if err := os.WriteFile(*metricsFile, metricsJSON, 0644); err != nil {
+		fmt.Printf("Error saving metrics to %s: %v\n", *metricsFile, err)
+	} else {
+		fmt.Printf("\nMetrics saved to: %s\n", *metricsFile)
+	}
 }
 
 // Add back the String() method for Finding
@@ -1224,68 +1296,34 @@ const (
 	ElementNode html.NodeType = 1
 )
 
-// Update checkVulnerabilities to include WordPress info
+// Update checkVulnerabilities to include new checks
 func checkVulnerabilities(domain string, client *http.Client) []Finding {
 	var findings []Finding
 	var mu sync.Mutex
 	var wg sync.WaitGroup
+
+	baseURL := "https://" + domain
 	
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	// Run all checks in parallel
+	wg.Add(6)
 
-	url := "https://" + domain
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-	if err != nil {
-		return findings
-	}
-
-	addBrowserHeaders(req)
-	resp, err := client.Do(req)
-	if err != nil || resp == nil {
-		return findings
-	}
-	defer resp.Body.Close()
-
-	respData, err := analyzeResponse(resp)
-	if err != nil {
-		return findings
-	}
-
-	// Run analyses in parallel
-	wg.Add(5)
-
-	// WordPress check with info gathering
+	// Check web application vulnerabilities
 	go func() {
 		defer wg.Done()
-		if wpFindings, wpInfo := checkWordPressVulnerabilities(domain, client); len(wpFindings) > 0 {
-			mu.Lock()
-			findings = append(findings, wpFindings...)
-			// Store WordPress info in the global results
-			if result, exists := scanResults.Results[domain]; exists && wpInfo != nil {
-				result.WordPress = wpInfo
-			}
-			mu.Unlock()
-		}
-	}()
-
-	// Check mixed content
-	go func() {
-		defer wg.Done()
-		if mixedFindings := checkMixedContent(respData.bodyString); len(mixedFindings) > 0 {
-			mu.Lock()
-			findings = append(findings, mixedFindings...)
-			mu.Unlock()
-		}
-	}()
-
-	// Check TLS
-	go func() {
-		defer wg.Done()
-		if respData.tlsInfo != nil {
-			if tlsFindings := checkTLSIssues(respData.tlsInfo); len(tlsFindings) > 0 {
-				mu.Lock()
-				findings = append(findings, tlsFindings...)
-				mu.Unlock()
+		for _, check := range webAppVulnPaths {
+			url := baseURL + check.path
+			if resp, err := client.Get(url); err == nil {
+				if resp.StatusCode == 200 {
+					mu.Lock()
+					findings = append(findings, Finding{
+						Type:        VulnTypeFileExposure,
+						Severity:    check.severity,
+						Description: check.description,
+						Evidence:    fmt.Sprintf("Accessible at %s", check.path),
+					})
+					mu.Unlock()
+				}
+				resp.Body.Close()
 			}
 		}
 	}()
@@ -1293,323 +1331,281 @@ func checkVulnerabilities(domain string, client *http.Client) []Finding {
 	// Check security headers
 	go func() {
 		defer wg.Done()
-		if headerFindings := checkSecurityHeaders(respData.headers, domain); len(headerFindings) > 0 {
-			mu.Lock()
-			findings = append(findings, headerFindings...)
-			mu.Unlock()
+		if resp, err := client.Get(baseURL); err == nil {
+			defer resp.Body.Close()
+			
+			// Check security headers
+			for _, check := range securityHeaderChecks {
+				if resp.Header.Get(check.header) == "" {
+					mu.Lock()
+					findings = append(findings, Finding{
+						Type:        VulnTypeSecHeader,
+						Severity:    check.severity,
+						Description: check.description,
+						Evidence:    fmt.Sprintf("Header %s not found", check.header),
+					})
+					mu.Unlock()
+				}
+			}
+
+			// Check response headers for information disclosure
+			for _, check := range securityResponseChecks {
+				for header, values := range resp.Header {
+					if strings.Contains(header, check.pattern) {
+						mu.Lock()
+						findings = append(findings, Finding{
+							Type:        VulnTypeTechDisclosure,
+							Severity:    check.severity,
+							Description: check.description,
+							Evidence:    fmt.Sprintf("%s: %s", header, values[0]),
+						})
+						mu.Unlock()
+					}
+				}
+			}
 		}
 	}()
 
-	// Check technology disclosure
+	// Check JavaScript files for vulnerabilities
 	go func() {
 		defer wg.Done()
-		if techFindings := checkTechnologyDisclosure(respData.bodyString); len(techFindings) > 0 {
-			mu.Lock()
-			findings = append(findings, techFindings...)
-			mu.Unlock()
+		if resp, err := client.Get(baseURL); err == nil {
+			defer resp.Body.Close()
+			body, err := io.ReadAll(resp.Body)
+			if err == nil {
+				// Find JavaScript files
+				jsFiles := findJavaScriptFiles(string(body))
+				for _, jsFile := range jsFiles {
+					if jsResp, err := client.Get(jsFile); err == nil {
+						jsBody, err := io.ReadAll(jsResp.Body)
+						jsResp.Body.Close()
+						if err == nil {
+							for _, pattern := range jsVulnPatterns {
+								if strings.Contains(string(jsBody), pattern.pattern) {
+									mu.Lock()
+									findings = append(findings, Finding{
+										Type:        VulnTypeSourceCode,
+										Severity:    pattern.severity,
+										Description: pattern.description,
+										Evidence:    fmt.Sprintf("Found in %s", jsFile),
+									})
+									mu.Unlock()
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}()
+
+	// Check infrastructure vulnerabilities
+	go func() {
+		defer wg.Done()
+		for _, check := range infraVulnChecks {
+			url := baseURL + check.path
+			if resp, err := client.Get(url); err == nil {
+				if resp.StatusCode == 200 {
+					mu.Lock()
+					findings = append(findings, Finding{
+						Type:        VulnTypeInfra,
+						Severity:    check.severity,
+						Description: check.description,
+						Evidence:    fmt.Sprintf("Found at %s", check.path),
+					})
+					mu.Unlock()
+				}
+				resp.Body.Close()
+			}
+		}
+	}()
+
+	// Check for API endpoints
+	go func() {
+		defer wg.Done()
+		apiPaths := []string{"/api", "/v1", "/v2", "/graphql", "/swagger", "/docs"}
+		for _, path := range apiPaths {
+			url := baseURL + path
+			if resp, err := client.Get(url); err == nil {
+				if resp.StatusCode == 200 {
+					mu.Lock()
+					findings = append(findings, Finding{
+						Type:        VulnTypeAPIExposure,
+						Severity:    "medium",
+						Description: "API endpoint exposed",
+						Evidence:    fmt.Sprintf("Accessible at %s", path),
+					})
+					mu.Unlock()
+				}
+				resp.Body.Close()
+			}
+		}
+	}()
+
+	// Check development tools and environments
+	go func() {
+		defer wg.Done()
+		devPaths := []string{"/.git", "/.env", "/node_modules", "/.npm", "/.yarn"}
+		for _, path := range devPaths {
+			url := baseURL + path
+			if resp, err := client.Get(url); err == nil {
+				if resp.StatusCode == 200 {
+					mu.Lock()
+					findings = append(findings, Finding{
+						Type:        VulnTypeDevTools,
+						Severity:    "high",
+						Description: "Development artifact exposed",
+						Evidence:    fmt.Sprintf("Found at %s", path),
+					})
+					mu.Unlock()
+				}
+				resp.Body.Close()
+			}
 		}
 	}()
 
 	wg.Wait()
-
-	// Add common metadata to all findings
-	for i := range findings {
-		findings[i].Timestamp = time.Now().Format(time.RFC3339)
-		findings[i].Domain = domain
-		findings[i].URL = url
-		findings[i].StatusCode = respData.statusCode
-	}
-
 	return findings
 }
 
-// Update checkWordPressVulnerabilities to track more plugin information
-func checkWordPressVulnerabilities(domain string, client *http.Client) ([]Finding, *WordPressInfo) {
-	var findings []Finding
-	wpInfo := &WordPressInfo{
-		DetectedPlugins: make(map[string]string),
+// Helper function to find JavaScript files in HTML
+func findJavaScriptFiles(html string) []string {
+	var files []string
+	scriptPattern := regexp.MustCompile(`<script[^>]+src=["']([^"']+)["']`)
+	matches := scriptPattern.FindAllStringSubmatch(html, -1)
+	for _, match := range matches {
+		if len(match) > 1 {
+			files = append(files, match[1])
+		}
 	}
+	return files
+}
+
+// Add new security header checks
+var securityHeaderChecks = []struct {
+	header      string
+	description string
+	severity    string
+}{
+	{"X-Permitted-Cross-Domain-Policies", "Missing cross-domain policy header", "medium"},
+	{"Cross-Origin-Embedder-Policy", "Missing COEP header", "low"},
+	{"Cross-Origin-Opener-Policy", "Missing COOP header", "low"},
+	{"Cross-Origin-Resource-Policy", "Missing CORP header", "low"},
+	{"Expect-CT", "Missing Certificate Transparency header", "low"},
+}
+
+// Add web application vulnerability paths
+var webAppVulnPaths = []struct {
+	path        string
+	description string
+	severity    string
+}{
+	// Development and Debug
+	{"/phpinfo.php", "PHP Info exposure", "high"},
+	{"/.env.local", "Environment file exposure", "critical"},
+	{"/.env.development", "Development environment file", "critical"},
+	{"/server-status", "Apache server status page", "high"},
+	{"/server-info", "Apache server info page", "high"},
 	
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	// First check if it's a WordPress site
-	wpAdminURL := "https://" + domain + "/wp-admin/"
-	wpLoginURL := "https://" + domain + "/wp-login.php"
-	wpContentURL := "https://" + domain + "/wp-content/"
-
-	for _, url := range []string{wpAdminURL, wpLoginURL, wpContentURL} {
-		req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-		if err != nil {
-			continue
-		}
-		addBrowserHeaders(req)
-		resp, err := client.Do(req)
-		if err != nil || resp == nil {
-			continue
-		}
-		resp.Body.Close()
-		if resp.StatusCode == 200 || resp.StatusCode == 301 || resp.StatusCode == 302 {
-			wpInfo.IsWordPress = true
-			break
-		}
-	}
-
-	if !wpInfo.IsWordPress {
-		return findings, nil
-	}
-
-	// Try to detect WordPress version
-	generatorURL := "https://" + domain + "/feed/"
-	if req, err := http.NewRequestWithContext(ctx, "GET", generatorURL, nil); err == nil {
-		if resp, err := client.Do(req); err == nil && resp != nil {
-			defer resp.Body.Close()
-			if body, err := io.ReadAll(resp.Body); err == nil {
-				if matches := regexp.MustCompile(`<generator>https://wordpress.org/\?v=([\d.]+)</generator>`).FindSubmatch(body); len(matches) > 1 {
-					wpInfo.Version = string(matches[1])
-				}
-			}
-		}
-	}
-
-	// Check for all common plugins first
-	for _, plugin := range commonComponents {
-		pluginURL := "https://" + domain + "/wp-content/plugins/" + plugin + "/"
-		req, err := http.NewRequestWithContext(ctx, "GET", pluginURL, nil)
-		if err != nil {
-			continue
-		}
-		addBrowserHeaders(req)
-		resp, err := client.Do(req)
-		if err != nil || resp == nil {
-			continue
-		}
-		resp.Body.Close()
-
-		if resp.StatusCode == 200 || resp.StatusCode == 403 {
-			// Try to detect version
-			versionURL := pluginURL + "readme.txt"
-			version := detectPluginVersion(versionURL, client)
-			wpInfo.DetectedPlugins[plugin] = version
-		}
-	}
-
-	// Check specifically for known vulnerable plugins
-	for _, vuln := range wordpressVulnerabilities {
-		pluginURL := "https://" + domain + vuln.checkPath
-		req, err := http.NewRequestWithContext(ctx, "GET", pluginURL, nil)
-		if err != nil {
-			continue
-		}
-		addBrowserHeaders(req)
-		resp, err := client.Do(req)
-		if err != nil || resp == nil {
-			continue
-		}
-		resp.Body.Close()
-
-		if resp.StatusCode == 200 || resp.StatusCode == 403 {
-			version := detectPluginVersion(pluginURL+"readme.txt", client)
-			
-			vulnPlugin := VulnerablePlugin{
-				Name:        vuln.pluginSlug,
-				Version:     version,
-				Path:        vuln.checkPath,
-				CVE:         vuln.cve,
-				Description: vuln.description,
-				Severity:    vuln.severity,
-			}
-			wpInfo.VulnerablePlugins = append(wpInfo.VulnerablePlugins, vulnPlugin)
-
-			findings = append(findings, Finding{
-				Type:        VulnTypeWPPlugin,
-				Severity:    vuln.severity,
-				Description: fmt.Sprintf("Potentially vulnerable WordPress plugin: %s %s (%s)", 
-					vuln.pluginSlug, version, vuln.cve),
-				Evidence:    fmt.Sprintf("Plugin directory found at %s, version: %s", vuln.checkPath, version),
-			})
-		}
-	}
-
-	// Check for common WordPress vulnerabilities and exposed endpoints
-	commonVulnPaths := []struct {
-		path        string
-		description string
-		severity    string
-	}{
-		{"/wp-json/wp/v2/users/", "WordPress User Enumeration via REST API", "medium"},
-		{"/wp-content/uploads/", "Directory Listing Enabled", "medium"},
-		{"/wp-content/debug.log", "Debug Log Exposure", "high"},
-		{"/wp-config.php.bak", "WordPress Config Backup", "critical"},
-		{"/wp-content/plugins/", "Plugin Directory Listing", "medium"},
-		{"/wp-content/themes/", "Theme Directory Listing", "medium"},
-	}
-
-	for _, vuln := range commonVulnPaths {
-		url := "https://" + domain + vuln.path
-		req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-		if err != nil {
-			continue
-		}
-		addBrowserHeaders(req)
-		resp, err := client.Do(req)
-		if err != nil || resp == nil {
-			continue
-		}
-		resp.Body.Close()
-
-		if resp.StatusCode == 200 {
-			wpInfo.ExposedEndpoints = append(wpInfo.ExposedEndpoints, vuln.path)
-			findings = append(findings, Finding{
-				Type:        VulnTypeWPCore,
-				Severity:    vuln.severity,
-				Description: vuln.description,
-				Evidence:    fmt.Sprintf("Accessible at %s", vuln.path),
-			})
-		}
-	}
-
-	return findings, wpInfo
-}
-
-// Helper function to detect plugin version
-func detectPluginVersion(versionURL string, client *http.Client) string {
-	req, err := http.NewRequest("GET", versionURL, nil)
-	if err != nil {
-		return "unknown"
-	}
-	addBrowserHeaders(req)
-	resp, err := client.Do(req)
-	if err != nil || resp == nil {
-		return "unknown"
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "unknown"
-	}
-
-	bodyStr := string(body)
-	if strings.Contains(bodyStr, "Stable tag:") {
-		parts := strings.Split(bodyStr, "Stable tag:")
-		if len(parts) > 1 {
-			version := strings.TrimSpace(strings.Split(parts[1], "\n")[0])
-			return version
-		}
-	}
-	return "unknown"
-}
-
-func checkTLSIssues(tlsState *tls.ConnectionState) []Finding {
-	var findings []Finding
-
-	// Check TLS version
-	if tlsState.Version < tls.VersionTLS12 {
-		findings = append(findings, Finding{
-			Type:        VulnTypeWeakTLS,
-			Severity:    "high",
-			Description: "Weak TLS version detected",
-			Evidence:    fmt.Sprintf("TLS %d.%d", tlsState.Version>>8, tlsState.Version&0xff),
-		})
-	}
-
-	// Check certificate expiration
-	if len(tlsState.PeerCertificates) > 0 {
-		cert := tlsState.PeerCertificates[0]
-		daysUntilExpiry := int(time.Until(cert.NotAfter).Hours() / 24)
-		if daysUntilExpiry < 30 {
-			findings = append(findings, Finding{
-				Type:        VulnTypeWeakTLS,
-				Severity:    "high",
-				Description: "Certificate expiring soon",
-				Evidence:    fmt.Sprintf("Expires in %d days", daysUntilExpiry),
-			})
-		}
-	}
-
-	return findings
-}
-
-func checkSecurityHeaders(headers http.Header, domain string) []Finding {
-	var findings []Finding
-
-	// Check CSP
-	if csp := headers.Get("Content-Security-Policy"); csp != "" {
-		for _, directive := range strings.Split(csp, ";") {
-			directive = strings.TrimSpace(directive)
-			for _, unsafe := range unsafeCSPDirectives {
-				if strings.Contains(directive, unsafe) {
-					findings = append(findings, Finding{
-						Type:        VulnTypeWeakCSP,
-						Severity:    "medium",
-						Description: "Unsafe CSP directive found",
-						Evidence:    fmt.Sprintf("Directive contains: %s", unsafe),
-					})
-					break
-				}
-			}
-		}
-	}
-
-	// Check cookies
-	for _, cookie := range headers["Set-Cookie"] {
-		if !strings.Contains(cookie, "Secure") || !strings.Contains(cookie, "HttpOnly") {
-			findings = append(findings, Finding{
-				Type:        VulnTypeWeakCookie,
-				Severity:    "medium",
-				Description: "Insecure cookie settings",
-				Evidence:    fmt.Sprintf("Cookie %s: Missing security flags", strings.Split(cookie, "=")[0]),
-			})
-		}
-	}
-
-	return findings
-}
-
-func checkTechnologyDisclosure(body string) []Finding {
-	var findings []Finding
-
-	for tech, patterns := range techFingerprints {
-		for _, pattern := range patterns {
-			if strings.Contains(body, pattern) {
-				findings = append(findings, Finding{
-					Type:        VulnTypeTechDisclosure,
-					Severity:    "low",
-					Description: "Technology stack disclosed",
-					Evidence:    fmt.Sprintf("Detected: %s", tech),
-				})
-				break
-			}
-		}
-	}
-
-	return findings
-}
-
-func checkMixedContent(body string) []Finding {
-	var findings []Finding
+	// Source Code and Version Control
+	{".svn/entries", "SVN repository exposure", "critical"},
+	{".hg/", "Mercurial repository exposure", "critical"},
+	{".bzr/", "Bazaar repository exposure", "critical"},
+	{".idea/", "IDE configuration exposure", "medium"},
+	{".vscode/", "VSCode configuration exposure", "medium"},
 	
-	for _, pattern := range mixedContentPatterns {
-		if matches := regexp.MustCompile(pattern).FindAllString(body, -1); len(matches) > 0 {
-			findings = append(findings, Finding{
-				Type:        VulnTypeMixedContent,
-				Severity:    "medium",
-				Description: "Mixed content found: HTTP resources on HTTPS page",
-				Evidence:    strings.Join(matches[:min(3, len(matches))], ", "),
-			})
-			break
-		}
-	}
+	// Backup Files
+	{"backup.zip", "Backup archive", "high"},
+	{"backup.tar.gz", "Backup archive", "high"},
+	{"backup.sql.gz", "Database backup", "critical"},
+	{".bak", "Backup file", "high"},
+	{".old", "Old file version", "medium"},
 	
-	return findings
+	// Configuration Files
+	{"config.json", "Configuration file", "high"},
+	{"settings.json", "Settings file", "high"},
+	{"config.xml", "XML configuration", "high"},
+	{"config.yml", "YAML configuration", "high"},
+	{"config.ini", "INI configuration", "high"},
+	
+	// API Documentation
+	{"api/docs", "API documentation", "medium"},
+	{"api/swagger", "Swagger documentation", "medium"},
+	{"api/graphql", "GraphQL endpoint", "medium"},
+	{"graphiql", "GraphQL IDE", "medium"},
+	
+	// Common CMS Paths
+	{"/wp-config.php~", "WordPress config backup", "critical"},
+	{"/wp-config.php.save", "WordPress config save", "critical"},
+	{"/drupal/CHANGELOG.txt", "Drupal version disclosure", "medium"},
+	{"/joomla.xml", "Joomla version disclosure", "medium"},
+	{"/administrator/manifests/files/joomla.xml", "Joomla version disclosure", "medium"},
+	
+	// Database Management
+	{"/phpmyadmin/", "phpMyAdmin interface", "high"},
+	{"/adminer.php", "Adminer interface", "high"},
+	{"/dbadmin/", "Database admin interface", "high"},
+	{"/mysql/", "MySQL interface", "high"},
+	
+	// Development Tools
+	{"/composer.json", "PHP dependencies", "medium"},
+	{"/package.json", "Node.js dependencies", "medium"},
+	{"/yarn.lock", "Yarn dependencies", "medium"},
+	{"/requirements.txt", "Python dependencies", "medium"},
+	{"/Gemfile", "Ruby dependencies", "medium"},
+	
+	// Error Pages
+	{"/error_log", "Error log exposure", "high"},
+	{"/php_error.log", "PHP error log", "high"},
+	{"/debug.log", "Debug log exposure", "high"},
+	
+	// Common Framework Paths
+	{"/laravel/.env", "Laravel environment file", "critical"},
+	{"/symfony/.env", "Symfony environment file", "critical"},
+	{"/django/settings.py", "Django settings", "critical"},
+	{"/rails/config/database.yml", "Rails database config", "critical"},
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
+// Add security response header checks
+var securityResponseChecks = []struct {
+	pattern     string
+	description string
+	severity    string
+}{
+	{"X-Powered-By:", "Technology disclosure in headers", "low"},
+	{"Server:", "Server version disclosure", "low"},
+	{"X-AspNet-Version:", "ASP.NET version disclosure", "low"},
+	{"X-Runtime:", "Ruby on Rails disclosure", "low"},
+	{"X-Generator:", "CMS/framework disclosure", "low"},
+}
+
+// Add JavaScript vulnerability patterns
+var jsVulnPatterns = []struct {
+	pattern     string
+	description string
+	severity    string
+}{
+	{"apiKey:", "Potential API key exposure", "high"},
+	{"api_key:", "Potential API key exposure", "high"},
+	{"secret:", "Potential secret exposure", "high"},
+	{"password:", "Potential password exposure", "high"},
+	{"aws_access:", "AWS access key exposure", "critical"},
+	{"firebase.initializeApp", "Firebase configuration exposure", "high"},
+	{"googleAnalytics", "Google Analytics configuration", "medium"},
+	{"stripe.key", "Stripe key exposure", "critical"},
+}
+
+// Add infrastructure vulnerability checks
+var infraVulnChecks = []struct {
+	path        string
+	description string
+	severity    string
+}{
+	{".well-known/security.txt", "Missing security.txt", "low"},
+	{"/crossdomain.xml", "Permissive cross-domain policy", "medium"},
+	{"/clientaccesspolicy.xml", "Permissive Silverlight policy", "medium"},
+	{".well-known/apple-app-site-association", "iOS app association exposure", "low"},
+	{".well-known/assetlinks.json", "Android app links exposure", "low"},
 }
 
 // Add after the existing types

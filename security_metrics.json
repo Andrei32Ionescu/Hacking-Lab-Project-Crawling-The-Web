@@ -1,0 +1,48 @@
+{
+  "total_sites": 200,
+  "hsts_stats": {
+    "sites_with_hsts": 29,
+    "sites_without_hsts": 171,
+    "hsts_percentage": 14.499999999999998,
+    "preload_enabled": 7,
+    "include_subdomains": 16
+  },
+  "csp_stats": {
+    "sites_with_csp": 20,
+    "sites_without_csp": 180,
+    "csp_percentage": 10,
+    "unsafe_inline_count": 10,
+    "unsafe_eval_count": 11,
+    "wildcard_sources": 3
+  },
+  "cookie_stats": {
+    "total_cookies": 0,
+    "insecure_cookies": 181,
+    "secure_cookies": 19,
+    "httponly_cookies": 18,
+    "samesite_strict": 0,
+    "samesite_lax": 2,
+    "samesite_none": 9,
+    "avg_cookies_per_site": 0
+  },
+  "wordpress_stats": {
+    "wordpress_sites": 0,
+    "vulnerable_plugins": 0,
+    "vulnerable_themes": 0,
+    "outdated_core": 0,
+    "cve_count": 0,
+    "high_severity": 0,
+    "medium_severity": 0,
+    "low_severity": 0
+  },
+  "tls_stats": {
+    "modern_tls": 60,
+    "intermediate_tls": 4,
+    "old_tls": 136,
+    "weak_ciphers": 0,
+    "strong_ciphers": 0,
+    "valid_certs": 0,
+    "expired_certs": 0,
+    "self_signed_certs": 0
+  }
+}
