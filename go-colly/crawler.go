@@ -546,8 +546,11 @@ func crawlForCSP(currenturl string, maxdepth int, writeResult func(string, ...in
 
 	// Risk assessment based on findings
 	if gotValid {
-		// Only assess risk if no CSP is present
-		if !hasCSPHeader && !hasMetaCSP {
+		// Determine risk level
+		var riskLevel string
+		if hasCSPHeader || hasMetaCSP {
+			riskLevel = "PROTECTED"
+		} else {
 			var riskCount, mitigationCount int
 
 			// Risk indicators
@@ -609,13 +612,78 @@ func crawlForCSP(currenturl string, maxdepth int, writeResult func(string, ...in
 			switch {
 			case netScore >= 4:
 				atomic.AddInt64(&riskHighCount, 1)
+				riskLevel = "HIGH"
 			case netScore >= 3:
 				atomic.AddInt64(&riskMediumCount, 1)
+				riskLevel = "MEDIUM"
 			case netScore >=2:
 				atomic.AddInt64(&riskLowCount, 1)
+				riskLevel = "LOW"
 			default:
 				atomic.AddInt64(&riskMinimalCount, 1)
+				riskLevel = "MINIMAL"
 			}
+
+			var protections []string
+			if hasCSPHeader { 
+				protections = append(protections, "CSP") 
+			}
+			if hasMetaCSP { 
+				protections = append(protections, "MetaCSP") 
+			}
+			if hasModernFramework { 
+				protections = append(protections, "Framework") 
+			}
+			if hasXCTO { 
+				protections = append(protections, "XCTO") 
+			}
+			if hasOutputEncoding { 
+				protections = append(protections, "Encoding") 
+			}
+			if hasInputValidation { 
+				protections = append(protections, "Validation") 
+			}
+			if hasSandboxedIframes { 
+				protections = append(protections, "Sandbox") 
+			}
+
+			var risks []string
+			if hasInlineScript { 
+				risks = append(risks, "InlineJS") 
+			}
+			if hasInlineEventHandlers { 
+				risks = append(risks, "EventHandlers") 
+			}
+			if hasEvalUsage { 
+				risks = append(risks, "Eval") 
+			}
+			if hasCrossOriginScripts { 
+				risks = append(risks, fmt.Sprintf("XOrigin(%d)", crossOriginScripts)) 
+			}
+			if len(externalDomains) > 1 { 
+				risks = append(risks, fmt.Sprintf("ExtDom(%d)", len(externalDomains))) 
+			}
+			if hasSensitiveForms { 
+				risks = append(risks, "SensitiveForms") 
+			}
+			if hasPostMessage { 
+				risks = append(risks, "PostMessage") 
+			}
+			if hasJSONP { 
+				risks = append(risks, "JSONP") 
+			}
+			
+			protectionStr := "none"
+			if len(protections) > 0 {
+				protectionStr = strings.Join(protections, ",")
+			}
+			
+			riskStr := "none"
+			if len(risks) > 0 {
+				riskStr = strings.Join(risks, ",")
+			}
+			
+			writeResult("SITE: %s | RISK LEVEL: %s | PROTECTIONS: %s | RISKS: %s | SCRIPTS: %d same-origin, %d cross-origin\n", currenturl, riskLevel, protectionStr, riskStr, sameOriginScripts, crossOriginScripts)
 		}
 	}
 

@@ -1,77 +1,739 @@
+SITE: https://3lift.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: InlineJS | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://a-mo.net | RISK LEVEL: MINIMAL | PROTECTIONS: Encoding | RISKS: InlineJS | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://2miners.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(4),ExtDom(2) | SCRIPTS: 1 same-origin, 4 cross-origin
+SITE: https://accuweather.com | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(9),ExtDom(4),JSONP | SCRIPTS: 0 same-origin, 9 cross-origin
+SITE: https://ad-delivery.net | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://adapty.io | RISK LEVEL: LOW | PROTECTIONS: Framework,XCTO,Encoding,Validation | RISKS: InlineJS,EventHandlers,XOrigin(3),ExtDom(3),SensitiveForms,PostMessage | SCRIPTS: 13 same-origin, 3 cross-origin
+SITE: https://adentifi.com | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://ably.io | RISK LEVEL: LOW | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,XOrigin(7),ExtDom(2) | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://addtoany.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(3),ExtDom(2) | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://adblockplus.org | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: InlineJS,Eval | SCRIPTS: 6 same-origin, 0 cross-origin
+SITE: https://adingo.jp | RISK LEVEL: LOW | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(20) | SCRIPTS: 0 same-origin, 20 cross-origin
+SITE: https://ad-score.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://adguard.com | RISK LEVEL: LOW | PROTECTIONS: Validation | RISKS: InlineJS,XOrigin(1),SensitiveForms | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://adjust.com | RISK LEVEL: LOW | PROTECTIONS: Framework,Encoding | RISKS: InlineJS,EventHandlers,XOrigin(1) | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://adfox.ru | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: InlineJS | SCRIPTS: 3 same-origin, 0 cross-origin
+SITE: https://admanmedia.com | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: InlineJS,PostMessage | SCRIPTS: 12 same-origin, 0 cross-origin
+SITE: https://adobe.com | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(3) | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://admaster.cc | RISK LEVEL: HIGH | PROTECTIONS: Framework,XCTO,Encoding,Validation | RISKS: InlineJS,EventHandlers,Eval,XOrigin(11),ExtDom(2),SensitiveForms,PostMessage,JSONP | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://admixer.net | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,Eval,XOrigin(27),ExtDom(6),SensitiveForms,JSONP | SCRIPTS: 0 same-origin, 27 cross-origin
+SITE: https://adkernel.com | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,XOrigin(8),ExtDom(3),JSONP | SCRIPTS: 0 same-origin, 8 cross-origin
+SITE: https://adsafeprotected.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://adsbynimbus.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,Eval,XOrigin(13),ExtDom(4) | SCRIPTS: 0 same-origin, 13 cross-origin
+SITE: https://adobe.io | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(23),ExtDom(2) | SCRIPTS: 0 same-origin, 23 cross-origin
+SITE: https://adriver.ru | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,Eval,XOrigin(13),ExtDom(3),PostMessage,JSONP | SCRIPTS: 0 same-origin, 13 cross-origin
+SITE: https://adrta.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://adsco.re | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://admatic.de | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,Eval,XOrigin(2),ExtDom(2),PostMessage,JSONP | SCRIPTS: 38 same-origin, 2 cross-origin
+SITE: https://adtarget.com.tr | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(2),ExtDom(2) | SCRIPTS: 11 same-origin, 2 cross-origin
+SITE: https://163.com | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,XOrigin(10),ExtDom(3) | SCRIPTS: 0 same-origin, 10 cross-origin
+SITE: https://adsrvr.org | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: EventHandlers,XOrigin(1) | SCRIPTS: 2 same-origin, 1 cross-origin
+SITE: https://adition.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(24),ExtDom(2),PostMessage,JSONP | SCRIPTS: 0 same-origin, 24 cross-origin
+SITE: https://ahcdn.com | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,SensitiveForms | SCRIPTS: 14 same-origin, 0 cross-origin
+SITE: https://adswizz.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,XOrigin(27),ExtDom(7),PostMessage,JSONP | SCRIPTS: 0 same-origin, 27 cross-origin
+SITE: https://affirm.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(10),ExtDom(5),JSONP | SCRIPTS: 0 same-origin, 10 cross-origin
+SITE: https://adtelligent.com | RISK LEVEL: HIGH | PROTECTIONS: Encoding,Validation | RISKS: InlineJS,EventHandlers,Eval,XOrigin(1),SensitiveForms,JSONP | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://ajax.systems | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO | RISKS: InlineJS | SCRIPTS: 41 same-origin, 0 cross-origin
+SITE: https://ahagamecenter.com | RISK LEVEL: LOW | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(1) | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://ajay.app | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: XOrigin(2) | SCRIPTS: 1 same-origin, 2 cross-origin
+SITE: https://akamai.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,Eval,XOrigin(9),ExtDom(2),PostMessage | SCRIPTS: 0 same-origin, 9 cross-origin
+SITE: https://360.cn | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,Eval,XOrigin(15),ExtDom(2) | SCRIPTS: 0 same-origin, 15 cross-origin
+SITE: https://aihelp.net | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,Eval,XOrigin(8),ExtDom(3) | SCRIPTS: 1 same-origin, 8 cross-origin
+SITE: https://alibaba.com | RISK LEVEL: MINIMAL | PROTECTIONS: Framework,XCTO,Encoding,Validation | RISKS: InlineJS,Eval,XOrigin(5),JSONP | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://adthrive.com | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,Eval,XOrigin(6),PostMessage,JSONP | SCRIPTS: 0 same-origin, 6 cross-origin
+SITE: https://alphonso.tv | RISK LEVEL: MEDIUM | PROTECTIONS: Encoding | RISKS: InlineJS,XOrigin(1),PostMessage,JSONP | SCRIPTS: 20 same-origin, 1 cross-origin
+SITE: https://aliexpress.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework,Encoding | RISKS: InlineJS,XOrigin(6),ExtDom(2),PostMessage | SCRIPTS: 0 same-origin, 6 cross-origin
+SITE: https://adskeeper.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(10),ExtDom(4),JSONP | SCRIPTS: 0 same-origin, 10 cross-origin
+SITE: https://amazon.de | RISK LEVEL: HIGH | PROTECTIONS: Framework,Encoding | RISKS: InlineJS,Eval,XOrigin(1),PostMessage,JSONP | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://amap.com | RISK LEVEL: LOW | PROTECTIONS: Encoding,Validation | RISKS: InlineJS,XOrigin(6),ExtDom(3) | SCRIPTS: 2 same-origin, 6 cross-origin
+SITE: https://amazontrust.com | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: InlineJS,XOrigin(3) | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://ampproject.net | RISK LEVEL: LOW | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(22) | SCRIPTS: 0 same-origin, 22 cross-origin
+SITE: https://americanexpress.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(10),ExtDom(3) | SCRIPTS: 0 same-origin, 10 cross-origin
+SITE: https://amazonvideo.com | RISK LEVEL: LOW | PROTECTIONS: Framework,XCTO,Encoding,Validation | RISKS: InlineJS,EventHandlers,Eval,XOrigin(11),PostMessage | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://amxrtb.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: InlineJS | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://ampproject.org | RISK LEVEL: LOW | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(22) | SCRIPTS: 0 same-origin, 22 cross-origin
+SITE: https://aliyun.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,XOrigin(8),JSONP | SCRIPTS: 0 same-origin, 8 cross-origin
+SITE: https://amplitude.com | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(3),ExtDom(2) | SCRIPTS: 39 same-origin, 3 cross-origin
+SITE: https://anyclip.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,EventHandlers,XOrigin(5),ExtDom(4) | SCRIPTS: 29 same-origin, 5 cross-origin
+SITE: https://aol.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(3),ExtDom(2) | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://alipay.com | RISK LEVEL: LOW | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(1) | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://apple.news | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO | RISKS: InlineJS | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://appboy.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,Eval,XOrigin(23) | SCRIPTS: 0 same-origin, 23 cross-origin
+SITE: https://appsflyer.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,XOrigin(13),ExtDom(2),PostMessage,JSONP | SCRIPTS: 0 same-origin, 13 cross-origin
+SITE: https://apptentive.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(5),ExtDom(2),JSONP | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://appspot.com | RISK LEVEL: HIGH | PROTECTIONS: Framework,XCTO,Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2),PostMessage,JSONP | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://amemv.com | RISK LEVEL: MINIMAL | PROTECTIONS: Encoding | RISKS: InlineJS | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://arlo.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,XOrigin(7) | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://arubanetworks.com | RISK LEVEL: MEDIUM | PROTECTIONS: Encoding | RISKS: InlineJS,XOrigin(5),ExtDom(2) | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://anker-in.com | RISK LEVEL: HIGH | PROTECTIONS: Framework,Encoding | RISKS: InlineJS,XOrigin(21),ExtDom(3),PostMessage,JSONP | SCRIPTS: 0 same-origin, 21 cross-origin
+SITE: https://arin.net | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: EventHandlers,XOrigin(7),ExtDom(2) | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://avast.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(18),ExtDom(4) | SCRIPTS: 0 same-origin, 18 cross-origin
+SITE: https://autodesk.com | RISK LEVEL: HIGH | PROTECTIONS: Framework,XCTO,Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(32),ExtDom(7),PostMessage | SCRIPTS: 0 same-origin, 32 cross-origin
+SITE: https://audible.com | RISK LEVEL: HIGH | PROTECTIONS: Framework,XCTO,Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(5),ExtDom(3),PostMessage | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://avito.ru | RISK LEVEL: MEDIUM | PROTECTIONS: Framework,XCTO,Validation | RISKS: InlineJS,EventHandlers,Eval,XOrigin(30),ExtDom(4) | SCRIPTS: 0 same-origin, 30 cross-origin
+SITE: https://att.net | RISK LEVEL: LOW | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://atl-paas.net | RISK LEVEL: LOW | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,Eval,XOrigin(4) | SCRIPTS: 0 same-origin, 4 cross-origin
+SITE: https://avito.st | RISK LEVEL: MEDIUM | PROTECTIONS: Framework,XCTO,Validation | RISKS: InlineJS,EventHandlers,Eval,XOrigin(30),ExtDom(4) | SCRIPTS: 0 same-origin, 30 cross-origin
+SITE: https://b-cdn.net | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(6),ExtDom(3) | SCRIPTS: 0 same-origin, 6 cross-origin
+SITE: https://bancointer.com.br | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(24),ExtDom(4) | SCRIPTS: 0 same-origin, 24 cross-origin
+SITE: https://azure.com | RISK LEVEL: LOW | PROTECTIONS: XCTO,Validation | RISKS: InlineJS,XOrigin(55),ExtDom(6) | SCRIPTS: 0 same-origin, 55 cross-origin
+SITE: https://att.com | RISK LEVEL: LOW | PROTECTIONS: Framework,XCTO,Encoding,Validation | RISKS: InlineJS,Eval,XOrigin(23),PostMessage,JSONP | SCRIPTS: 0 same-origin, 23 cross-origin
+SITE: https://au.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Validation | RISKS: InlineJS,EventHandlers,Eval,XOrigin(23),ExtDom(5) | SCRIPTS: 0 same-origin, 23 cross-origin
+SITE: https://batch.com | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(1),SensitiveForms | SCRIPTS: 17 same-origin, 1 cross-origin
+SITE: https://azure.net | RISK LEVEL: LOW | PROTECTIONS: XCTO,Validation | RISKS: InlineJS,XOrigin(55),ExtDom(6) | SCRIPTS: 0 same-origin, 55 cross-origin
+SITE: https://bbc.com | RISK LEVEL: MINIMAL | PROTECTIONS: Framework,XCTO,Encoding | RISKS: InlineJS,XOrigin(19),ExtDom(6) | SCRIPTS: 0 same-origin, 19 cross-origin
+SITE: https://av380.net | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: InlineJS,SensitiveForms | SCRIPTS: 6 same-origin, 0 cross-origin
+SITE: https://bereal.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(4),ExtDom(4),PostMessage,JSONP | SCRIPTS: 21 same-origin, 4 cross-origin
+SITE: https://betterttv.net | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO | RISKS: XOrigin(1) | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://bigo.sg | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(4),ExtDom(3) | SCRIPTS: 2 same-origin, 4 cross-origin
+SITE: https://bb.com.br | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: InlineJS,XOrigin(1) | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://battle.net | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,EventHandlers,XOrigin(5),JSONP | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://bidease.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(7),ExtDom(5) | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://blcdog.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://binance.com | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(1) | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://boomplaymusic.com | RISK LEVEL: HIGH | PROTECTIONS: Validation | RISKS: InlineJS,XOrigin(7),ExtDom(4),SensitiveForms | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://bls.dev | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,Eval,XOrigin(14),ExtDom(2) | SCRIPTS: 0 same-origin, 14 cross-origin
+SITE: https://brandmetrics.com | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(5),ExtDom(2) | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://bounceexchange.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(12),ExtDom(2) | SCRIPTS: 0 same-origin, 12 cross-origin
+SITE: https://blismedia.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Encoding,Validation | RISKS: InlineJS,Eval,XOrigin(6),ExtDom(2),SensitiveForms,PostMessage,JSONP | SCRIPTS: 0 same-origin, 6 cross-origin
+SITE: https://booking.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework,XCTO,Encoding | RISKS: InlineJS,Eval,XOrigin(71),ExtDom(3),JSONP | SCRIPTS: 0 same-origin, 71 cross-origin
+SITE: https://bilibili.com | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(5),ExtDom(2) | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://bstats.org | RISK LEVEL: LOW | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,XOrigin(1) | SCRIPTS: 3 same-origin, 1 cross-origin
+SITE: https://brightcove.com | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,Eval,XOrigin(27),ExtDom(2),PostMessage,JSONP | SCRIPTS: 0 same-origin, 27 cross-origin
+SITE: https://braze.eu | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,Eval,XOrigin(23) | SCRIPTS: 0 same-origin, 23 cross-origin
+SITE: https://bsky.app | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO | RISKS: XOrigin(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://bunny.net | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(2),ExtDom(2) | SCRIPTS: 4 same-origin, 2 cross-origin
+SITE: https://bttrack.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://braze.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,Eval,XOrigin(23) | SCRIPTS: 0 same-origin, 23 cross-origin
+SITE: https://bstatic.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework,XCTO,Encoding | RISKS: InlineJS,Eval,XOrigin(72),ExtDom(3),JSONP | SCRIPTS: 0 same-origin, 72 cross-origin
+SITE: https://bugsnag.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,XOrigin(9),ExtDom(4),PostMessage,JSONP | SCRIPTS: 0 same-origin, 9 cross-origin
+SITE: https://cdn-cookieyes.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://buzzoola.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: InlineJS,EventHandlers | SCRIPTS: 5 same-origin, 0 cross-origin
+SITE: https://cdn.house | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: InlineJS | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://capitalone.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework,XCTO,Encoding,Validation | RISKS: InlineJS,EventHandlers,XOrigin(14),ExtDom(3),SensitiveForms,JSONP | SCRIPTS: 0 same-origin, 14 cross-origin
+SITE: https://capcut.com | RISK LEVEL: HIGH | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(23),ExtDom(3),JSONP | SCRIPTS: 0 same-origin, 23 cross-origin
+SITE: https://carriersignal.info | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://chartbeat.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,Eval,XOrigin(4),ExtDom(4),PostMessage,JSONP | SCRIPTS: 7 same-origin, 4 cross-origin
+SITE: https://centurylink.net | RISK LEVEL: HIGH | PROTECTIONS: Validation | RISKS: InlineJS,EventHandlers,Eval,XOrigin(15),ExtDom(4),SensitiveForms | SCRIPTS: 0 same-origin, 15 cross-origin
+SITE: https://branch.io | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,XOrigin(10),ExtDom(3),JSONP | SCRIPTS: 0 same-origin, 10 cross-origin
+SITE: https://casalemedia.com | RISK LEVEL: MEDIUM | PROTECTIONS: Validation | RISKS: InlineJS,XOrigin(9),ExtDom(3) | SCRIPTS: 0 same-origin, 9 cross-origin
+SITE: https://bytedance.com | RISK LEVEL: LOW | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,XOrigin(15),JSONP | SCRIPTS: 0 same-origin, 15 cross-origin
+SITE: https://character.ai | RISK LEVEL: MINIMAL | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(1) | SCRIPTS: 13 same-origin, 1 cross-origin
+SITE: https://charter.net | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,Eval,XOrigin(7) | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://clevertap-prod.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://cleverwebserver.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO,Validation | RISKS: InlineJS,XOrigin(13),ExtDom(2),SensitiveForms | SCRIPTS: 0 same-origin, 13 cross-origin
+SITE: https://churnzero.net | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,XOrigin(4),ExtDom(3),JSONP | SCRIPTS: 0 same-origin, 4 cross-origin
+SITE: https://brightcloud.com | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,XOrigin(8),ExtDom(2),JSONP | SCRIPTS: 0 same-origin, 8 cross-origin
+SITE: https://chartboost.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,XOrigin(2),ExtDom(2),JSONP | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://cloudflareinsights.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://cloudflare.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,Eval,XOrigin(5),ExtDom(2) | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://cloudflarestatus.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(8),ExtDom(2),SensitiveForms | SCRIPTS: 0 same-origin, 8 cross-origin
+SITE: https://cloudbirds.cn | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: InlineJS,XOrigin(1) | SCRIPTS: 1 same-origin, 1 cross-origin
+SITE: https://centurygame.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,Eval,XOrigin(25),ExtDom(2),PostMessage,JSONP | SCRIPTS: 0 same-origin, 25 cross-origin
+SITE: https://coingecko.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,Eval,XOrigin(23),ExtDom(6),SensitiveForms | SCRIPTS: 0 same-origin, 23 cross-origin
+SITE: https://cloudappsecurity.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(54),ExtDom(4) | SCRIPTS: 0 same-origin, 54 cross-origin
+SITE: https://comodoca.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(5),PostMessage,JSONP | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://connatix.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(4),ExtDom(4),JSONP | SCRIPTS: 2 same-origin, 4 cross-origin
+SITE: https://connectad.io | RISK LEVEL: HIGH | PROTECTIONS: Framework,Validation | RISKS: InlineJS,EventHandlers,Eval,XOrigin(4),ExtDom(3),SensitiveForms | SCRIPTS: 27 same-origin, 4 cross-origin
+SITE: https://consentmanager.net | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,XOrigin(6),ExtDom(4),PostMessage,JSONP | SCRIPTS: 0 same-origin, 6 cross-origin
+SITE: https://contextweb.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://caixa.gov.br | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,XOrigin(27),ExtDom(3) | SCRIPTS: 0 same-origin, 27 cross-origin
+SITE: https://conviva.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,XOrigin(16),ExtDom(5),PostMessage,JSONP | SCRIPTS: 0 same-origin, 16 cross-origin
+SITE: https://crazygames.com | RISK LEVEL: MINIMAL | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,XOrigin(16) | SCRIPTS: 0 same-origin, 16 cross-origin
+SITE: https://createjs.com | RISK LEVEL: LOW | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(4),ExtDom(4) | SCRIPTS: 3 same-origin, 4 cross-origin
+SITE: https://curseforge.com | RISK LEVEL: LOW | PROTECTIONS: Framework,Validation | RISKS: InlineJS,XOrigin(17),ExtDom(2) | SCRIPTS: 0 same-origin, 17 cross-origin
+SITE: https://customer.io | RISK LEVEL: MINIMAL | PROTECTIONS: Framework | RISKS: InlineJS,Eval | SCRIPTS: 31 same-origin, 0 cross-origin
+SITE: https://dalyfeds.com | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: InlineJS,XOrigin(1) | SCRIPTS: 1 same-origin, 1 cross-origin
+SITE: https://dailyinnovation.biz | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 1 same-origin, 0 cross-origin
+SITE: https://crunchyroll.com | RISK LEVEL: LOW | PROTECTIONS: Framework,Encoding | RISKS: InlineJS,Eval,XOrigin(33) | SCRIPTS: 0 same-origin, 33 cross-origin
+SITE: https://datadome.co | RISK LEVEL: LOW | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,EventHandlers,XOrigin(4),ExtDom(4) | SCRIPTS: 14 same-origin, 4 cross-origin
+SITE: https://cpanel.net | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,Eval,XOrigin(2),ExtDom(2),PostMessage,JSONP | SCRIPTS: 8 same-origin, 2 cross-origin
+SITE: https://datto.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(11),ExtDom(4) | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://cxense.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(3),ExtDom(3) | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://debian.org | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO | RISKS: EventHandlers | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://deezer.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://demandbase.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO,Encoding,Validation | RISKS: InlineJS,XOrigin(5),ExtDom(2),PostMessage,JSONP | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://deltaork.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(3),ExtDom(2) | SCRIPTS: 1 same-origin, 3 cross-origin
+SITE: https://demonii.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: InlineJS | SCRIPTS: 1 same-origin, 0 cross-origin
+SITE: https://dell.com | RISK LEVEL: HIGH | PROTECTIONS: Framework | RISKS: InlineJS,EventHandlers,Eval,XOrigin(4) | SCRIPTS: 0 same-origin, 4 cross-origin
+SITE: https://desync.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://digitaloceanspaces.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(11),ExtDom(2) | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://disqus.com | RISK LEVEL: LOW | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://disneyplus.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(15),ExtDom(2) | SCRIPTS: 0 same-origin, 15 cross-origin
+SITE: https://digicert.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Validation | RISKS: InlineJS,EventHandlers,Eval,XOrigin(19),ExtDom(5) | SCRIPTS: 0 same-origin, 19 cross-origin
+SITE: https://docker.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO,Encoding,Validation | RISKS: InlineJS,Eval,XOrigin(60),ExtDom(6),JSONP | SCRIPTS: 0 same-origin, 60 cross-origin
+SITE: https://cloudlinks.cn | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(3) | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://crazyegg.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://dotmetrics.net | RISK LEVEL: LOW | PROTECTIONS: Encoding | RISKS: InlineJS,XOrigin(3),ExtDom(2) | SCRIPTS: 1 same-origin, 3 cross-origin
+SITE: https://deepintent.com | RISK LEVEL: HIGH | PROTECTIONS: Framework,Encoding | RISKS: InlineJS,Eval,XOrigin(38),ExtDom(3),JSONP | SCRIPTS: 0 same-origin, 38 cross-origin
+SITE: https://docker.io | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO,Encoding,Validation | RISKS: InlineJS,Eval,XOrigin(60),ExtDom(6),JSONP | SCRIPTS: 0 same-origin, 60 cross-origin
+SITE: https://dexcom.com | RISK LEVEL: LOW | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,XOrigin(9),ExtDom(2) | SCRIPTS: 0 same-origin, 9 cross-origin
+SITE: https://dotomi.com | RISK LEVEL: LOW | PROTECTIONS: Framework | RISKS: InlineJS,Eval,XOrigin(18) | SCRIPTS: 0 same-origin, 18 cross-origin
+SITE: https://daum.net | RISK LEVEL: LOW | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(9),ExtDom(2) | SCRIPTS: 0 same-origin, 9 cross-origin
+SITE: https://dtscout.com | RISK LEVEL: HIGH | PROTECTIONS: Validation | RISKS: InlineJS,EventHandlers,Eval,XOrigin(10),SensitiveForms,PostMessage | SCRIPTS: 0 same-origin, 10 cross-origin
+SITE: https://dynamics.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(55),ExtDom(4) | SCRIPTS: 0 same-origin, 55 cross-origin
+SITE: https://duolingo.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,Eval,XOrigin(10),ExtDom(3),JSONP | SCRIPTS: 0 same-origin, 10 cross-origin
+SITE: https://dzen.ru | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(3) | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://earthlink.net | RISK LEVEL: LOW | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(18),ExtDom(2) | SCRIPTS: 0 same-origin, 18 cross-origin
+SITE: https://e-planning.net | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,XOrigin(7),ExtDom(5) | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://easybrain.com | RISK LEVEL: MINIMAL | PROTECTIONS: Validation | RISKS: InlineJS,SensitiveForms | SCRIPTS: 1 same-origin, 0 cross-origin
+SITE: https://e-volution.ai | RISK LEVEL: HIGH | PROTECTIONS: Validation | RISKS: InlineJS,XOrigin(2),ExtDom(2),SensitiveForms,JSONP | SCRIPTS: 19 same-origin, 2 cross-origin
+SITE: https://dyndns.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,XOrigin(3),ExtDom(3),SensitiveForms | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://dyndns.org | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,XOrigin(3),ExtDom(3),SensitiveForms | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://eizzih.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://elfsight.com | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,Eval,XOrigin(2),ExtDom(2),JSONP | SCRIPTS: 1 same-origin, 2 cross-origin
+SITE: https://emxdgt.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://duckdns.org | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(4),ExtDom(4) | SCRIPTS: 0 same-origin, 4 cross-origin
+SITE: https://ebay.com | RISK LEVEL: LOW | PROTECTIONS: Framework,XCTO,Encoding,Validation | RISKS: InlineJS,EventHandlers,XOrigin(7),ExtDom(2),JSONP | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://ekatox.com | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: InlineJS | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://eufylife.com | RISK LEVEL: LOW | PROTECTIONS: Framework,XCTO,Encoding,Validation | RISKS: InlineJS,XOrigin(73),ExtDom(2),SensitiveForms,PostMessage | SCRIPTS: 0 same-origin, 73 cross-origin
+SITE: https://epicgames.dev | RISK LEVEL: HIGH | PROTECTIONS: Framework | RISKS: InlineJS,Eval,XOrigin(10),ExtDom(2) | SCRIPTS: 0 same-origin, 10 cross-origin
+SITE: https://erome.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(5),ExtDom(4) | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://exoclick.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(5),ExtDom(3),JSONP | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://ex.co | RISK LEVEL: MEDIUM | PROTECTIONS: Encoding | RISKS: InlineJS,XOrigin(5),ExtDom(3),JSONP | SCRIPTS: 18 same-origin, 5 cross-origin
+SITE: https://example.org | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://evergage.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(17),ExtDom(2) | SCRIPTS: 0 same-origin, 17 cross-origin
+SITE: https://fast.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 1 same-origin, 0 cross-origin
+SITE: https://expressapisv2.net | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://example.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://fastly.net | RISK LEVEL: LOW | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(6) | SCRIPTS: 0 same-origin, 6 cross-origin
+SITE: https://evidon.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,XOrigin(2),ExtDom(2),JSONP | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://facemojikeyboard.com | RISK LEVEL: LOW | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(1) | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://fedoraproject.org | RISK LEVEL: MINIMAL | PROTECTIONS: Framework,XCTO | RISKS: InlineJS | SCRIPTS: 1 same-origin, 0 cross-origin
+SITE: https://feednews.com | RISK LEVEL: MINIMAL | PROTECTIONS: Framework | RISKS: InlineJS,Eval | SCRIPTS: 10 same-origin, 0 cross-origin
+SITE: https://dingtalk.com | RISK LEVEL: HIGH | PROTECTIONS: Framework | RISKS: InlineJS,Eval,XOrigin(9),ExtDom(2),JSONP | SCRIPTS: 0 same-origin, 9 cross-origin
+SITE: https://fitanalytics.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(3),ExtDom(3) | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://fireoscaptiveportal.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://flashtalking.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO,Validation | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 18 same-origin, 2 cross-origin
+SITE: https://force.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(17),ExtDom(2) | SCRIPTS: 0 same-origin, 17 cross-origin
+SITE: https://fontawesome.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(5),ExtDom(5),JSONP | SCRIPTS: 2 same-origin, 5 cross-origin
+SITE: https://flingo.tv | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(11),ExtDom(8) | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://foxnews.com | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(4) | SCRIPTS: 0 same-origin, 4 cross-origin
+SITE: https://flipboard.com | RISK LEVEL: LOW | PROTECTIONS: Framework,XCTO,Encoding | RISKS: InlineJS,XOrigin(18),ExtDom(3),PostMessage | SCRIPTS: 0 same-origin, 18 cross-origin
+SITE: https://fotmob.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(46),JSONP | SCRIPTS: 0 same-origin, 46 cross-origin
+SITE: https://frameo.net | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,Eval,XOrigin(18),ExtDom(3) | SCRIPTS: 0 same-origin, 18 cross-origin
+SITE: https://dvr163.com | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: InlineJS | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://fullstory.com | RISK LEVEL: HIGH | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(4),ExtDom(2),JSONP | SCRIPTS: 0 same-origin, 4 cross-origin
+SITE: https://feishu.cn | RISK LEVEL: LOW | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,XOrigin(6),ExtDom(5) | SCRIPTS: 0 same-origin, 6 cross-origin
+SITE: https://fwmrm.net | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,XOrigin(10),ExtDom(5) | SCRIPTS: 0 same-origin, 10 cross-origin
+SITE: https://gboxlab.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,XOrigin(3),ExtDom(2) | SCRIPTS: 4 same-origin, 3 cross-origin
+SITE: https://gemius.pl | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(8),ExtDom(2) | SCRIPTS: 0 same-origin, 8 cross-origin
+SITE: https://geotrust.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,Eval,XOrigin(16),ExtDom(4) | SCRIPTS: 0 same-origin, 16 cross-origin
+SITE: https://gdms.cloud | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: InlineJS,XOrigin(7) | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://giphy.com | RISK LEVEL: LOW | PROTECTIONS: Framework | RISKS: InlineJS,Eval,JSONP | SCRIPTS: 28 same-origin, 0 cross-origin
+SITE: https://github.io | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: InlineJS,XOrigin(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://gist.build | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,Eval,XOrigin(31) | SCRIPTS: 0 same-origin, 31 cross-origin
+SITE: https://getbeamer.com | RISK LEVEL: MEDIUM | PROTECTIONS: Encoding,Validation | RISKS: InlineJS,XOrigin(11),ExtDom(7),SensitiveForms | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://getui.com | RISK LEVEL: MINIMAL | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,XOrigin(12) | SCRIPTS: 0 same-origin, 12 cross-origin
+SITE: https://globalsign.com | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,XOrigin(10),ExtDom(4),JSONP | SCRIPTS: 1 same-origin, 10 cross-origin
+SITE: https://global-e.com | RISK LEVEL: HIGH | PROTECTIONS: Framework,Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(27),ExtDom(5) | SCRIPTS: 0 same-origin, 27 cross-origin
+SITE: https://gifshow.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://gmail.com | RISK LEVEL: HIGH | PROTECTIONS: Framework,XCTO,Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2),PostMessage,JSONP | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://garena.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(5),ExtDom(2) | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://gog.com | RISK LEVEL: MEDIUM | PROTECTIONS: Encoding | RISKS: InlineJS,XOrigin(14),ExtDom(3) | SCRIPTS: 0 same-origin, 14 cross-origin
+SITE: https://google.ae | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.at | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.be | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.bg | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://go.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework,Encoding | RISKS: InlineJS,XOrigin(13),ExtDom(2),JSONP | SCRIPTS: 0 same-origin, 13 cross-origin
+SITE: https://google.ca | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.ch | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.cl | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.cn | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://google.co.id | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.co.il | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.co.in | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.co.jp | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.co.ke | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.co.kr | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.co.nz | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.co.uk | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.co.ve | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.co.th | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.co.za | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.ar | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.au | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.br | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.bd | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.co | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.ec | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.do | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.hk | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.gt | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.my | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.mx | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.na | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.pe | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.ph | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.pk | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.pr | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.py | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.sa | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.sg | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.tr | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.tw | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.ua | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.cz | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.de | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.com.vn | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.dk | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.es | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.fi | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.fr | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.gr | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.hu | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.ie | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.iq | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.it | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.nl | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.no | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.pl | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.pt | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.ro | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.ru | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.se | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.us | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://google.tm | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://googlesyndication.com | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://he.net | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,Eval,XOrigin(1) | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://gradient.network | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: InlineJS | SCRIPTS: 14 same-origin, 0 cross-origin
+SITE: https://heapanalytics.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(16),ExtDom(3) | SCRIPTS: 0 same-origin, 16 cross-origin
+SITE: https://here.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Validation | RISKS: InlineJS,EventHandlers,Eval,XOrigin(11),ExtDom(3) | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://histats.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,Eval,XOrigin(7),ExtDom(3),SensitiveForms | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://hm.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(27),ExtDom(4) | SCRIPTS: 0 same-origin, 27 cross-origin
+SITE: https://heytapmobi.com | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: XOrigin(1) | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://hotjar.com | RISK LEVEL: HIGH | PROTECTIONS: Framework,Validation | RISKS: InlineJS,XOrigin(20),ExtDom(3),SensitiveForms,PostMessage | SCRIPTS: 0 same-origin, 20 cross-origin
+SITE: https://hihonorcloud.com | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO | RISKS: InlineJS | SCRIPTS: 3 same-origin, 0 cross-origin
+SITE: https://hotmail.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(50),ExtDom(4) | SCRIPTS: 0 same-origin, 50 cross-origin
+SITE: https://hoyoverse.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(5),ExtDom(2) | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://honeygain.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,Eval,XOrigin(18) | SCRIPTS: 0 same-origin, 18 cross-origin
+SITE: https://hp.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Validation | RISKS: InlineJS,EventHandlers,Eval,XOrigin(7),ExtDom(2) | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://hubhc.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(22),ExtDom(3),PostMessage,JSONP | SCRIPTS: 0 same-origin, 22 cross-origin
+SITE: https://icanhazip.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://hybrid.ai | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: InlineJS,XOrigin(1) | SCRIPTS: 4 same-origin, 1 cross-origin
+SITE: https://id5-sync.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://ifconfig.co | RISK LEVEL: LOW | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://ifconfig.me | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://iheart.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework,Encoding | RISKS: InlineJS,XOrigin(82),ExtDom(2),JSONP | SCRIPTS: 0 same-origin, 82 cross-origin
+SITE: https://httpbin.org | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: InlineJS | SCRIPTS: 3 same-origin, 0 cross-origin
+SITE: https://im-apps.net | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://imunify360.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,PostMessage,JSONP | SCRIPTS: 4 same-origin, 0 cross-origin
+SITE: https://indexww.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://infolinks.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,Eval,XOrigin(7),ExtDom(4),SensitiveForms,JSONP | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://int08h.com | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://inmobi.com | RISK LEVEL: LOW | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(12) | SCRIPTS: 0 same-origin, 12 cross-origin
+SITE: https://insurads.com | RISK LEVEL: MEDIUM | PROTECTIONS: Encoding | RISKS: InlineJS,XOrigin(4),ExtDom(4) | SCRIPTS: 0 same-origin, 4 cross-origin
+SITE: https://intercom.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,Eval,XOrigin(12) | SCRIPTS: 0 same-origin, 12 cross-origin
+SITE: https://intercom.io | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,Eval,XOrigin(12) | SCRIPTS: 0 same-origin, 12 cross-origin
+SITE: https://ip-api.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,Eval,JSONP | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://intercomcdn.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,Eval,XOrigin(12) | SCRIPTS: 0 same-origin, 12 cross-origin
+SITE: https://intelbras.com.br | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://ipinfo.io | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO,Validation | RISKS: InlineJS,XOrigin(10) | SCRIPTS: 0 same-origin, 10 cross-origin
+SITE: https://ipvanish.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(22),ExtDom(5),PostMessage,JSONP | SCRIPTS: 0 same-origin, 22 cross-origin
+SITE: https://iqm.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: InlineJS | SCRIPTS: 40 same-origin, 0 cross-origin
+SITE: https://ipify.org | RISK LEVEL: MEDIUM | PROTECTIONS: Encoding | RISKS: InlineJS,XOrigin(7),ExtDom(5) | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://ip.pn | RISK LEVEL: MINIMAL | PROTECTIONS: Framework | RISKS: InlineJS | SCRIPTS: 1 same-origin, 0 cross-origin
+SITE: https://itau.com.br | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO,Encoding,Validation | RISKS: InlineJS,EventHandlers,XOrigin(47),ExtDom(7),SensitiveForms | SCRIPTS: 0 same-origin, 47 cross-origin
+SITE: https://iterable.com | RISK LEVEL: LOW | PROTECTIONS: XCTO,Encoding,Validation | RISKS: InlineJS,EventHandlers,XOrigin(4),ExtDom(4),SensitiveForms | SCRIPTS: 16 same-origin, 4 cross-origin
+SITE: https://fyber.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(6),ExtDom(4) | SCRIPTS: 0 same-origin, 6 cross-origin
+SITE: https://intentiq.com | RISK LEVEL: HIGH | PROTECTIONS: Validation | RISKS: InlineJS,EventHandlers,XOrigin(25),ExtDom(5),SensitiveForms,PostMessage,JSONP | SCRIPTS: 0 same-origin, 25 cross-origin
+SITE: https://jetbrains.com | RISK LEVEL: LOW | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,XOrigin(5),ExtDom(2) | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://iqiyi.com | RISK LEVEL: MEDIUM | PROTECTIONS: Encoding | RISKS: InlineJS,XOrigin(5),ExtDom(2) | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://jivox.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,Eval,XOrigin(7),ExtDom(4),JSONP | SCRIPTS: 9 same-origin, 7 cross-origin
+SITE: https://joinhoney.com | RISK LEVEL: LOW | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,XOrigin(23),ExtDom(2) | SCRIPTS: 0 same-origin, 23 cross-origin
+SITE: https://judge.me | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://jd.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,Eval,XOrigin(11),ExtDom(4) | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://jwpltx.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://juicyads.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,XOrigin(13),ExtDom(6),JSONP | SCRIPTS: 0 same-origin, 13 cross-origin
+SITE: https://jwplayer.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(9),ExtDom(5),PostMessage,JSONP | SCRIPTS: 24 same-origin, 9 cross-origin
+SITE: https://kargo.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,XOrigin(16),ExtDom(7) | SCRIPTS: 0 same-origin, 16 cross-origin
+SITE: https://kampyle.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,Eval,XOrigin(25),ExtDom(12),PostMessage,JSONP | SCRIPTS: 0 same-origin, 25 cross-origin
+SITE: https://kick.com | RISK LEVEL: MINIMAL | PROTECTIONS: Framework | RISKS: InlineJS,Eval | SCRIPTS: 58 same-origin, 0 cross-origin
+SITE: https://klaviyo.com | RISK LEVEL: HIGH | PROTECTIONS: Framework,XCTO,Encoding | RISKS: InlineJS,Eval,XOrigin(6),ExtDom(3),PostMessage,JSONP | SCRIPTS: 0 same-origin, 6 cross-origin
+SITE: https://kochava.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(23),ExtDom(3) | SCRIPTS: 0 same-origin, 23 cross-origin
+SITE: https://krushmedia.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(2),ExtDom(2),PostMessage,JSONP | SCRIPTS: 21 same-origin, 2 cross-origin
+SITE: https://kueezrtb.com | RISK LEVEL: HIGH | PROTECTIONS: Framework | RISKS: InlineJS,EventHandlers,XOrigin(3),ExtDom(2) | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://kakao.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(7),ExtDom(4) | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://larkplayerapp.com | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(12) | SCRIPTS: 0 same-origin, 12 cross-origin
+SITE: https://kwai.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(11),ExtDom(2) | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://kuaishou.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://lenovomm.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: InlineJS,XOrigin(1) | SCRIPTS: 7 same-origin, 1 cross-origin
+SITE: https://liftoff.io | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,XOrigin(26),ExtDom(3),PostMessage,JSONP | SCRIPTS: 0 same-origin, 26 cross-origin
+SITE: https://lifeaiot.com | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO | RISKS: none | SCRIPTS: 2 same-origin, 0 cross-origin
+SITE: https://lijit.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 1 same-origin, 0 cross-origin
+SITE: https://lazada.sg | RISK LEVEL: HIGH | PROTECTIONS: Framework,XCTO,Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(17),PostMessage,JSONP | SCRIPTS: 0 same-origin, 17 cross-origin
+SITE: https://lge.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(6),ExtDom(4),JSONP | SCRIPTS: 0 same-origin, 6 cross-origin
+SITE: https://livechatinc.com | RISK LEVEL: HIGH | PROTECTIONS: Validation | RISKS: InlineJS,EventHandlers,Eval,XOrigin(11),ExtDom(2),SensitiveForms | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://live.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(49),ExtDom(4) | SCRIPTS: 0 same-origin, 49 cross-origin
+SITE: https://liveintent.com | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO,Encoding,Validation | RISKS: InlineJS,XOrigin(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://logitech.com | RISK LEVEL: HIGH | PROTECTIONS: Framework | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2),SensitiveForms | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://line.me | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(8),ExtDom(2) | SCRIPTS: 0 same-origin, 8 cross-origin
+SITE: https://long.tv | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,PostMessage,JSONP | SCRIPTS: 14 same-origin, 0 cross-origin
+SITE: https://mailchimp.com | RISK LEVEL: HIGH | PROTECTIONS: Framework,Validation | RISKS: InlineJS,EventHandlers,XOrigin(3),ExtDom(3),SensitiveForms,JSONP | SCRIPTS: 5 same-origin, 3 cross-origin
+SITE: https://medallia.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,Eval,XOrigin(25),ExtDom(12),PostMessage,JSONP | SCRIPTS: 0 same-origin, 25 cross-origin
+SITE: https://meethue.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(3),ExtDom(2) | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://media.net | RISK LEVEL: HIGH | PROTECTIONS: Encoding,Validation | RISKS: InlineJS,Eval,XOrigin(6),ExtDom(4),SensitiveForms,PostMessage,JSONP | SCRIPTS: 0 same-origin, 6 cross-origin
+SITE: https://mediago.io | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: XOrigin(7) | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://meraki.com | RISK LEVEL: LOW | PROTECTIONS: Framework | RISKS: InlineJS,JSONP | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://mercadolibre.com | RISK LEVEL: LOW | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(1) | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://media6degrees.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,Eval,XOrigin(11),ExtDom(2),JSONP | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://meitu.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,Eval,XOrigin(7),ExtDom(2) | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://microsoft.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(42),ExtDom(4) | SCRIPTS: 0 same-origin, 42 cross-origin
+SITE: https://meituan.com | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(9) | SCRIPTS: 0 same-origin, 9 cross-origin
+SITE: https://minecraft.net | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,XOrigin(6),ExtDom(4),PostMessage | SCRIPTS: 0 same-origin, 6 cross-origin
+SITE: https://mmcdn.com | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://mfadsrvr.com | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: EventHandlers,XOrigin(3),ExtDom(2) | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://mgid.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,EventHandlers,XOrigin(4),ExtDom(2) | SCRIPTS: 0 same-origin, 4 cross-origin
+SITE: https://mobilefuse.com | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO | RISKS: InlineJS,Eval | SCRIPTS: 13 same-origin, 0 cross-origin
+SITE: https://moengage.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),PostMessage,JSONP | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://mojang.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,XOrigin(6),ExtDom(4),PostMessage | SCRIPTS: 0 same-origin, 6 cross-origin
+SITE: https://mlb.com | RISK LEVEL: LOW | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,XOrigin(37),ExtDom(3) | SCRIPTS: 0 same-origin, 37 cross-origin
+SITE: https://mob.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://mountain.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(2),PostMessage,JSONP | SCRIPTS: 3 same-origin, 2 cross-origin
+SITE: https://mux.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,Eval,XOrigin(29) | SCRIPTS: 0 same-origin, 29 cross-origin
+SITE: https://mysterium.network | RISK LEVEL: HIGH | PROTECTIONS: Framework,XCTO,Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(11),ExtDom(2),PostMessage,JSONP | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://nakheelteam.cc | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 4 same-origin, 0 cross-origin
+SITE: https://navdmp.com | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: InlineJS,XOrigin(1) | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://naorisprotocol.network | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: InlineJS,Eval | SCRIPTS: 7 same-origin, 0 cross-origin
+SITE: https://nessus.org | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,XOrigin(17),ExtDom(5) | SCRIPTS: 0 same-origin, 17 cross-origin
+SITE: https://nba.com | RISK LEVEL: LOW | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,XOrigin(37),ExtDom(2) | SCRIPTS: 0 same-origin, 37 cross-origin
+SITE: https://newsroom.bi | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(8),ExtDom(4) | SCRIPTS: 0 same-origin, 8 cross-origin
+SITE: https://miui.com | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(11) | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://netflix.com | RISK LEVEL: HIGH | PROTECTIONS: Framework,XCTO,Validation | RISKS: InlineJS,Eval,XOrigin(2),ExtDom(2),PostMessage,JSONP | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://naver.com | RISK LEVEL: HIGH | PROTECTIONS: Framework,Validation | RISKS: InlineJS,EventHandlers,XOrigin(7),ExtDom(2),JSONP | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://nianticlabs.com | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: XOrigin(2) | SCRIPTS: 2 same-origin, 2 cross-origin
+SITE: https://nexx360.io | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(2),ExtDom(2),PostMessage,JSONP | SCRIPTS: 32 same-origin, 2 cross-origin
+SITE: https://nordvpn.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,Eval,XOrigin(4),ExtDom(2) | SCRIPTS: 7 same-origin, 4 cross-origin
+SITE: https://npr.org | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,Eval,XOrigin(8),ExtDom(5),JSONP | SCRIPTS: 0 same-origin, 8 cross-origin
+SITE: https://norton.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,Eval,XOrigin(20),ExtDom(3),PostMessage | SCRIPTS: 0 same-origin, 20 cross-origin
+SITE: https://ntppool.org | RISK LEVEL: LOW | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(4),ExtDom(4) | SCRIPTS: 0 same-origin, 4 cross-origin
+SITE: https://nubank.com.br | RISK LEVEL: MINIMAL | PROTECTIONS: Framework,XCTO,Validation | RISKS: InlineJS,SensitiveForms | SCRIPTS: 17 same-origin, 0 cross-origin
+SITE: https://newsbreak.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(19),ExtDom(3) | SCRIPTS: 0 same-origin, 19 cross-origin
+SITE: https://ntp.br | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: InlineJS,Eval | SCRIPTS: 2 same-origin, 0 cross-origin
+SITE: https://ntp.org | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://no-ip.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,XOrigin(11),ExtDom(5),SensitiveForms,JSONP | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://notion.so | RISK LEVEL: LOW | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(20) | SCRIPTS: 0 same-origin, 20 cross-origin
+SITE: https://oath.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO,Validation | RISKS: InlineJS,XOrigin(5),ExtDom(2),SensitiveForms | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://office365.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(51),ExtDom(5) | SCRIPTS: 0 same-origin, 51 cross-origin
+SITE: https://okta.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(11),ExtDom(4),JSONP | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://one.one | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,XOrigin(5),ExtDom(4) | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://onelink.me | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,XOrigin(20),ExtDom(5),PostMessage,JSONP | SCRIPTS: 0 same-origin, 20 cross-origin
+SITE: https://onesignal.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,XOrigin(8),ExtDom(4) | SCRIPTS: 10 same-origin, 8 cross-origin
+SITE: https://onetag-sys.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://onlyfans.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(57),ExtDom(2) | SCRIPTS: 0 same-origin, 57 cross-origin
+SITE: https://onaudience.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,Eval,XOrigin(3),ExtDom(3) | SCRIPTS: 2 same-origin, 3 cross-origin
+SITE: https://openai.com | RISK LEVEL: MINIMAL | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,Eval | SCRIPTS: 56 same-origin, 0 cross-origin
+SITE: https://openx.net | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://olx.com.br | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(17),ExtDom(3) | SCRIPTS: 0 same-origin, 17 cross-origin
+SITE: https://onedrive.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(46),ExtDom(5) | SCRIPTS: 0 same-origin, 46 cross-origin
+SITE: https://openxcdn.net | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://openloop.so | RISK LEVEL: MINIMAL | PROTECTIONS: Framework | RISKS: InlineJS | SCRIPTS: 1 same-origin, 0 cross-origin
+SITE: https://oppomobile.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,XOrigin(2),ExtDom(2) | SCRIPTS: 1 same-origin, 2 cross-origin
+SITE: https://opendns.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(5),ExtDom(3) | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://optimizely.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Encoding,Validation | RISKS: InlineJS,Eval,XOrigin(7),ExtDom(4),SensitiveForms,PostMessage,JSONP | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://openweathermap.org | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,XOrigin(2),ExtDom(2) | SCRIPTS: 7 same-origin, 2 cross-origin
+SITE: https://ouraring.com | RISK LEVEL: MINIMAL | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,Eval,SensitiveForms | SCRIPTS: 25 same-origin, 0 cross-origin
+SITE: https://overwolf.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,Eval,XOrigin(7),ExtDom(3),JSONP | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://ovh.net | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: XOrigin(1) | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://outbrain.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(3),ExtDom(2),SensitiveForms | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://palmplaystore.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: EventHandlers | SCRIPTS: 1 same-origin, 0 cross-origin
+SITE: https://pandasecurity.com | RISK LEVEL: LOW | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(8) | SCRIPTS: 0 same-origin, 8 cross-origin
+SITE: https://outlook.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(50),ExtDom(4) | SCRIPTS: 0 same-origin, 50 cross-origin
+SITE: https://paramountplus.com | RISK LEVEL: HIGH | PROTECTIONS: Framework,Validation | RISKS: InlineJS,EventHandlers,XOrigin(7),ExtDom(5),SensitiveForms | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://peoplepc.com | RISK LEVEL: LOW | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(18),ExtDom(2) | SCRIPTS: 0 same-origin, 18 cross-origin
+SITE: https://pghub.io | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://pandora.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://phantom.app | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(14),SensitiveForms | SCRIPTS: 0 same-origin, 14 cross-origin
+SITE: https://piano.io | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(3),ExtDom(3) | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://picsart.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2) | SCRIPTS: 1 same-origin, 2 cross-origin
+SITE: https://pki.goog | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(5),ExtDom(3) | SCRIPTS: 1 same-origin, 5 cross-origin
+SITE: https://playrix.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: InlineJS | SCRIPTS: 2 same-origin, 0 cross-origin
+SITE: https://permutive.com | RISK LEVEL: LOW | PROTECTIONS: XCTO | RISKS: InlineJS,PostMessage,JSONP | SCRIPTS: 20 same-origin, 0 cross-origin
+SITE: https://pluto.tv | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(3),ExtDom(3) | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://podscribe.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,EventHandlers,XOrigin(14),ExtDom(5) | SCRIPTS: 0 same-origin, 14 cross-origin
+SITE: https://plutotv.net | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(3),ExtDom(3) | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://posthog.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: InlineJS | SCRIPTS: 9 same-origin, 0 cross-origin
+SITE: https://playstation.com | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO,Encoding,Validation,Sandbox | RISKS: InlineJS,XOrigin(21),ExtDom(3) | SCRIPTS: 0 same-origin, 21 cross-origin
+SITE: https://pornhub.com | RISK LEVEL: HIGH | PROTECTIONS: Framework,Encoding,Validation | RISKS: InlineJS,EventHandlers,Eval,XOrigin(15),ExtDom(3),SensitiveForms,PostMessage,JSONP | SCRIPTS: 0 same-origin, 15 cross-origin
+SITE: https://prreqcroab.icu | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://primevideo.com | RISK LEVEL: LOW | PROTECTIONS: Framework,XCTO,Encoding,Validation | RISKS: InlineJS,EventHandlers,Eval,XOrigin(11),PostMessage | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://primis.tech | RISK LEVEL: HIGH | PROTECTIONS: Validation | RISKS: InlineJS,XOrigin(17),ExtDom(2),SensitiveForms | SCRIPTS: 0 same-origin, 17 cross-origin
+SITE: https://pubnub.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,Eval,XOrigin(16),ExtDom(2) | SCRIPTS: 0 same-origin, 16 cross-origin
+SITE: https://powerapps.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(41),ExtDom(4) | SCRIPTS: 0 same-origin, 41 cross-origin
+SITE: https://pushd.com | RISK LEVEL: LOW | PROTECTIONS: XCTO,Encoding,Validation | RISKS: InlineJS,EventHandlers,XOrigin(5),ExtDom(4) | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://pusher.com | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: InlineJS,XOrigin(1) | SCRIPTS: 3 same-origin, 1 cross-origin
+SITE: https://qualtrics.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO,Encoding,Validation | RISKS: InlineJS,EventHandlers,XOrigin(23),ExtDom(5),SensitiveForms | SCRIPTS: 0 same-origin, 23 cross-origin
+SITE: https://quantummetric.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,Eval,XOrigin(33) | SCRIPTS: 0 same-origin, 33 cross-origin
+SITE: https://quad9.net | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO | RISKS: none | SCRIPTS: 7 same-origin, 0 cross-origin
+SITE: https://quicksetcloud.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(4),ExtDom(4),SensitiveForms,PostMessage,JSONP | SCRIPTS: 5 same-origin, 4 cross-origin
+SITE: https://quickconnect.to | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: InlineJS,Eval | SCRIPTS: 3 same-origin, 0 cross-origin
+SITE: https://rainberrytv.com | RISK LEVEL: MINIMAL | PROTECTIONS: Framework | RISKS: InlineJS,EventHandlers | SCRIPTS: 1 same-origin, 0 cross-origin
+SITE: https://rainbird.com | RISK LEVEL: LOW | PROTECTIONS: XCTO,Validation | RISKS: InlineJS,XOrigin(6),ExtDom(3) | SCRIPTS: 0 same-origin, 6 cross-origin
+SITE: https://qvdt3feo.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://rambler.ru | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,Eval,XOrigin(8),ExtDom(4),JSONP | SCRIPTS: 0 same-origin, 8 cross-origin
+SITE: https://rakuten.co.jp | RISK LEVEL: HIGH | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,EventHandlers,Eval,XOrigin(39),ExtDom(7) | SCRIPTS: 0 same-origin, 39 cross-origin
+SITE: https://rakuten.com | RISK LEVEL: LOW | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,XOrigin(9),ExtDom(2) | SCRIPTS: 0 same-origin, 9 cross-origin
+SITE: https://reebr.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://reasonsecurity.com | RISK LEVEL: LOW | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(16) | SCRIPTS: 0 same-origin, 16 cross-origin
+SITE: https://qcloud.com | RISK LEVEL: HIGH | PROTECTIONS: Framework,Encoding | RISKS: InlineJS,Eval,XOrigin(7),ExtDom(2),JSONP | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://revenuecat.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(3),SensitiveForms | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://quark.cn | RISK LEVEL: LOW | PROTECTIONS: XCTO,Validation | RISKS: InlineJS,Eval,XOrigin(1) | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://riotgames.com | RISK LEVEL: MEDIUM | PROTECTIONS: Encoding | RISKS: InlineJS,XOrigin(5),ExtDom(4) | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://rmhfrtnd.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://riskified.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(7),ExtDom(3) | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://revcontent.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO,Validation | RISKS: InlineJS,XOrigin(13),ExtDom(6),SensitiveForms | SCRIPTS: 0 same-origin, 13 cross-origin
+SITE: https://rokt.com | RISK LEVEL: MEDIUM | PROTECTIONS: Validation | RISKS: InlineJS,XOrigin(3),ExtDom(3),SensitiveForms | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://rkdms.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://richaudience.com | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,SensitiveForms | SCRIPTS: 27 same-origin, 0 cross-origin
+SITE: https://rockstargames.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(4),ExtDom(2) | SCRIPTS: 0 same-origin, 4 cross-origin
+SITE: https://rtbhouse.com | RISK LEVEL: LOW | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(35) | SCRIPTS: 0 same-origin, 35 cross-origin
+SITE: https://ropro.io | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,Eval,XOrigin(9),ExtDom(7) | SCRIPTS: 2 same-origin, 9 cross-origin
+SITE: https://rutube.ru | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,XOrigin(13),ExtDom(2) | SCRIPTS: 2 same-origin, 13 cross-origin
+SITE: https://samba.tv | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(11),ExtDom(8) | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://samplicio.us | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: InlineJS | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://samsungapps.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://salesforceliveagent.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(17),ExtDom(2) | SCRIPTS: 0 same-origin, 17 cross-origin
+SITE: https://samsunghealth.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 2 same-origin, 0 cross-origin
+SITE: https://salesforce.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(17),ExtDom(2) | SCRIPTS: 0 same-origin, 17 cross-origin
+SITE: https://samsungknox.com | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(18),ExtDom(3) | SCRIPTS: 0 same-origin, 18 cross-origin
+SITE: https://samsung.com | RISK LEVEL: HIGH | PROTECTIONS: Framework,Encoding | RISKS: InlineJS,EventHandlers,XOrigin(13),ExtDom(3),SensitiveForms,PostMessage | SCRIPTS: 0 same-origin, 13 cross-origin
+SITE: https://screencore.io | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(2),ExtDom(2) | SCRIPTS: 2 same-origin, 2 cross-origin
+SITE: https://sendbird.com | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(3),ExtDom(3),JSONP | SCRIPTS: 74 same-origin, 3 cross-origin
+SITE: https://sensic.net | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://segment.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,XOrigin(4),ExtDom(3),SensitiveForms,JSONP | SCRIPTS: 7 same-origin, 4 cross-origin
+SITE: https://seedtag.com | RISK LEVEL: LOW | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://segment.io | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,XOrigin(11),ExtDom(4),SensitiveForms,JSONP | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://sharepoint.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(48),ExtDom(5) | SCRIPTS: 0 same-origin, 48 cross-origin
+SITE: https://shodan.io | RISK LEVEL: LOW | PROTECTIONS: XCTO | RISKS: XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://siftscience.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,Eval,XOrigin(11),ExtDom(5) | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://signal.org | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO | RISKS: InlineJS,Eval | SCRIPTS: 3 same-origin, 0 cross-origin
+SITE: https://shopify.com | RISK LEVEL: MINIMAL | PROTECTIONS: Framework,XCTO | RISKS: InlineJS | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://simpli.fi | RISK LEVEL: LOW | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(1),SensitiveForms | SCRIPTS: 8 same-origin, 1 cross-origin
+SITE: https://simperium.com | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,Eval,XOrigin(1) | SCRIPTS: 5 same-origin, 1 cross-origin
+SITE: https://site.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(17),ExtDom(2) | SCRIPTS: 0 same-origin, 17 cross-origin
+SITE: https://sina.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://siriusxm.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,Eval,XOrigin(10) | SCRIPTS: 0 same-origin, 10 cross-origin
+SITE: https://sinaimg.cn | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://signalr.net | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(11),ExtDom(4) | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://slack.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,Eval,XOrigin(12),ExtDom(3) | SCRIPTS: 0 same-origin, 12 cross-origin
+SITE: https://smartclip.net | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://singular.net | RISK LEVEL: MEDIUM | PROTECTIONS: Framework,Encoding | RISKS: InlineJS,Eval,XOrigin(6),JSONP | SCRIPTS: 0 same-origin, 6 cross-origin
+SITE: https://skyhigh.cloud | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(8),ExtDom(2),JSONP | SCRIPTS: 0 same-origin, 8 cross-origin
+SITE: https://smartproxy.com | RISK LEVEL: HIGH | PROTECTIONS: Framework | RISKS: InlineJS,Eval,XOrigin(26),ExtDom(2) | SCRIPTS: 0 same-origin, 26 cross-origin
+SITE: https://smadex.com | RISK LEVEL: HIGH | PROTECTIONS: Validation | RISKS: InlineJS,Eval,XOrigin(6),ExtDom(2),PostMessage,JSONP | SCRIPTS: 5 same-origin, 6 cross-origin
+SITE: https://smartthings.com | RISK LEVEL: HIGH | PROTECTIONS: Framework,Encoding | RISKS: InlineJS,EventHandlers,XOrigin(17),ExtDom(3),SensitiveForms | SCRIPTS: 0 same-origin, 17 cross-origin
+SITE: https://sndcdn.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(11),ExtDom(3) | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://shopeemobile.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: InlineJS | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://snigelweb.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,Eval,XOrigin(10),ExtDom(4) | SCRIPTS: 0 same-origin, 10 cross-origin
+SITE: https://smartyads.com | RISK LEVEL: LOW | PROTECTIONS: XCTO,Validation | RISKS: InlineJS,XOrigin(2),ExtDom(2),SensitiveForms | SCRIPTS: 1 same-origin, 2 cross-origin
+SITE: https://sonobi.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(2),ExtDom(2),PostMessage,JSONP | SCRIPTS: 17 same-origin, 2 cross-origin
+SITE: https://sonnenbatterie.de | RISK LEVEL: HIGH | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(18),ExtDom(2),SensitiveForms | SCRIPTS: 0 same-origin, 18 cross-origin
+SITE: https://sonicwall.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://soundcloud.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(11),ExtDom(3) | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://sophos.com | RISK LEVEL: LOW | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,XOrigin(6),ExtDom(2) | SCRIPTS: 0 same-origin, 6 cross-origin
+SITE: https://sonos.com | RISK LEVEL: HIGH | PROTECTIONS: Framework | RISKS: InlineJS,Eval,XOrigin(21),ExtDom(2) | SCRIPTS: 0 same-origin, 21 cross-origin
+SITE: https://spankbang.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,Eval,XOrigin(12),ExtDom(4) | SCRIPTS: 1 same-origin, 12 cross-origin
+SITE: https://snackvideo.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(11),ExtDom(2) | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://sitescout.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,Eval,XOrigin(7),ExtDom(3) | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://sohu.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,XOrigin(10),ExtDom(6) | SCRIPTS: 0 same-origin, 10 cross-origin
+SITE: https://speedtestcustom.com | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(1) | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://sportybet.com | RISK LEVEL: LOW | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,XOrigin(7),PostMessage | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://sogou.com | RISK LEVEL: MEDIUM | PROTECTIONS: Encoding,Validation | RISKS: InlineJS,EventHandlers,XOrigin(7),ExtDom(2) | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://squarespace.com | RISK LEVEL: MINIMAL | PROTECTIONS: Framework,XCTO,Validation | RISKS: InlineJS,XOrigin(9),ExtDom(2) | SCRIPTS: 0 same-origin, 9 cross-origin
+SITE: https://spot.im | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(12) | SCRIPTS: 0 same-origin, 12 cross-origin
+SITE: https://roku.com | RISK LEVEL: MINIMAL | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,XOrigin(4),ExtDom(2) | SCRIPTS: 0 same-origin, 4 cross-origin
+SITE: https://stealth.si | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://squareup.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework,XCTO,Validation | RISKS: InlineJS,EventHandlers,XOrigin(2),SensitiveForms,PostMessage | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://spacex.com | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(3) | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://sprinklr.com | RISK LEVEL: HIGH | PROTECTIONS: Framework | RISKS: InlineJS,Eval,XOrigin(22),ExtDom(2) | SCRIPTS: 0 same-origin, 22 cross-origin
+SITE: https://snssdk.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,Eval,XOrigin(2),JSONP | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://supercell.com | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: InlineJS,XOrigin(1) | SCRIPTS: 10 same-origin, 1 cross-origin
+SITE: https://surfshark.com | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO | RISKS: InlineJS | SCRIPTS: 18 same-origin, 0 cross-origin
+SITE: https://swishapps.ai | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://syncthing.net | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(3),ExtDom(3) | SCRIPTS: 1 same-origin, 3 cross-origin
+SITE: https://starmakerstudios.com | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: InlineJS,XOrigin(3),ExtDom(3) | SCRIPTS: 5 same-origin, 3 cross-origin
+SITE: https://ssl.com | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(1),JSONP | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://stackadapt.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Validation | RISKS: InlineJS,Eval,XOrigin(24),ExtDom(3),SensitiveForms | SCRIPTS: 0 same-origin, 24 cross-origin
+SITE: https://superwall.me | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(14),ExtDom(2),JSONP | SCRIPTS: 0 same-origin, 14 cross-origin
+SITE: https://sundaysky.com | RISK LEVEL: HIGH | PROTECTIONS: Framework,XCTO,Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(5),ExtDom(4),SensitiveForms,PostMessage,JSONP | SCRIPTS: 24 same-origin, 5 cross-origin
+SITE: https://t.me | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,XOrigin(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://swiftkey.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(56),ExtDom(3) | SCRIPTS: 0 same-origin, 56 cross-origin
+SITE: https://t.co | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,Eval | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://splashtop.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,Eval,XOrigin(6),ExtDom(3),JSONP | SCRIPTS: 0 same-origin, 6 cross-origin
+SITE: https://strava.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(14),ExtDom(2) | SCRIPTS: 0 same-origin, 14 cross-origin
+SITE: https://tailscale.com | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(2),ExtDom(2) | SCRIPTS: 22 same-origin, 2 cross-origin
+SITE: https://tapad.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(9),ExtDom(7) | SCRIPTS: 2 same-origin, 9 cross-origin
+SITE: https://pendo.io | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,Eval,XOrigin(21),ExtDom(7),PostMessage,JSONP | SCRIPTS: 0 same-origin, 21 cross-origin
+SITE: https://teads.tv | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://telegram.org | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: InlineJS,EventHandlers | SCRIPTS: 2 same-origin, 0 cross-origin
+SITE: https://teamviewer.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,XOrigin(6),ExtDom(4),PostMessage | SCRIPTS: 0 same-origin, 6 cross-origin
+SITE: https://tawk.to | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,Eval,XOrigin(27),ExtDom(3) | SCRIPTS: 0 same-origin, 27 cross-origin
+SITE: https://taobao.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(14),ExtDom(2),JSONP | SCRIPTS: 0 same-origin, 14 cross-origin
+SITE: https://tenable.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,EventHandlers,XOrigin(19),ExtDom(5) | SCRIPTS: 0 same-origin, 19 cross-origin
+SITE: https://tapjoy.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,Eval,XOrigin(53) | SCRIPTS: 0 same-origin, 53 cross-origin
+SITE: https://themoviedb.org | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,Eval,XOrigin(7),ExtDom(2) | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://the-ozone-project.com | RISK LEVEL: HIGH | PROTECTIONS: Encoding,Validation | RISKS: InlineJS,XOrigin(33),ExtDom(4),SensitiveForms,PostMessage,JSONP | SCRIPTS: 0 same-origin, 33 cross-origin
+SITE: https://system-monitor.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,Eval,XOrigin(7),ExtDom(4),SensitiveForms | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://tizen.org | RISK LEVEL: HIGH | PROTECTIONS: Validation | RISKS: InlineJS,XOrigin(5),ExtDom(3),PostMessage,JSONP | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://terabox.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,Eval,XOrigin(9),ExtDom(5),JSONP | SCRIPTS: 0 same-origin, 9 cross-origin
+SITE: https://tns-counter.ru | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://tmdb.org | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,Eval,XOrigin(7),ExtDom(2) | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://tplinkcloud.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,XOrigin(15) | SCRIPTS: 0 same-origin, 15 cross-origin
+SITE: https://transmissionbt.com | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO | RISKS: InlineJS | SCRIPTS: 2 same-origin, 0 cross-origin
+SITE: https://trello.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,XOrigin(34),ExtDom(2),SensitiveForms | SCRIPTS: 0 same-origin, 34 cross-origin
+SITE: https://treasuredata.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(17),ExtDom(4),PostMessage,JSONP | SCRIPTS: 0 same-origin, 17 cross-origin
+SITE: https://traffmonetizer.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,Eval,XOrigin(1),PostMessage,JSONP | SCRIPTS: 44 same-origin, 1 cross-origin
+SITE: https://truecaller.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,XOrigin(2),ExtDom(2),SensitiveForms | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://tru.am | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://trustpilot.com | RISK LEVEL: LOW | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,XOrigin(11),ExtDom(3) | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://ttcache.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://tradplusad.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: XOrigin(1) | SCRIPTS: 13 same-origin, 1 cross-origin
+SITE: https://twingate.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(3),ExtDom(3),JSONP | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://twitch.tv | RISK LEVEL: LOW | PROTECTIONS: Framework,XCTO,Encoding | RISKS: InlineJS,Eval,XOrigin(52),JSONP | SCRIPTS: 0 same-origin, 52 cross-origin
+SITE: https://tenda.com.cn | RISK LEVEL: MINIMAL | PROTECTIONS: Framework,XCTO | RISKS: InlineJS | SCRIPTS: 1 same-origin, 0 cross-origin
+SITE: https://trip.com | RISK LEVEL: LOW | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,XOrigin(1),JSONP | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://twilio.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,Eval,XOrigin(11),ExtDom(4),JSONP | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://tubemogul.com | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,XOrigin(4),SensitiveForms,JSONP | SCRIPTS: 0 same-origin, 4 cross-origin
+SITE: https://tynt.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,XOrigin(1) | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://tubitv.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://ui.com | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,XOrigin(5),ExtDom(3) | SCRIPTS: 2 same-origin, 5 cross-origin
+SITE: https://uisp.com | RISK LEVEL: LOW | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(3),ExtDom(2) | SCRIPTS: 2 same-origin, 3 cross-origin
+SITE: https://undertone.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Validation | RISKS: InlineJS,EventHandlers,Eval,XOrigin(23),ExtDom(4),SensitiveForms,JSONP | SCRIPTS: 0 same-origin, 23 cross-origin
+SITE: https://typekit.com | RISK LEVEL: LOW | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,XOrigin(8),ExtDom(6) | SCRIPTS: 0 same-origin, 8 cross-origin
+SITE: https://unifi-ai.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://unity3d.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,Eval,XOrigin(41) | SCRIPTS: 0 same-origin, 41 cross-origin
+SITE: https://unpkg.com | RISK LEVEL: MINIMAL | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,XOrigin(1) | SCRIPTS: 1 same-origin, 1 cross-origin
+SITE: https://unsplash.com | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO,Encoding,Validation | RISKS: InlineJS,Eval | SCRIPTS: 8 same-origin, 0 cross-origin
+SITE: https://ubnt.com | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,XOrigin(7),ExtDom(4) | SCRIPTS: 0 same-origin, 7 cross-origin
+SITE: https://unrulymedia.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://useinsider.com | RISK LEVEL: HIGH | PROTECTIONS: XCTO,Validation | RISKS: InlineJS,EventHandlers,Eval,XOrigin(5),ExtDom(4),PostMessage,JSONP | SCRIPTS: 11 same-origin, 5 cross-origin
+SITE: https://ucweb.com | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(4) | SCRIPTS: 0 same-origin, 4 cross-origin
+SITE: https://uribl.com | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: InlineJS,Eval | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://verisign.net | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://vidazoo.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO,Encoding | RISKS: InlineJS,XOrigin(18),ExtDom(5),JSONP | SCRIPTS: 0 same-origin, 18 cross-origin
+SITE: https://viber.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(8),ExtDom(2) | SCRIPTS: 0 same-origin, 8 cross-origin
+SITE: https://vimeo.com | RISK LEVEL: LOW | PROTECTIONS: Framework,XCTO | RISKS: InlineJS,XOrigin(20),ExtDom(3) | SCRIPTS: 0 same-origin, 20 cross-origin
+SITE: https://verisign.com | RISK LEVEL: LOW | PROTECTIONS: XCTO,Validation | RISKS: InlineJS,EventHandlers,XOrigin(4) | SCRIPTS: 0 same-origin, 4 cross-origin
+SITE: https://uvfuns.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(11),ExtDom(2) | SCRIPTS: 0 same-origin, 11 cross-origin
+SITE: https://v-videoapp.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://vidoomy.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,Eval,XOrigin(5),ExtDom(2),SensitiveForms | SCRIPTS: 0 same-origin, 5 cross-origin
+SITE: https://vivoglobal.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://vungle.com | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,XOrigin(26),ExtDom(3),PostMessage,JSONP | SCRIPTS: 0 same-origin, 26 cross-origin
+SITE: https://wattpad.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://weather.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework,XCTO,Encoding | RISKS: InlineJS,EventHandlers,XOrigin(4),ExtDom(4),JSONP | SCRIPTS: 4 same-origin, 4 cross-origin
+SITE: https://wasabisys.com | RISK LEVEL: MEDIUM | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(12),ExtDom(2) | SCRIPTS: 0 same-origin, 12 cross-origin
+SITE: https://vivo.com.cn | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,Eval,XOrigin(10),ExtDom(3) | SCRIPTS: 0 same-origin, 10 cross-origin
+SITE: https://wetransfer.com | RISK LEVEL: LOW | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(11) | SCRIPTS: 1 same-origin, 11 cross-origin
+SITE: https://wikimedia.org | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(1) | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://wikipedia.org | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://widgetable.net | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 1 same-origin, 0 cross-origin
+SITE: https://wistia.com | RISK LEVEL: MINIMAL | PROTECTIONS: Framework | RISKS: InlineJS,Eval | SCRIPTS: 23 same-origin, 0 cross-origin
+SITE: https://withgoogle.com | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(2),ExtDom(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://wix.com | RISK LEVEL: HIGH | PROTECTIONS: Framework,XCTO,Encoding,Validation | RISKS: InlineJS,EventHandlers,Eval,XOrigin(13),ExtDom(2),PostMessage,JSONP | SCRIPTS: 0 same-origin, 13 cross-origin
+SITE: https://windows.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(8),ExtDom(4) | SCRIPTS: 0 same-origin, 8 cross-origin
+SITE: https://wordpress.com | RISK LEVEL: MINIMAL | PROTECTIONS: Framework,XCTO,Encoding,Validation | RISKS: InlineJS,XOrigin(5),ExtDom(2) | SCRIPTS: 1 same-origin, 5 cross-origin
+SITE: https://workers.dev | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(4),ExtDom(3) | SCRIPTS: 0 same-origin, 4 cross-origin
+SITE: https://wp.com | RISK LEVEL: MINIMAL | PROTECTIONS: Framework,XCTO,Encoding,Validation | RISKS: InlineJS,XOrigin(6),ExtDom(3) | SCRIPTS: 0 same-origin, 6 cross-origin
+SITE: https://wordpress.org | RISK LEVEL: MEDIUM | PROTECTIONS: Encoding,Validation | RISKS: InlineJS,Eval,XOrigin(1),PostMessage,JSONP | SCRIPTS: 4 same-origin, 1 cross-origin
+SITE: https://webengage.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,Eval,XOrigin(6),ExtDom(4),JSONP | SCRIPTS: 35 same-origin, 6 cross-origin
+SITE: https://wechat.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,Eval,XOrigin(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://wunderground.com | RISK LEVEL: LOW | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(4) | SCRIPTS: 0 same-origin, 4 cross-origin
+SITE: https://weathercn.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: XOrigin(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://xhamsterlive.com | RISK LEVEL: MINIMAL | PROTECTIONS: Framework,Validation | RISKS: InlineJS,Eval,JSONP | SCRIPTS: 1 same-origin, 0 cross-origin
+SITE: https://wps.cn | RISK LEVEL: LOW | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://xfinity.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(8),ExtDom(4) | SCRIPTS: 0 same-origin, 8 cross-origin
+SITE: https://xlgmedia.com | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: none | SCRIPTS: 0 same-origin, 0 cross-origin
+SITE: https://xhpingcdn.com | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,EventHandlers,XOrigin(1),JSONP | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://yadro.ru | RISK LEVEL: MINIMAL | PROTECTIONS: none | RISKS: InlineJS,EventHandlers | SCRIPTS: 6 same-origin, 0 cross-origin
+SITE: https://ya.ru | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO | RISKS: InlineJS | SCRIPTS: 3 same-origin, 0 cross-origin
+SITE: https://yahoo.net | RISK LEVEL: LOW | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://yammer.com | RISK LEVEL: MEDIUM | PROTECTIONS: none | RISKS: InlineJS,XOrigin(3) | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://yahoo.com | RISK LEVEL: LOW | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(2) | SCRIPTS: 0 same-origin, 2 cross-origin
+SITE: https://yandex.ru | RISK LEVEL: MINIMAL | PROTECTIONS: XCTO | RISKS: InlineJS | SCRIPTS: 3 same-origin, 0 cross-origin
+SITE: https://wshareit.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(106),ExtDom(3) | SCRIPTS: 0 same-origin, 106 cross-origin
+SITE: https://yandex.net | RISK LEVEL: LOW | PROTECTIONS: XCTO | RISKS: InlineJS,XOrigin(3) | SCRIPTS: 0 same-origin, 3 cross-origin
+SITE: https://yieldmo.com | RISK LEVEL: HIGH | PROTECTIONS: Encoding | RISKS: InlineJS,XOrigin(4),ExtDom(4),PostMessage,JSONP | SCRIPTS: 14 same-origin, 4 cross-origin
+SITE: https://xiaohongshu.com | RISK LEVEL: MEDIUM | PROTECTIONS: Framework | RISKS: InlineJS,EventHandlers,XOrigin(9) | SCRIPTS: 0 same-origin, 9 cross-origin
+SITE: https://zemanta.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,EventHandlers,Eval,XOrigin(14),ExtDom(3),JSONP | SCRIPTS: 0 same-origin, 14 cross-origin
+SITE: https://zoom.us | RISK LEVEL: LOW | PROTECTIONS: Framework | RISKS: InlineJS,XOrigin(1) | SCRIPTS: 0 same-origin, 1 cross-origin
+SITE: https://zoho.com | RISK LEVEL: LOW | PROTECTIONS: none | RISKS: InlineJS,XOrigin(8) | SCRIPTS: 0 same-origin, 8 cross-origin
+SITE: https://ys7.com | RISK LEVEL: HIGH | PROTECTIONS: none | RISKS: InlineJS,XOrigin(6),ExtDom(2) | SCRIPTS: 0 same-origin, 6 cross-origin
+SITE: https://zeotap.com | RISK LEVEL: HIGH | PROTECTIONS: Framework,Encoding | RISKS: InlineJS,EventHandlers,Eval,XOrigin(3),ExtDom(3),JSONP | SCRIPTS: 26 same-origin, 3 cross-origin
 
-Scraping completed in 1m45.1407918s
+Scraping completed in 1m54.4698432s
 Scraped 0 urls
 Scraped 2001 root domains
 Scraped 0 urls per second
-Root domains per second: 19.03
+Root domains per second: 17.48
 Concurrency: 16
 Mode: csp
 Depth: 1
-Valid responses: 1064
-Failed responses: 937
+Valid responses: 1062
+Failed responses: 939
 Status code breakdown:
-  522: 2
-  404: 63
-  200: 1063
-  503: 3
-  504: 1
-  429: 3
-  400: 3
-  403: 52
-  401: 2
   520: 2
-  0: 791
+  200: 061
+  0: 793
+  403: 51
+  429: 2
   498: 2
-  502: 2
-  500: 2
+  401: 2
+  522: 2
   301: 2
-  202: 1
+  500: 2
   204: 6
+  503: 3
+  502: 2
+  404: 63
+  202: 1
+  400: 3
+  504: 3
 Status 0 error breakdown (grouped network errors):
-  dial tcp: lookup ...: no such host: 594
-  tls: failed to verify certificate: x509: certificate is valid for ..., not ...: 45
-  read tcp ... wsarecv: An existing connection was forcibly closed by the remote host.: 8
+  dial tcp: lookup ...: no such host: 596
+  tls: failed to verify certificate: x509: certificate is valid for ..., not ...: 43
+  read tcp ... wsarecv: An existing connection was forcibly closed by the remote host.: 6
   EOF: 5
   tls: failed to verify certificate: x509: certificate signed by unknown authority: 4
-  Get "https://gcloudcs.com": dial tcp: lookup gcloudcs.com: getaddrinfow: The requested name is valid, but no data of the requested type was found.: 1
-  Get "https://h30495.www3.hp.com/": tls: failed to verify certificate: x509: certificate has expired or is not yet valid: : 1
-  Get "https://wbx2.com": dial tcp 13.59.223.206:443: i/o timeout: 1
-  Get "https://godaddy.com": net/http: TLS handshake timeout: 1
-  Get "https://bfmio.com": dial tcp 54.225.90.171:443: i/o timeout: 1
-  ...and 129 more
-Total status 0 (network) errors: 790
-Status 0 errors: 790 (84.3% of all failed responses)
+  Get "https://nflximg.com": dial tcp 207.45.72.215:443: i/o timeout: 1
+  Get "https://fengpongshu.com": dial tcp 5.9.143.123:443: i/o timeout: 1
+  Get "https://cloudflarestorage.com": net/http: timeout awaiting response headers: 1
+  Get "https://ymmobi.com": tls: failed to verify certificate: x509: certificate has expired or is not yet valid: : 1
+  Get "https://leiniao.com": dial tcp 203.107.60.192:443: i/o timeout: 1
+  ...and 135 more
+Total status 0 (network) errors: 794
+Status 0 errors: 794 (84.6% of all failed responses)
 Cloudflare 403 Forbidden errors: 9
 
 CSP and XSS Protection Analysis over 2001 domains:
 CSP Implementation:
-  Has CSP header: 388 (36.5%)
+  Has CSP header: 386 (36.3%)
   Has meta CSP: 26 (2.4%)
 
 XSS Risk Indicators (average per url):
-  Inline scripts: 11.91
-  Inline event handlers: 3.09
-  Inline styles: 10.81
-  eval() usage: 0.75
+  Inline scripts: 11.90
+  Inline event handlers: 2.82
+  Inline styles: 10.79
+  eval() usage: 0.73
   postMessage usage: 0.17
   JSONP endpoints: 0.28
 
 Script Loading Patterns (average per url):
-  External scripts: 12.04
-  Cross-origin scripts: 10.16
+  External scripts: 12.08
+  Cross-origin scripts: 10.20
   Same-origin scripts: 1.88
 
 XSS Protection Measures:
-  Modern frameworks: 621 (58.4%)
-  X-Content-Type-Options: 523 (49.2%)
-  Output encoding: 687 (64.6%)
-  Input validation: 401 (37.7%)
-  Sandboxed iframes: 9 (0.8%)
-  HttpOnly cookies: 626 (58.8%)
-  Sensitive forms: 256 (24.1%)
+  Modern frameworks: 621 (58.5%)
+  X-Content-Type-Options: 517 (48.7%)
+  Output encoding: 683 (64.3%)
+  Input validation: 403 (37.9%)
+  Sandboxed iframes: 10 (0.9%)
+  HttpOnly cookies: 641 (60.4%)
+  Sensitive forms: 244 (23.0%)
 
 XSS Risk Assessment (sites without CSP):
-  High risk: 276 (25.9%)
-  Medium risk: 150 (14.1%)
+  High risk: 274 (25.8%)
+  Medium risk: 152 (14.3%)
   Low risk: 101 (9.5%)
   Minimal risk: 135 (12.7%)
