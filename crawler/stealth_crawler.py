@@ -44,10 +44,10 @@ totalCrawled = 0
 # crawlWG sync.WaitGroup
 successCount = 0
 failCount = 0
-statusCounts = Dict()
-status0Errors = Dict()
+statusCounts = dict()
+status0Errors = dict()
 
-async def grab(url: str, outfile: str, mode: str) -> None:
+async def grab(url: str, outfile: str, mode: str, counters) -> None:
         async with AsyncCamoufox(
         headless=True,
         os=["windows","macos","linux"],
@@ -86,8 +86,12 @@ async def grab(url: str, outfile: str, mode: str) -> None:
                             plugin_name = match_plugin.group(1)
                             ver = re.search(r"[?&]ver=([^&]+)", asset_url)
                             plugin.append(plugin_name + (f"@{ver.group(1)}" if ver else ""))
-                elif mode == "jssearch":
 
+                    print(f"URL: {url}")
+                    print(f"Theme: {theme}")
+                    print(f"Plugins: {', '.join(plugin)}")
+
+                elif mode == "jssearch":
                     keyword = sys.argv[2] if len(sys.argv) > 2 else None
                     if not keyword:
                         print("No keyword provided for JS search mode.")
@@ -111,11 +115,12 @@ async def grab(url: str, outfile: str, mode: str) -> None:
                                     print(f"Keyword '{keyword}' found in JS: {js_url}")
                         except Exception as e:
                             print(f"Error fetching {js_url}: {e}")
+
                 elif mode == "csp":
-                    global totalCSPChecked, hasCSPHeaderCount, hasMetaCSPCount, inlineScriptCount, inlineStyleCount, \
-                        externalScriptCount, evalUsageCount, crossOriginScriptsCount, sameOriginScriptsCount, modernFrameworkCount, \
-                        sensitiveFormsCount, hdrCTOCount, cookieHttpOnlyCount, outputEncodingCount, inputValidationCount, sandboxedIframesCount, unsafeInlineEventHandlersCount, \
-                        jsonpEndpointsCount, postMessageUsageCount, riskHighCount, riskMediumCount, riskLowCount, riskMinimalCount, totalCrawled, successCount, failCount, statusCounts, status0Errors
+                    # global totalCSPChecked, hasCSPHeaderCount, hasMetaCSPCount, inlineScriptCount, inlineStyleCount, \
+                    #     externalScriptCount, evalUsageCount, crossOriginScriptsCount, sameOriginScriptsCount, modernFrameworkCount, \
+                    #     sensitiveFormsCount, hdrCTOCount, cookieHttpOnlyCount, outputEncodingCount, inputValidationCount, sandboxedIframesCount, unsafeInlineEventHandlersCount, \
+                    #     jsonpEndpointsCount, postMessageUsageCount, riskHighCount, riskMediumCount, riskLowCount, riskMinimalCount, totalCrawled, successCount, failCount, statusCounts, status0Errors
                     has_csp_hdr = bool(resp and resp.headers.get("content-security-policy"))
                     has_xcto = resp and resp.headers.get("x-content-type-options", "").lower() == "nosniff"
 
@@ -204,97 +209,87 @@ async def grab(url: str, outfile: str, mode: str) -> None:
                     else:
                         risk_level = "Minimal"
 
-                    print(
-                        f"[CSP]\t{url}\t"
-                        f"CSP_Header={int(has_csp_hdr)}\tMeta_CSP={int(has_meta_csp)}\t"
-                        f"InlineJS={inline_scripts}\tInlineCSS={inline_styles}\tEvtAttr={inline_evt_handlers}\t"
-                        f"SameJS={same_origin_scripts}\tXSiteJS={cross_origin_scripts}\t"
-                        f"Eval={int(eval_usage)}\tpostMessage={int(post_msg)}\tJSONP={int(jsonp)}\t"
-                        f"ModernFW={int(modern_fw)}\tXCTO={int(has_xcto)}\tSandboxIFR={int(sandbox_ifr)}\t"
-                        f"SensitiveForm={int(sensitive_form)}\tRisk={risk_level}"
-                    )
+                    # print(
+                    #     f"[CSP]\t{url}\t"
+                    #     f"CSP_Header={int(has_csp_hdr)}\tMeta_CSP={int(has_meta_csp)}\t"
+                    #     f"InlineJS={inline_scripts}\tInlineCSS={inline_styles}\tEvtAttr={inline_evt_handlers}\t"
+                    #     f"SameJS={same_origin_scripts}\tXSiteJS={cross_origin_scripts}\t"
+                    #     f"Eval={int(eval_usage)}\tpostMessage={int(post_msg)}\tJSONP={int(jsonp)}\t"
+                    #     f"ModernFW={int(modern_fw)}\tXCTO={int(has_xcto)}\tSandboxIFR={int(sandbox_ifr)}\t"
+                    #     f"SensitiveForm={int(sensitive_form)}\tRisk={risk_level}"
+                    # )
 
-                    totalCrawled += 1
-                    successCount += 1
+                    counters['totalCrawled'] += 1
+                    counters['successCount'] += 1
 
-                    hasCSPHeaderCount += has_csp_hdr
-                    hasMetaCSPCount += has_meta_csp
-                    inlineScriptCount += inline_scripts
-                    unsafeInlineEventHandlersCount += inline_evt_handlers
-                    inlineStyleCount += inline_styles
-                    evalUsageCount += int(eval_usage)
-                    postMessageUsageCount += int(post_msg)
-                    jsonpEndpointsCount += int(jsonp)
-                    externalScriptCount += same_origin_scripts + cross_origin_scripts
-                    sameOriginScriptsCount += same_origin_scripts
-                    crossOriginScriptsCount += cross_origin_scripts
-                    modernFrameworkCount += int(modern_fw)
-                    hdrCTOCount += int(has_xcto)
-                    sandboxedIframesCount += int(sandbox_ifr)
-                    sensitiveFormsCount += int(sensitive_form)
+                    counters['hasCSPHeaderCount'] += has_csp_hdr
+                    counters['hasMetaCSPCount'] += has_meta_csp
+                    counters['inlineScriptCount'] += inline_scripts
+                    counters['unsafeInlineEventHandlersCount'] += inline_evt_handlers
+                    counters['inlineStyleCount'] += inline_styles
+                    counters['evalUsageCount'] += int(eval_usage)
+                    counters['postMessageUsageCount'] += int(post_msg)
+                    counters['jsonpEndpointsCount'] += int(jsonp)
+                    counters['externalScriptCount'] += same_origin_scripts + cross_origin_scripts
+                    counters['sameOriginScriptsCount'] += same_origin_scripts
+                    counters['crossOriginScriptsCount'] += cross_origin_scripts
+                    counters['modernFrameworkCount'] += int(modern_fw)
+                    counters['hdrCTOCount'] += int(has_xcto)
+                    counters['sandboxedIframesCount'] += int(sandbox_ifr)
+                    counters['sensitiveFormsCount'] += int(sensitive_form)
                     if not (has_csp_hdr or has_meta_csp):
                         if risk_level == "High":
-                            riskHighCount += 1
+                            counters['riskHighCount'] += 1
                         elif risk_level == "Medium":
-                            riskMediumCount += 1
+                            counters['riskMediumCount'] += 1
                         elif risk_level == "Low":
-                            riskLowCount += 1
+                            counters['riskLowCount'] += 1
                         elif risk_level == "Minimal":
-                            riskMinimalCount += 1
-                    writeResult("\nCSP and XSS Protection Analysis over %d domains:\n", totalCrawled)
-                    writeResult("CSP Implementation:\n")
-                    writeResult("  Has CSP header: %d (%.1f%%)\n", hasCSPHeaderCount,
-                                (hasCSPHeaderCount / successCount) * 100)
-                    writeResult("  Has meta CSP: %d (%.1f%%)\n", hasMetaCSPCount,
-                                (hasMetaCSPCount / successCount) * 100)
+                            counters['riskMinimalCount'] += 1
 
-                    writeResult("\nXSS Risk Indicators (average per url):\n")
-                    writeResult("  Inline scripts: %.2f\n", inlineScriptCount / successCount)
-                    writeResult("  Inline event handlers: %.2f\n",
-                                unsafeInlineEventHandlersCount / successCount)
-                    writeResult("  Inline styles: %.2f\n", inlineStyleCount / successCount)
-                    writeResult("  eval() usage: %.2f\n", evalUsageCount / successCount)
-                    writeResult("  postMessage usage: %.2f\n", postMessageUsageCount / successCount)
-                    writeResult("  JSONP endpoints: %.2f\n", jsonpEndpointsCount / successCount)
+                    protections = []
+                    if has_csp_hdr or has_meta_csp:
+                        protections.append("CSP")
+                    if has_xcto:
+                        protections.append("XCTO")
+                    if modern_fw:
+                        protections.append("Framework")
+                    if sandbox_ifr:
+                        protections.append("Sandbox")
 
-                    writeResult("\nScript Loading Patterns (average per url):\n")
-                    writeResult("  External scripts: %.2f\n", externalScriptCount / successCount)
-                    writeResult("  Cross-origin scripts: %.2f\n", crossOriginScriptsCount / successCount)
-                    writeResult("  Same-origin scripts: %.2f\n", sameOriginScriptsCount / successCount)
+                    risks = []
+                    if inline_scripts:
+                        risks.append("InlineJS")
+                    if inline_evt_handlers:
+                        risks.append("EventHandlers")
+                    if inline_styles:
+                        risks.append("InlineCSS")
+                    if eval_usage:
+                        risks.append("Eval")
+                    if cross_origin_scripts:
+                        risks.append(f"XOrigin({cross_origin_scripts})")
+                    if sensitive_form:
+                        risks.append("SensitiveForms")
+                    if post_msg:
+                        risks.append("PostMessage")
+                    if jsonp:
+                        risks.append("JSONP")
 
-                    writeResult("\nXSS Protection Measures:\n")
-                    writeResult("  Modern frameworks: %d (%.1f%%)\n", modernFrameworkCount,
-                                (modernFrameworkCount / successCount) * 100)
-                    writeResult("  X-Content-Type-Options: %d (%.1f%%)\n", hdrCTOCount,
-                                (hdrCTOCount / successCount) * 100)
-                    writeResult("  Output encoding: %d (%.1f%%)\n", outputEncodingCount,
-                                (outputEncodingCount / successCount) * 100)
-                    writeResult("  Input validation: %d (%.1f%%)\n", inputValidationCount,
-                                (inputValidationCount / successCount) * 100)
-                    writeResult("  Sandboxed iframes: %d (%.1f%%)\n", sandboxedIframesCount,
-                                (sandboxedIframesCount / successCount) * 100)
-                    writeResult("  HttpOnly cookies: %d (%.1f%%)\n", cookieHttpOnlyCount,
-                                (cookieHttpOnlyCount / successCount) * 100)
-                    writeResult("  Sensitive forms: %d (%.1f%%)\n", sensitiveFormsCount,
-                                (sensitiveFormsCount / successCount) * 100)
+                    prot_str = ", ".join(protections) if protections else "None"
+                    risk_str = ", ".join(risks) if risks else "None"
 
-                    writeResult("\nXSS Risk Assessment (sites without CSP):\n")
-                    writeResult("  High risk: %d (%.1f%%)\n", riskHighCount,
-                                (riskHighCount / successCount) * 100)
-                    writeResult("  Medium risk: %d (%.1f%%)\n", riskMediumCount,
-                                (riskMediumCount / successCount) * 100)
-                    writeResult("  Low risk: %d (%.1f%%)\n", riskLowCount,
-                                (riskLowCount / successCount) * 100)
-                    writeResult("  Minimal risk: %d (%.1f%%)\n", riskMinimalCount,
-                                (riskMinimalCount / successCount) * 100)
+                    print(
+                        f"SITE: {url} | "
+                        f"RISK LEVEL: {risk_level.upper()} | "
+                        f"PROTECTIONS: {prot_str} | "
+                        f"RISKS: {risk_str} | "
+                        f"SCRIPTS: {same_origin_scripts} same-origin, {cross_origin_scripts} cross-origin"
+                    )
 
             except Exception as e:
+                print(e)
                 print(f"Error processing {url}: {e}")
                 return
-            
-            print(f"URL: {url}")
-            print(f"Theme: {theme}")
-            print(f"Plugins: {', '.join(plugin)}")
 
             await page.close()
             await browser.close()
@@ -325,8 +320,20 @@ def main():
 
 
     num_cores = multiprocessing.cpu_count()
-    num_cores = 4
+    num_cores = 14
     print(f"Running on {num_cores} cores")
+
+    manager = multiprocessing.Manager()
+    counters = manager.dict({'totalCrawled': 0, 'hasCSPHeaderCount': 0, 'successCount': 0,
+                             'hasMetaCSPCount': 0, 'inlineScriptCount': 0, 'unsafeInlineEventHandlersCount': 0,
+                             'inlineStyleCount': 0, 'evalUsageCount': 0, 'postMessageUsageCount': 0,
+                             'jsonpEndpointsCount': 0, 'externalScriptCount': 0, 'sameOriginScriptsCount': 0,
+                             'crossOriginScriptsCount': 0, 'modernFrameworkCount': 0, 'hdrCTOCount': 0,
+                             'outputEncodingCount': 0, 'inputValidationCount': 0, 'sandboxedIframesCount': 0,
+                             'cookieHttpOnlyCount': 0, 'sensitiveFormsCount': 0, 'riskHighCount': 0, 'riskMediumCount': 0,
+                             'riskLowCount': 0, 'riskMinimalCount': 0, 'protections': []
+                             })
+
     tasks = []
     with open("urls.txt", "r") as f:
         urls = f.readlines()
@@ -335,12 +342,60 @@ def main():
             full_url = "https://www." + raw_url
             tasks.append(full_url)
     with multiprocessing.Pool(num_cores) as pool:
-        pool.map(sync_grab, tasks)
+        pool.starmap(sync_grab, [(tasks, counters) for tasks in tasks])
 
-def sync_grab(full_url: str):
+    if curr_mode == "csp":
+        writeResult("\nCSP and XSS Protection Analysis over %d domains:\n", counters['totalCrawled'])
+        writeResult("CSP Implementation:\n")
+        writeResult("  Has CSP header: %d (%.1f%%)\n", counters['hasCSPHeaderCount'],
+                    (counters['hasCSPHeaderCount'] / counters['successCount']) * 100)
+        writeResult("  Has meta CSP: %d (%.1f%%)\n", counters['hasMetaCSPCount'],
+                    (counters['hasMetaCSPCount'] / counters['successCount']) * 100)
+
+        writeResult("\nXSS Risk Indicators (average per url):\n")
+        writeResult("  Inline scripts: %.2f\n", counters['inlineScriptCount'] / counters['successCount'])
+        writeResult("  Inline event handlers: %.2f\n",
+                    counters['unsafeInlineEventHandlersCount'] / counters['successCount'])
+        writeResult("  Inline styles: %.2f\n", counters['inlineStyleCount'] / counters['successCount'])
+        writeResult("  eval() usage: %.2f\n", counters['evalUsageCount'] / counters['successCount'])
+        writeResult("  postMessage usage: %.2f\n", counters['postMessageUsageCount'] / counters['successCount'])
+        writeResult("  JSONP endpoints: %.2f\n", counters['jsonpEndpointsCount'] / counters['successCount'])
+
+        writeResult("\nScript Loading Patterns (average per url):\n")
+        writeResult("  External scripts: %.2f\n", counters['externalScriptCount'] / counters['successCount'])
+        writeResult("  Cross-origin scripts: %.2f\n", counters['crossOriginScriptsCount'] / counters['successCount'])
+        writeResult("  Same-origin scripts: %.2f\n", counters['sameOriginScriptsCount'] / counters['successCount'])
+
+        writeResult("\nXSS Protection Measures:\n")
+        writeResult("  Modern frameworks: %d (%.1f%%)\n", counters['modernFrameworkCount'],
+                    (counters['modernFrameworkCount'] / counters['successCount']) * 100)
+        writeResult("  X-Content-Type-Options: %d (%.1f%%)\n", counters['hdrCTOCount'],
+                    (counters['hdrCTOCount'] / counters['successCount']) * 100)
+        writeResult("  Output encoding: %d (%.1f%%)\n", counters['outputEncodingCount'],
+                    (counters['outputEncodingCount'] / counters['successCount']) * 100)
+        writeResult("  Input validation: %d (%.1f%%)\n", counters['inputValidationCount'],
+                    (counters['inputValidationCount'] / counters['successCount']) * 100)
+        writeResult("  Sandboxed iframes: %d (%.1f%%)\n", counters['sandboxedIframesCount'],
+                    (counters['sandboxedIframesCount'] / counters['successCount']) * 100)
+        writeResult("  HttpOnly cookies: %d (%.1f%%)\n", counters['cookieHttpOnlyCount'],
+                    (counters['cookieHttpOnlyCount'] / counters['successCount']) * 100)
+        writeResult("  Sensitive forms: %d (%.1f%%)\n", counters['sensitiveFormsCount'],
+                    (counters['sensitiveFormsCount'] / counters['successCount']) * 100)
+
+        writeResult("\nXSS Risk Assessment (sites without CSP):\n")
+        writeResult("  High risk: %d (%.1f%%)\n", counters['riskHighCount'],
+                    (counters['riskHighCount'] / counters['successCount']) * 100)
+        writeResult("  Medium risk: %d (%.1f%%)\n", counters['riskMediumCount'],
+                    (counters['riskMediumCount'] / counters['successCount']) * 100)
+        writeResult("  Low risk: %d (%.1f%%)\n", counters['riskLowCount'],
+                    (counters['riskLowCount'] / counters['successCount']) * 100)
+        writeResult("  Minimal risk: %d (%.1f%%)\n", counters['riskMinimalCount'],
+                    (counters['riskMinimalCount'] / counters['successCount']) * 100)
+
+def sync_grab(full_url, counters):
     url = full_url.split("https://www.")[-1]
-    print(full_url)
-    asyncio.run(grab(full_url, f"screenshots/{url}.png", sys.argv[1]))
+    # print(full_url)
+    asyncio.run(grab(full_url, f"screenshots/{url}.png", sys.argv[1], counters))
 
 if __name__ == "__main__":
     timer = time.time()
