@@ -7,10 +7,12 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 import re
 import multiprocessing, time
+import aiohttp
+import sys
 
 SCREENSHOT_DIR = "screenshots"
 
-async def grab(url: str, outfile: str, mode = "wordpress") -> None:
+async def grab(url: str, outfile: str, mode: str) -> None:
         async with AsyncCamoufox(
         headless=True,
         os=["windows","macos","linux"],
@@ -49,6 +51,31 @@ async def grab(url: str, outfile: str, mode = "wordpress") -> None:
                             plugin_name = match_plugin.group(1)
                             ver = re.search(r"[?&]ver=([^&]+)", asset_url)
                             plugin.append(plugin_name + (f"@{ver.group(1)}" if ver else ""))
+                elif mode == "jssearch":
+
+                    keyword = sys.argv[2] if len(sys.argv) > 2 else None
+                    if not keyword:
+                        print("No keyword provided for JS search mode.")
+                        return
+                    seen    = set()
+                    ctx_req = page.context.request
+
+                    for tag in soup.find_all("script", src=True):
+                        js_url = urljoin(url, tag["src"])
+                        if js_url in seen:
+                            continue
+                        seen.add(js_url)
+
+                        print(f"Found JS: {js_url}")
+
+                        try:
+                            resp = await ctx_req.get(js_url, timeout=15000)
+                            if resp.status == 200:
+                                body = await resp.text()
+                                if not keyword or keyword in body:
+                                    print(f"Keyword '{keyword}' found in JS: {js_url}")
+                        except Exception as e:
+                            print(f"Error fetching {js_url}: {e}")
             except Exception as e:
                 print(f"Error processing {url}: {e}")
                 return
@@ -65,6 +92,17 @@ async def grab(url: str, outfile: str, mode = "wordpress") -> None:
 
 def main():
     os.makedirs(SCREENSHOT_DIR, exist_ok=True)
+    
+    curr_mode = sys.argv[1] if len(sys.argv) > 1 else "wordpress"
+    if curr_mode not in ["wordpress", "jssearch"]:
+        print("Usage: python stealth_crawler.py <mode>")
+        print("Modes: wordpress, jssearch")
+        return
+    if curr_mode == "jssearch":
+        if len(sys.argv) < 3:
+            print("Usage: python stealth_crawler.py jssearch <keyword>")
+            return
+    
 
     num_cores = multiprocessing.cpu_count()
     num_cores = 4
@@ -82,7 +120,7 @@ def main():
 def sync_grab(full_url: str):
     url = full_url.split("https://www.")[-1]
     print(full_url)
-    asyncio.run(grab(full_url, f"screenshots/{url}.png"))
+    asyncio.run(grab(full_url, f"screenshots/{url}.png", sys.argv[1]))
 
 if __name__ == "__main__":
     timer = time.time()
