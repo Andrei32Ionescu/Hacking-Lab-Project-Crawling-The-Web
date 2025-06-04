@@ -310,13 +310,17 @@ def main():
     os.makedirs(SCREENSHOT_DIR, exist_ok=True)
 
     curr_mode = sys.argv[1] if len(sys.argv) > 1 else "wordpress"
-    if curr_mode not in ["wordpress", "jssearch"]:
+    if curr_mode not in ["wordpress", "jssearch", "csp"]:
         print("Usage: python stealth_crawler.py <mode>")
-        print("Modes: wordpress, jssearch")
+        print("Modes: wordpress, jssearch, csp")
         return
     if curr_mode == "jssearch":
         if len(sys.argv) < 3:
             print("Usage: python stealth_crawler.py jssearch <keyword>")
+            return
+    if curr_mode == "csp":
+        if len(sys.argv) >= 3:
+            print("Usage: python stealth_crawler.py csp")
             return
 
 
