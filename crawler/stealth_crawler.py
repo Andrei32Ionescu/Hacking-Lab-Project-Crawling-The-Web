@@ -1,16 +1,51 @@
 import asyncio, random, os
+from typing import Dict
+
 from utils import handle_cloudflare_challenge
 from camoufox.async_api import AsyncCamoufox
 from browserforge.injectors.playwright import AsyncNewContext
 from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 import re
 import multiprocessing, time
+import requests
+import threading
+from collections import defaultdict
 import aiohttp
 import sys
 
 SCREENSHOT_DIR = "screenshots"
+
+totalCSPChecked = 0
+hasCSPHeaderCount = 0
+hasMetaCSPCount = 0
+inlineScriptCount = 0
+inlineStyleCount = 0
+externalScriptCount = 0
+evalUsageCount = 0
+crossOriginScriptsCount = 0
+sameOriginScriptsCount = 0
+modernFrameworkCount = 0
+sensitiveFormsCount = 0
+hdrCTOCount = 0
+cookieHttpOnlyCount = 0
+outputEncodingCount = 0
+inputValidationCount = 0
+sandboxedIframesCount = 0
+unsafeInlineEventHandlersCount = 0
+jsonpEndpointsCount = 0
+postMessageUsageCount = 0
+riskHighCount = 0
+riskMediumCount = 0
+riskLowCount = 0
+riskMinimalCount = 0
+totalCrawled = 0
+# crawlWG sync.WaitGroup
+successCount = 0
+failCount = 0
+statusCounts = Dict()
+status0Errors = Dict()
 
 async def grab(url: str, outfile: str, mode: str) -> None:
         async with AsyncCamoufox(
@@ -21,7 +56,7 @@ async def grab(url: str, outfile: str, mode: str) -> None:
             plugin = []
             theme = None
             try:
-                await page.goto(url, wait_until="domcontentloaded", timeout=10000)
+                resp = await page.goto(url, wait_until="domcontentloaded", timeout=10000)
                 await asyncio.sleep(0.5)      
 
             except Exception as e:
@@ -76,6 +111,183 @@ async def grab(url: str, outfile: str, mode: str) -> None:
                                     print(f"Keyword '{keyword}' found in JS: {js_url}")
                         except Exception as e:
                             print(f"Error fetching {js_url}: {e}")
+                elif mode == "csp":
+                    global totalCSPChecked, hasCSPHeaderCount, hasMetaCSPCount, inlineScriptCount, inlineStyleCount, \
+                        externalScriptCount, evalUsageCount, crossOriginScriptsCount, sameOriginScriptsCount, modernFrameworkCount, \
+                        sensitiveFormsCount, hdrCTOCount, cookieHttpOnlyCount, outputEncodingCount, inputValidationCount, sandboxedIframesCount, unsafeInlineEventHandlersCount, \
+                        jsonpEndpointsCount, postMessageUsageCount, riskHighCount, riskMediumCount, riskLowCount, riskMinimalCount, totalCrawled, successCount, failCount, statusCounts, status0Errors
+                    has_csp_hdr = bool(resp and resp.headers.get("content-security-policy"))
+                    has_xcto = resp and resp.headers.get("x-content-type-options", "").lower() == "nosniff"
+
+                    has_meta_csp = bool(soup.find("meta", attrs={"http-equiv": "Content-Security-Policy"}))
+                    inline_scripts = len(soup.find_all("script", src=False))
+                    inline_styles = len(soup.find_all("style")) + \
+                                    sum(bool(t.get("style")) for t in soup.find_all(attrs={"style": True}))
+
+                    evt_attrs = ["onclick", "onload", "onerror", "onmouseover", "onmouseout",
+                                 "onchange", "onsubmit", "onfocus", "onblur", "onkeyup",
+                                 "onkeydown", "onkeypress"]
+                    inline_evt_handlers = sum(
+                        1 for t in soup.find_all(attrs=lambda attr: attr and any(a in attr for a in evt_attrs))
+                    )
+
+                    same_origin_scripts = 0
+                    cross_origin_scripts = 0
+                    current_host = urlparse(url).hostname
+                    eval_usage = False
+                    post_msg = False
+                    jsonp = False
+                    modern_fw = False
+                    sensitive_form = False
+                    sandbox_ifr = bool(soup.find("iframe", sandbox=True))
+
+                    framework_re = re.compile(r"(react|angular|vue\.|svelte|ember|next\.js|nuxt)", re.I)
+                    eval_re = re.compile(r"\b(eval\s*\(|new\s+Function\s*\()", re.I)
+                    postmsg_re = re.compile(r"\bpostMessage\b", re.I)
+                    jsonp_re = re.compile(r"callback=", re.I)
+
+                    for tag in soup.find_all("script"):
+                        content = tag.string or ""
+                        if not tag.get("src"):
+                            if eval_re.search(content):
+                                eval_usage = True
+                            if framework_re.search(content):
+                                modern_fw = True
+                            if postmsg_re.search(content):
+                                post_msg = True
+                            if jsonp_re.search(content) and "jsonp" in content.lower():
+                                jsonp = True
+                        else:
+                            src = urljoin(url, tag["src"])
+                            host = urlparse(src).hostname
+                            if host == current_host:
+                                same_origin_scripts += 1
+                            else:
+                                cross_origin_scripts += 1
+
+                    for form in soup.find_all("form"):
+                        for inp in form.find_all("input"):
+                            tp = (inp.get("type") or "").lower()
+                            nm = (inp.get("name") or "").lower()
+                            fid = (inp.get("id") or "").lower()
+                            if tp in ("password", "email", "tel") or \
+                                    any(k in nm for k in ("pass", "card", "cvv", "ssn")) or \
+                                    any(k in fid for k in ("pass", "card", "cvv", "ssn")):
+                                sensitive_form = True
+                                break
+
+                    risk = 0
+                    mitigation = 0
+
+                    risk += inline_scripts > 0
+                    risk += inline_evt_handlers > 0
+                    risk += inline_styles > 0
+                    risk += eval_usage
+                    risk += cross_origin_scripts > 0
+                    risk += sensitive_form
+                    risk += post_msg
+                    risk += jsonp
+
+                    mitigation += has_csp_hdr or has_meta_csp
+                    mitigation += modern_fw
+                    mitigation += has_xcto
+                    mitigation += sandbox_ifr
+                    mitigation += same_origin_scripts > cross_origin_scripts
+
+                    net = risk - mitigation
+                    if net >= 4:
+                        risk_level = "High"
+                    elif net >= 3:
+                        risk_level = "Medium"
+                    elif net >= 2:
+                        risk_level = "Low"
+                    else:
+                        risk_level = "Minimal"
+
+                    print(
+                        f"[CSP]\t{url}\t"
+                        f"CSP_Header={int(has_csp_hdr)}\tMeta_CSP={int(has_meta_csp)}\t"
+                        f"InlineJS={inline_scripts}\tInlineCSS={inline_styles}\tEvtAttr={inline_evt_handlers}\t"
+                        f"SameJS={same_origin_scripts}\tXSiteJS={cross_origin_scripts}\t"
+                        f"Eval={int(eval_usage)}\tpostMessage={int(post_msg)}\tJSONP={int(jsonp)}\t"
+                        f"ModernFW={int(modern_fw)}\tXCTO={int(has_xcto)}\tSandboxIFR={int(sandbox_ifr)}\t"
+                        f"SensitiveForm={int(sensitive_form)}\tRisk={risk_level}"
+                    )
+
+                    totalCrawled += 1
+                    successCount += 1
+
+                    hasCSPHeaderCount += has_csp_hdr
+                    hasMetaCSPCount += has_meta_csp
+                    inlineScriptCount += inline_scripts
+                    unsafeInlineEventHandlersCount += inline_evt_handlers
+                    inlineStyleCount += inline_styles
+                    evalUsageCount += int(eval_usage)
+                    postMessageUsageCount += int(post_msg)
+                    jsonpEndpointsCount += int(jsonp)
+                    externalScriptCount += same_origin_scripts + cross_origin_scripts
+                    sameOriginScriptsCount += same_origin_scripts
+                    crossOriginScriptsCount += cross_origin_scripts
+                    modernFrameworkCount += int(modern_fw)
+                    hdrCTOCount += int(has_xcto)
+                    sandboxedIframesCount += int(sandbox_ifr)
+                    sensitiveFormsCount += int(sensitive_form)
+                    if not (has_csp_hdr or has_meta_csp):
+                        if risk_level == "High":
+                            riskHighCount += 1
+                        elif risk_level == "Medium":
+                            riskMediumCount += 1
+                        elif risk_level == "Low":
+                            riskLowCount += 1
+                        elif risk_level == "Minimal":
+                            riskMinimalCount += 1
+                    writeResult("\nCSP and XSS Protection Analysis over %d domains:\n", totalCrawled)
+                    writeResult("CSP Implementation:\n")
+                    writeResult("  Has CSP header: %d (%.1f%%)\n", hasCSPHeaderCount,
+                                (hasCSPHeaderCount / successCount) * 100)
+                    writeResult("  Has meta CSP: %d (%.1f%%)\n", hasMetaCSPCount,
+                                (hasMetaCSPCount / successCount) * 100)
+
+                    writeResult("\nXSS Risk Indicators (average per url):\n")
+                    writeResult("  Inline scripts: %.2f\n", inlineScriptCount / successCount)
+                    writeResult("  Inline event handlers: %.2f\n",
+                                unsafeInlineEventHandlersCount / successCount)
+                    writeResult("  Inline styles: %.2f\n", inlineStyleCount / successCount)
+                    writeResult("  eval() usage: %.2f\n", evalUsageCount / successCount)
+                    writeResult("  postMessage usage: %.2f\n", postMessageUsageCount / successCount)
+                    writeResult("  JSONP endpoints: %.2f\n", jsonpEndpointsCount / successCount)
+
+                    writeResult("\nScript Loading Patterns (average per url):\n")
+                    writeResult("  External scripts: %.2f\n", externalScriptCount / successCount)
+                    writeResult("  Cross-origin scripts: %.2f\n", crossOriginScriptsCount / successCount)
+                    writeResult("  Same-origin scripts: %.2f\n", sameOriginScriptsCount / successCount)
+
+                    writeResult("\nXSS Protection Measures:\n")
+                    writeResult("  Modern frameworks: %d (%.1f%%)\n", modernFrameworkCount,
+                                (modernFrameworkCount / successCount) * 100)
+                    writeResult("  X-Content-Type-Options: %d (%.1f%%)\n", hdrCTOCount,
+                                (hdrCTOCount / successCount) * 100)
+                    writeResult("  Output encoding: %d (%.1f%%)\n", outputEncodingCount,
+                                (outputEncodingCount / successCount) * 100)
+                    writeResult("  Input validation: %d (%.1f%%)\n", inputValidationCount,
+                                (inputValidationCount / successCount) * 100)
+                    writeResult("  Sandboxed iframes: %d (%.1f%%)\n", sandboxedIframesCount,
+                                (sandboxedIframesCount / successCount) * 100)
+                    writeResult("  HttpOnly cookies: %d (%.1f%%)\n", cookieHttpOnlyCount,
+                                (cookieHttpOnlyCount / successCount) * 100)
+                    writeResult("  Sensitive forms: %d (%.1f%%)\n", sensitiveFormsCount,
+                                (sensitiveFormsCount / successCount) * 100)
+
+                    writeResult("\nXSS Risk Assessment (sites without CSP):\n")
+                    writeResult("  High risk: %d (%.1f%%)\n", riskHighCount,
+                                (riskHighCount / successCount) * 100)
+                    writeResult("  Medium risk: %d (%.1f%%)\n", riskMediumCount,
+                                (riskMediumCount / successCount) * 100)
+                    writeResult("  Low risk: %d (%.1f%%)\n", riskLowCount,
+                                (riskLowCount / successCount) * 100)
+                    writeResult("  Minimal risk: %d (%.1f%%)\n", riskMinimalCount,
+                                (riskMinimalCount / successCount) * 100)
+
             except Exception as e:
                 print(f"Error processing {url}: {e}")
                 return
@@ -90,9 +302,13 @@ async def grab(url: str, outfile: str, mode: str) -> None:
 
             # k = 1|000|000|000
 
+
+def writeResult(fmt, *args):
+    print(fmt % args)
+
 def main():
     os.makedirs(SCREENSHOT_DIR, exist_ok=True)
-    
+
     curr_mode = sys.argv[1] if len(sys.argv) > 1 else "wordpress"
     if curr_mode not in ["wordpress", "jssearch"]:
         print("Usage: python stealth_crawler.py <mode>")
@@ -102,7 +318,7 @@ def main():
         if len(sys.argv) < 3:
             print("Usage: python stealth_crawler.py jssearch <keyword>")
             return
-    
+
 
     num_cores = multiprocessing.cpu_count()
     num_cores = 4
