@@ -286,6 +286,69 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
                         f"SCRIPTS: {same_origin_scripts} same-origin, {cross_origin_scripts} cross-origin"
                     )
 
+                elif mode == "apache":
+                    start = time.time()
+                    request_counter = 0
+                    ctx_req = page.context.request
+                    
+                    async def fetch_once(u:str):
+                        nonlocal request_counter
+                        try:
+                            resp = await ctx_req.get(u, timeout=15000)
+                            request_counter += 1
+                            return resp
+                        except Exception as e:
+                            print(f"Error fetching {u}: {e}")
+                        return None
+                    
+                    is_apache = False
+                    apache_version = None
+                    apache_comment = None
+                    detection_source = None
+
+                    #Probe root URL
+                    root_body = await fetch_once(url)
+                    if root_body:
+                        server_header = page.context.headers.get("server", "")
+                        matei = re.match(r"Apache(?:/([\d.]+))?(?:\s+\(([^)]+)\))?", server_header, re.I)
+                        if matei:
+                            is_apache = True
+                            apache_version = matei.group(1) or ""
+                            apache_comment = matei.group(2) or ""
+                            detection_source = "Server Header"
+
+                    if (not is_apache or not apache_version) and root_body:
+                        #Craft fake 404 URL
+                        fake_url = urljoin(url, f"/ThisPageShouldNotExist-{int(time.time()*1e6)}")
+                        err_resp = await fetch_once(fake_url)
+                        if err_resp and err_resp.status in (404,403,500):
+                            body = await err_resp.text()
+
+                            m = re.search(r"Apache(?:/([\d.]+))?(?:\s+\(([^)]+)\))?\s+Server at", body, re.I)
+                            if m:
+                                is_apache = True
+                                detection_source = f"Error Page({err_resp.status})"
+                                if not apache_version and m.group(1):
+                                    apache_version = m.group(1)
+                                if not apache_comment and m.group(2):
+                                    apache_comment = m.group(2)
+                            elif not is_apache and "<address>Apache" in body:
+                                is_apache = True
+                                detection_source = "Error Page"
+                    
+                    duration = time.time() - start
+                    rps = request_counter / duration if duration > 0 else 0
+
+                    print(f"URL: {url}")
+                    if is_apache:
+                        print(f"Apache Version: {apache_version or 'Unknown'}")
+                        print(f"Apache Comment: {apache_comment or 'None'}")
+                        print(f"Detection Source: {detection_source}")
+                        print(f"Requests Made: {request_counter} in {duration:.2f}s ({rps:.2f} RPS)")
+                    else:
+                        print("Not an Apache server or version could not be determined.")
+                        print(f"Requests Made: {request_counter} in {duration:.2f}s ({rps:.2f} RPS)")
+
             except Exception as e:
                 print(e)
                 print(f"Error processing {url}: {e}")
