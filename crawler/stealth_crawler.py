@@ -309,7 +309,7 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
                     #Probe root URL
                     root_body = await fetch_once(url)
                     if root_body:
-                        server_header = page.context.headers.get("server", "")
+                        server_header = root_body.headers.get("server", "")
                         matei = re.match(r"Apache(?:/([\d.]+))?(?:\s+\(([^)]+)\))?", server_header, re.I)
                         if matei:
                             is_apache = True
@@ -368,7 +368,7 @@ def main():
     os.makedirs(SCREENSHOT_DIR, exist_ok=True)
 
     curr_mode = sys.argv[1] if len(sys.argv) > 1 else "wordpress"
-    if curr_mode not in ["wordpress", "jssearch", "csp"]:
+    if curr_mode not in ["wordpress", "jssearch", "csp", "apache"]:
         print("Usage: python stealth_crawler.py <mode>")
         print("Modes: wordpress, jssearch, csp")
         return
@@ -379,6 +379,11 @@ def main():
     if curr_mode == "csp":
         if len(sys.argv) >= 3:
             print("Usage: python stealth_crawler.py csp")
+            return
+
+    if curr_mode == "apache":
+        if len(sys.argv) >= 3:
+            print("Usage: python stealth_crawler.py apache")
             return
 
 
