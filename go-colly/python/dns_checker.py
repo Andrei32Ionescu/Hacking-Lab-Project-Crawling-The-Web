@@ -2,7 +2,7 @@ import re
 import dns.resolver
 from collections import defaultdict
 
-INPUT_FILE = "input.log"
+INPUT_FILE = "input"
 OUTPUT_FILE = "dns_results.txt"
 
 DNS_ERROR_PATTERN = re.compile(r"dial tcp: lookup ([^:]+): no such host")

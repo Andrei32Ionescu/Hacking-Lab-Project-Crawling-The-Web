@@ -56,14 +56,14 @@ var riskMinimalCount int64
 
 func main() {
 	// Command-line flags
-	mode := flag.String("mode", "title", "Mode: 'title' or 'jssearch'")
+	mode := flag.String("mode", "title", "Mode: title, jssearch, wordpress or csp")
 	keyword := flag.String("keyword", "", "Keyword to search for in JS files (jssearch mode)")
 	depth := flag.Int("depth", 1, "Crawl depth (1 = only main page)")
 	csvfile := flag.String("file", "top-1m.csv", "CSV file with domains")
 	logToConsole := flag.Bool("console", false, "Also log results to console")
 	concurrency := flag.Int("concurrency", 1, "Number of sites to crawl in parallel")
 	debug := flag.Bool("debug", false, "Show detailed crawl/debug logs")
-	indexed := flag.Bool("indexed", false, "CSV has an index column; domain is in the second column")
+	indexed := flag.Bool("indexed", true, "CSV has an index column; domain is in the second column")
 	resultsFileN := flag.String("results", "results", "File to write results to (default: 'results')")
 	flag.Parse()
 
@@ -256,12 +256,12 @@ func main() {
 	if *mode == "csp" {
 		headerCount := atomic.LoadInt64(&hasCSPHeaderCount)
 		metaCount := atomic.LoadInt64(&hasMetaCSPCount)
-		
+
 		writeResult("\nCSP and XSS Protection Analysis over %d domains:\n", totalCrawled)
 		writeResult("CSP Implementation:\n")
 		writeResult("  Has CSP header: %d (%.1f%%)\n", headerCount, (float64(headerCount)/float64(successCount))*100)
 		writeResult("  Has meta CSP: %d (%.1f%%)\n", metaCount, (float64(metaCount)/float64(successCount))*100)
-		
+
 		writeResult("\nXSS Risk Indicators (average per url):\n")
 		writeResult("  Inline scripts: %.2f\n", float64(atomic.LoadInt64(&inlineScriptCount))/float64(successCount))
 		writeResult("  Inline event handlers: %.2f\n", float64(atomic.LoadInt64(&unsafeInlineEventHandlersCount))/float64(successCount))
@@ -269,12 +269,12 @@ func main() {
 		writeResult("  eval() usage: %.2f\n", float64(atomic.LoadInt64(&evalUsageCount))/float64(successCount))
 		writeResult("  postMessage usage: %.2f\n", float64(atomic.LoadInt64(&postMessageUsageCount))/float64(successCount))
 		writeResult("  JSONP endpoints: %.2f\n", float64(atomic.LoadInt64(&jsonpEndpointsCount))/float64(successCount))
-		
+
 		writeResult("\nScript Loading Patterns (average per url):\n")
 		writeResult("  External scripts: %.2f\n", float64(atomic.LoadInt64(&externalScriptCount))/float64(successCount))
 		writeResult("  Cross-origin scripts: %.2f\n", float64(atomic.LoadInt64(&crossOriginScriptsCount))/float64(successCount))
 		writeResult("  Same-origin scripts: %.2f\n", float64(atomic.LoadInt64(&sameOriginScriptsCount))/float64(successCount))
-		
+
 		writeResult("\nXSS Protection Measures:\n")
 		writeResult("  Modern frameworks: %d (%.1f%%)\n", atomic.LoadInt64(&modernFrameworkCount), (float64(atomic.LoadInt64(&modernFrameworkCount))/float64(successCount))*100)
 		writeResult("  X-Content-Type-Options: %d (%.1f%%)\n", atomic.LoadInt64(&hdrCTOCount), (float64(atomic.LoadInt64(&hdrCTOCount))/float64(successCount))*100)
@@ -283,7 +283,7 @@ func main() {
 		writeResult("  Sandboxed iframes: %d (%.1f%%)\n", atomic.LoadInt64(&sandboxedIframesCount), (float64(atomic.LoadInt64(&sandboxedIframesCount))/float64(successCount))*100)
 		writeResult("  HttpOnly cookies: %d (%.1f%%)\n", atomic.LoadInt64(&cookieHttpOnlyCount), (float64(atomic.LoadInt64(&cookieHttpOnlyCount))/float64(successCount))*100)
 		writeResult("  Sensitive forms: %d (%.1f%%)\n", atomic.LoadInt64(&sensitiveFormsCount), (float64(atomic.LoadInt64(&sensitiveFormsCount))/float64(successCount))*100)
-		
+
 		writeResult("\nXSS Risk Assessment (sites without CSP):\n")
 		writeResult("  High risk: %d (%.1f%%)\n", atomic.LoadInt64(&riskHighCount), (float64(atomic.LoadInt64(&riskHighCount))/float64(successCount))*100)
 		writeResult("  Medium risk: %d (%.1f%%)\n", atomic.LoadInt64(&riskMediumCount), (float64(atomic.LoadInt64(&riskMediumCount))/float64(successCount))*100)
@@ -321,11 +321,11 @@ func crawlForCSP(currenturl string, maxdepth int, writeResult func(string, ...in
 	var sameOriginScripts int
 	var crossOriginScripts int
 	var externalDomains = make(map[string]bool)
-	
+
 	// Parse the current domain for comparison
 	currentURL, _ := url.Parse(currenturl)
 	currentDomain := currentURL.Hostname()
-	
+
 	c.OnResponse(func(r *colly.Response) {
 		status := r.StatusCode
 		if status >= 200 && status < 300 {
@@ -337,13 +337,13 @@ func crawlForCSP(currenturl string, maxdepth int, writeResult func(string, ...in
 
 		atomic.AddInt64(&totalCSPChecked, 1)
 		hdrs := r.Headers
-		
+
 		// Check for CSP header
 		if hdrs.Get("Content-Security-Policy") != "" {
 			hasCSPHeader = true
 			atomic.AddInt64(&hasCSPHeaderCount, 1)
 		}
-		
+
 		// Check for X-Content-Type-Options
 		if hdrs.Get("X-Content-Type-Options") == "nosniff" {
 			hasXCTO = true
@@ -358,7 +358,7 @@ func crawlForCSP(currenturl string, maxdepth int, writeResult func(string, ...in
 			hasInlineScript = true
 			atomic.AddInt64(&inlineScriptCount, 1)
 		}
-		
+
 		// Check for eval usage
 		evalPatterns := []string{
 			"eval(", "eval ", "new function(", "settimeout(\"", "setinterval(\"",
@@ -372,7 +372,7 @@ func crawlForCSP(currenturl string, maxdepth int, writeResult func(string, ...in
 				break
 			}
 		}
-		
+
 		// Check for modern frameworks
 		frameworkPatterns := []string{
 			"react", "angular", "vue.", "svelte", "ember",
@@ -386,7 +386,7 @@ func crawlForCSP(currenturl string, maxdepth int, writeResult func(string, ...in
 				break
 			}
 		}
-		
+
 		// Check for output encoding
 		encodingPatterns := []string{
 			"escapehtml", "escape_html", "htmlescape", "encodeuricomponent",
@@ -401,13 +401,13 @@ func crawlForCSP(currenturl string, maxdepth int, writeResult func(string, ...in
 				break
 			}
 		}
-		
+
 		// Check for postMessage usage
 		if strings.Contains(content, "postmessage") || strings.Contains(content, "addeventlistener('message'") || strings.Contains(content, "onmessage") {
 			hasPostMessage = true
 			atomic.AddInt64(&postMessageUsageCount, 1)
 		}
-		
+
 		// Check for JSONP patterns
 		jsonpPatterns := []string{
 			"callback=", "jsonp", "?callback", "&callback", "jsonpcallback",
@@ -424,16 +424,16 @@ func crawlForCSP(currenturl string, maxdepth int, writeResult func(string, ...in
 			atomic.AddInt64(&jsonpEndpointsCount, 1)
 		}
 	})
-	
+
 	// Check for inline event handlers
 	eventHandlers := []string{"onclick", "onload", "onerror", "onmouseover", "onmouseout", "onchange", "onsubmit", "onfocus", "onblur", "onkeyup", "onkeydown", "onkeypress"}
 	for _, handler := range eventHandlers {
-		c.OnHTML("[" + handler + "]", func(e *colly.HTMLElement) {
+		c.OnHTML("["+handler+"]", func(e *colly.HTMLElement) {
 			hasInlineEventHandlers = true
 			atomic.AddInt64(&unsafeInlineEventHandlersCount, 1)
 		})
 	}
-	
+
 	// Check for inline styles
 	c.OnHTML("style", func(e *colly.HTMLElement) {
 		if len(strings.TrimSpace(e.Text)) > 0 {
@@ -441,32 +441,32 @@ func crawlForCSP(currenturl string, maxdepth int, writeResult func(string, ...in
 			atomic.AddInt64(&inlineStyleCount, 1)
 		}
 	})
-	
+
 	// Check for elements with style attribute
 	c.OnHTML("[style]", func(e *colly.HTMLElement) {
 		if e.Attr("style") != "" {
 			hasInlineStyle = true
 		}
 	})
-	
+
 	// Check for external scripts
 	c.OnHTML("script[src]", func(e *colly.HTMLElement) {
 		src := strings.TrimSpace(e.Attr("src"))
 		if src == "" {
 			return
 		}
-		
+
 		scriptURL, err := url.Parse(src)
 		if err != nil {
 			return
 		}
-		
+
 		if scriptURL.Host == "" {
 			scriptURL = e.Request.URL.ResolveReference(scriptURL)
 		}
-		
+
 		atomic.AddInt64(&externalScriptCount, 1)
-		
+
 		// Check if it's cross-origin or same-origin
 		if scriptURL.Host == currentDomain {
 			sameOriginScripts++
@@ -478,13 +478,13 @@ func crawlForCSP(currenturl string, maxdepth int, writeResult func(string, ...in
 			externalDomains[scriptURL.Host] = true
 		}
 	})
-	
+
 	// Check for meta CSP
 	c.OnHTML("meta[http-equiv=Content-Security-Policy]", func(e *colly.HTMLElement) {
 		hasMetaCSP = true
 		atomic.AddInt64(&hasMetaCSPCount, 1)
 	})
-	
+
 	// Check for forms with sensitive data
 	c.OnHTML("form", func(e *colly.HTMLElement) {
 		// Check for password, email, credit card, etc..
@@ -492,10 +492,10 @@ func crawlForCSP(currenturl string, maxdepth int, writeResult func(string, ...in
 			inputType := strings.ToLower(el.Attr("type"))
 			inputName := strings.ToLower(el.Attr("name"))
 			inputId := strings.ToLower(el.Attr("id"))
-			
+
 			sensitiveTypes := []string{"password", "email", "tel", "ssn", "creditcard"}
 			sensitivePatterns := []string{"pass", "pwd", "email", "card", "cvv", "ssn", "social", "tax", "bank", "account", "routing"}
-			
+
 			for _, t := range sensitiveTypes {
 				if inputType == t {
 					hasSensitiveForms = true
@@ -503,7 +503,7 @@ func crawlForCSP(currenturl string, maxdepth int, writeResult func(string, ...in
 					return
 				}
 			}
-			
+
 			for _, p := range sensitivePatterns {
 				if strings.Contains(inputName, p) || strings.Contains(inputId, p) {
 					hasSensitiveForms = true
@@ -513,19 +513,19 @@ func crawlForCSP(currenturl string, maxdepth int, writeResult func(string, ...in
 			}
 		})
 	})
-	
+
 	// Check for input validation
 	c.OnHTML("input[pattern], input[required], input[minlength], input[maxlength], select[required], textarea[required]", func(e *colly.HTMLElement) {
 		hasInputValidation = true
 		atomic.AddInt64(&inputValidationCount, 1)
 	})
-	
+
 	// Check for sandboxed iframes
 	c.OnHTML("iframe[sandbox]", func(e *colly.HTMLElement) {
 		hasSandboxedIframes = true
 		atomic.AddInt64(&sandboxedIframesCount, 1)
 	})
-	
+
 	// Check cookies
 	c.OnResponse(func(r *colly.Response) {
 		for _, cookie := range r.Headers.Values("Set-Cookie") {
@@ -616,7 +616,7 @@ func crawlForCSP(currenturl string, maxdepth int, writeResult func(string, ...in
 			case netScore >= 3:
 				atomic.AddInt64(&riskMediumCount, 1)
 				riskLevel = "MEDIUM"
-			case netScore >=2:
+			case netScore >= 2:
 				atomic.AddInt64(&riskLowCount, 1)
 				riskLevel = "LOW"
 			default:
@@ -625,64 +625,64 @@ func crawlForCSP(currenturl string, maxdepth int, writeResult func(string, ...in
 			}
 
 			var protections []string
-			if hasCSPHeader { 
-				protections = append(protections, "CSP") 
+			if hasCSPHeader {
+				protections = append(protections, "CSP")
 			}
-			if hasMetaCSP { 
-				protections = append(protections, "MetaCSP") 
+			if hasMetaCSP {
+				protections = append(protections, "MetaCSP")
 			}
-			if hasModernFramework { 
-				protections = append(protections, "Framework") 
+			if hasModernFramework {
+				protections = append(protections, "Framework")
 			}
-			if hasXCTO { 
-				protections = append(protections, "XCTO") 
+			if hasXCTO {
+				protections = append(protections, "XCTO")
 			}
-			if hasOutputEncoding { 
-				protections = append(protections, "Encoding") 
+			if hasOutputEncoding {
+				protections = append(protections, "Encoding")
 			}
-			if hasInputValidation { 
-				protections = append(protections, "Validation") 
+			if hasInputValidation {
+				protections = append(protections, "Validation")
 			}
-			if hasSandboxedIframes { 
-				protections = append(protections, "Sandbox") 
+			if hasSandboxedIframes {
+				protections = append(protections, "Sandbox")
 			}
 
 			var risks []string
-			if hasInlineScript { 
-				risks = append(risks, "InlineJS") 
+			if hasInlineScript {
+				risks = append(risks, "InlineJS")
 			}
-			if hasInlineEventHandlers { 
-				risks = append(risks, "EventHandlers") 
+			if hasInlineEventHandlers {
+				risks = append(risks, "EventHandlers")
 			}
-			if hasEvalUsage { 
-				risks = append(risks, "Eval") 
+			if hasEvalUsage {
+				risks = append(risks, "Eval")
 			}
-			if hasCrossOriginScripts { 
-				risks = append(risks, fmt.Sprintf("XOrigin(%d)", crossOriginScripts)) 
+			if hasCrossOriginScripts {
+				risks = append(risks, fmt.Sprintf("XOrigin(%d)", crossOriginScripts))
 			}
-			if len(externalDomains) > 1 { 
-				risks = append(risks, fmt.Sprintf("ExtDom(%d)", len(externalDomains))) 
+			if len(externalDomains) > 1 {
+				risks = append(risks, fmt.Sprintf("ExtDom(%d)", len(externalDomains)))
 			}
-			if hasSensitiveForms { 
-				risks = append(risks, "SensitiveForms") 
+			if hasSensitiveForms {
+				risks = append(risks, "SensitiveForms")
 			}
-			if hasPostMessage { 
-				risks = append(risks, "PostMessage") 
+			if hasPostMessage {
+				risks = append(risks, "PostMessage")
 			}
-			if hasJSONP { 
-				risks = append(risks, "JSONP") 
+			if hasJSONP {
+				risks = append(risks, "JSONP")
 			}
-			
+
 			protectionStr := "none"
 			if len(protections) > 0 {
 				protectionStr = strings.Join(protections, ",")
 			}
-			
+
 			riskStr := "none"
 			if len(risks) > 0 {
 				riskStr = strings.Join(risks, ",")
 			}
-			
+
 			writeResult("SITE: %s | RISK LEVEL: %s | PROTECTIONS: %s | RISKS: %s | SCRIPTS: %d same-origin, %d cross-origin\n", currenturl, riskLevel, protectionStr, riskStr, sameOriginScripts, crossOriginScripts)
 		}
 	}
