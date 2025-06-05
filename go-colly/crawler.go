@@ -64,7 +64,7 @@ func main() {
 	concurrency := flag.Int("concurrency", 1, "Number of sites to crawl in parallel")
 	debug := flag.Bool("debug", false, "Show detailed crawl/debug logs")
 	indexed := flag.Bool("indexed", true, "CSV has an index column; domain is in the second column")
-	resultsFileN := flag.String("results", "results", "File to write results to (default: 'results')")
+	resultsFileN := flag.String("results", "results", "File to write results to")
 	flag.Parse()
 
 	// Always load the CSV file from the datasets folder
