@@ -10,6 +10,7 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"os"
+	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -56,7 +57,7 @@ var riskMinimalCount int64
 
 func main() {
 	// Command-line flags
-	mode := flag.String("mode", "title", "Mode: title, jssearch, wordpress, csp or wix")
+	mode := flag.String("mode", "title", "Mode: title, jssearch, wordpress, csp, wix, or 'apache' (for Apache/Tomcat detection)")
 	keyword := flag.String("keyword", "", "Keyword to search for in JS files (jssearch mode)")
 	depth := flag.Int("depth", 1, "Crawl depth (1 = only main page)")
 	csvfile := flag.String("file", "top-1m.csv", "CSV file with domains")
@@ -179,6 +180,8 @@ func main() {
 				gotValid = crawlForCSP(url, *depth, writeResult, proxyFunc, *debug, &statusCounts, &status0Errors)
 			} else if *mode == "wix" {
 				gotValid = crawlForWix(url, *depth, writeResult, proxyFunc, *debug, &statusCounts, &status0Errors)
+			} else if *mode == "apache" {
+				gotValid = crawlForApache(url, writeResult, proxyFunc, *debug, &statusCounts, &status0Errors)
 			} else {
 				if *debug {
 					writeResult("Unknown mode: %s\n", *mode)
@@ -844,6 +847,149 @@ func crawlForJS(currenturl string, maxdepth int, keyword string, writeResult fun
 	}
 	c.Wait()
 	return gotValid
+}
+
+// crawlForApache attempts to detect if a site is running Apache or Tomcat and its version.
+// Returns true if the primary URL returns a 2xx status for success/fail counts.
+func crawlForApache(currenturl string, writeResult func(string, ...interface{}), proxyFunc colly.ProxyFunc, debug bool, statusCounts *sync.Map, status0Errors *sync.Map) bool {
+	type WebServerInfo struct {
+		Version string
+		Comment string // for Apache (e.g., Ubuntu)
+		Source  string
+	}
+	foundWebServer := make(map[string]WebServerInfo)
+	var primaryUrlOkForSuccessCount bool = false
+	var rootRespStatus int
+
+	// Create a new synchronous collector for this specific task.
+	c := colly.NewCollector(
+		colly.Async(false),
+	)
+
+	c.SetRequestTimeout(15 * time.Second)
+	if proxyFunc != nil {
+		c.SetProxyFunc(proxyFunc)
+	}
+	c.OnRequest(func(r *colly.Request) {
+		r.Headers.Set("User-Agent", userAgents[int(time.Now().UnixNano())%len(userAgents)])
+	})
+
+	c.RedirectHandler = func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
+
+	addErrorHandler(c, writeResult, statusCounts, status0Errors, debug)
+
+	c.OnResponse(func(r *colly.Response) {
+		if r.Request.URL.String() == currenturl {
+			rootRespStatus = r.StatusCode
+			if r.StatusCode >= 200 && r.StatusCode < 300 {
+				primaryUrlOkForSuccessCount = true
+			}
+		}
+
+		serverHeader := r.Headers.Get("Server")
+		xPoweredByHeader := r.Headers.Get("X-Powered-By")
+
+		// Apache check from Server header
+		reApacheHeader := regexp.MustCompile(`^Apache(?:/([\d\.]+))?(?:\s+\(([^)]+)\))?`)
+		if matches := reApacheHeader.FindStringSubmatch(serverHeader); len(matches) > 0 {
+			info := WebServerInfo{Source: "Server Header"}
+			if len(matches) > 1 && matches[1] != "" {
+				info.Version = matches[1]
+			}
+			if len(matches) > 2 && matches[2] != "" {
+				info.Comment = matches[2]
+			}
+			foundWebServer["Apache"] = info
+		}
+
+		// Tomcat check from headers
+		if strings.Contains(serverHeader, "Apache-Coyote") || strings.Contains(serverHeader, "Tomcat") {
+			info := foundWebServer["Tomcat"] // Get existing or new struct
+			info.Source = "Server Header"
+			reTomcatVer := regexp.MustCompile(`Apache Tomcat/([\d\.]+[A-Za-z\d\.-]*)`)
+			if matches := reTomcatVer.FindStringSubmatch(serverHeader); len(matches) > 1 {
+				info.Version = matches[1]
+			}
+			foundWebServer["Tomcat"] = info
+		}
+		if strings.Contains(xPoweredByHeader, "Servlet") || strings.Contains(xPoweredByHeader, "JSP") {
+			if _, exists := foundWebServer["Tomcat"]; !exists {
+				foundWebServer["Tomcat"] = WebServerInfo{Source: "X-Powered-By Header"}
+			}
+		}
+
+		bodyString := string(r.Body)
+
+		// Apache error page check
+		reApacheErr := regexp.MustCompile(`Apache(?:/([\d\.]+))?(?:\s+\(([^)]+)\))?\s+Server at`)
+		if matches := reApacheErr.FindStringSubmatch(bodyString); len(matches) > 0 {
+			if info, ok := foundWebServer["Apache"]; !ok || info.Version == "" {
+				newInfo := WebServerInfo{Source: fmt.Sprintf("Error Page (%d)", r.StatusCode)}
+				if len(matches) > 1 && matches[1] != "" {
+					newInfo.Version = matches[1]
+				}
+				if len(matches) > 2 && matches[2] != "" {
+					newInfo.Comment = matches[2]
+				}
+				foundWebServer["Apache"] = newInfo
+			}
+		}
+
+		// Tomcat error page and RELEASE-NOTES.txt check
+		reTomcatErr := regexp.MustCompile(`Apache Tomcat/(?:Version )?([\d\.]+[A-Za-z\d\.-]*)`)
+		if matches := reTomcatErr.FindStringSubmatch(bodyString); len(matches) > 1 {
+			if info, ok := foundWebServer["Tomcat"]; !ok || info.Version == "" {
+				foundWebServer["Tomcat"] = WebServerInfo{Version: matches[1], Source: fmt.Sprintf("Error Page (%d)", r.StatusCode)}
+			}
+		}
+		if r.StatusCode == http.StatusOK && strings.HasSuffix(r.Request.URL.Path, "/RELEASE-NOTES.txt") {
+			reRN := regexp.MustCompile(`Apache Tomcat Version ([\d\.]+[A-Za-z\d\.-]*)`)
+			if matches := reRN.FindStringSubmatch(bodyString); len(matches) > 1 {
+				if info, ok := foundWebServer["Tomcat"]; ok && info.Version == "" {
+					info.Version = matches[1]
+					info.Source = "RELEASE-NOTES.txt"
+					foundWebServer["Tomcat"] = info
+				}
+			}
+		}
+	})
+
+	c.Visit(currenturl)
+
+	runErrorPageCheck := len(foundWebServer) == 0 ||
+		(foundWebServer["Apache"].Version == "" && foundWebServer["Apache"].Source != "") ||
+		(foundWebServer["Tomcat"].Version == "" && foundWebServer["Tomcat"].Source != "")
+
+	if runErrorPageCheck {
+		nonExistentURL := strings.TrimRight(currenturl, "/") + "/iliketomoveitmoveit" + fmt.Sprintf("%d", time.Now().UnixNano())
+		c.Visit(nonExistentURL)
+	}
+
+	if info, ok := foundWebServer["Tomcat"]; ok && info.Version == "" {
+		releaseNotesURL := strings.TrimRight(currenturl, "/") + "/RELEASE-NOTES.txt"
+		c.Visit(releaseNotesURL)
+	}
+
+	if len(foundWebServer) > 0 {
+		writeResult("URL: %s\n", currenturl)
+		for techName, info := range foundWebServer {
+			writeResult("  Web-server Detected: %s\n", techName)
+			versionStr := "Unknown"
+			if info.Version != "" {
+				versionStr = info.Version
+				if info.Comment != "" {
+					versionStr += " (" + info.Comment + ")"
+				}
+			}
+			writeResult("  Version: %s (Source: %s)\n", versionStr, info.Source)
+		}
+	} else if debug {
+		writeResult("URL: %s - No specific web-server (Apache/Tomcat) detected (primary URL status: %d)\n", currenturl, rootRespStatus)
+	}
+
+	return primaryUrlOkForSuccessCount
 }
 
 func crawlForWix(currenturl string, maxdepth int, writeResult func(string, ...interface{}), proxyFunc colly.ProxyFunc, debug bool, statusCounts *sync.Map, status0Errors *sync.Map) bool {
