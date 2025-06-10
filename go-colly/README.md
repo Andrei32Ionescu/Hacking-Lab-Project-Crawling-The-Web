@@ -31,7 +31,7 @@ go run crawler.go --help
 For example, when crawling for wordpress websites from a list of indexed domains, you might run the following command:
 
 ```sh
-go run crawler.go -mode=wordpress -concurrency=16 -file="cloudflare2000.csv" -depth=1
+go run crawler.go -mode=wordpress -concurrency=16 -file="cloudflare2000.csv" -depth=1 -indexed=false
 ```
 
 ## Running with Docker
@@ -47,7 +47,7 @@ docker build -t go-colly-crawler .
 docker run --rm go-colly-crawler
 
 # Pass arguments (example)
-docker run --rm go-colly-crawler -mode=wordpress -concurrency=16 -file="cloudflare2000.csv" -depth=1 -console
+docker run --rm go-colly-crawler -mode=wordpress -concurrency=16 -file="cloudflare2000.csv" -depth=1 -indexed=false -console
 ```
 
 The `datasets` folder is included in the image by default.
