@@ -16,6 +16,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	"strconv"
 
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/proxy"
@@ -29,6 +30,16 @@ var cloudflare403Count int64
 
 // Set to track domains with Cloudflare 403 errors
 var cloudflareDomains sync.Map
+
+// Security scan counters
+var dirListingCount int64
+var gitRepoCount int64
+var configFileCount int64
+var xssVulnCount int64
+var secHeaderCount int64
+var corsIssueCount int64
+var insecureCookieCount int64
+var totalSecurityIssues int64
 
 // CSP stats counters
 var totalCSPChecked int64
@@ -57,7 +68,7 @@ var riskMinimalCount int64
 
 func main() {
 	// Command-line flags
-	mode := flag.String("mode", "title", "Mode: title, jssearch, wordpress, csp, wix, or 'apache' (for Apache/Tomcat detection)")
+	mode := flag.String("mode", "title", "Mode: title, jssearch, wordpress, csp, wix, security, or 'apache' (for Apache/Tomcat detection)")
 	keyword := flag.String("keyword", "", "Keyword to search for in JS files (jssearch mode)")
 	depth := flag.Int("depth", 1, "Crawl depth (1 = only main page)")
 	csvfile := flag.String("file", "top-1m.csv", "CSV file with domains")
@@ -182,6 +193,8 @@ func main() {
 				gotValid = crawlForWix(url, *depth, writeResult, proxyFunc, *debug, &statusCounts, &status0Errors)
 			} else if *mode == "apache" {
 				gotValid = crawlForApache(url, writeResult, proxyFunc, *debug, &statusCounts, &status0Errors)
+			} else if *mode == "security" {
+				gotValid = crawlForSecurityIssues(url, *depth, writeResult, proxyFunc, *debug, &statusCounts, &status0Errors)
 			} else {
 				if *debug {
 					writeResult("Unknown mode: %s\n", *mode)
@@ -294,6 +307,42 @@ func main() {
 		writeResult("  Medium risk: %d (%.1f%%)\n", atomic.LoadInt64(&riskMediumCount), (float64(atomic.LoadInt64(&riskMediumCount))/float64(successCount))*100)
 		writeResult("  Low risk: %d (%.1f%%)\n", atomic.LoadInt64(&riskLowCount), (float64(atomic.LoadInt64(&riskLowCount))/float64(successCount))*100)
 		writeResult("  Minimal risk: %d (%.1f%%)\n", atomic.LoadInt64(&riskMinimalCount), (float64(atomic.LoadInt64(&riskMinimalCount))/float64(successCount))*100)
+	}
+
+	// Add security scan stats if in security mode
+	if *mode == "security" {
+		writeResult("\nSecurity Scan Summary:\n")
+		writeResult("Total security issues found: %d\n", atomic.LoadInt64(&totalSecurityIssues))
+		writeResult("Directory listings found: %d (%.1f%% of scanned sites)\n", 
+			atomic.LoadInt64(&dirListingCount), 
+			(float64(atomic.LoadInt64(&dirListingCount))/float64(successCount))*100)
+		writeResult("Git repositories exposed: %d (%.1f%% of scanned sites)\n", 
+			atomic.LoadInt64(&gitRepoCount), 
+			(float64(atomic.LoadInt64(&gitRepoCount))/float64(successCount))*100)
+		writeResult("Config files exposed: %d (%.1f%% of scanned sites)\n", 
+			atomic.LoadInt64(&configFileCount), 
+			(float64(atomic.LoadInt64(&configFileCount))/float64(successCount))*100)
+		writeResult("Potential XSS vulnerabilities: %d (%.1f%% of scanned sites)\n", 
+			atomic.LoadInt64(&xssVulnCount), 
+			(float64(atomic.LoadInt64(&xssVulnCount))/float64(successCount))*100)
+		writeResult("Security header issues: %d (%.1f%% of scanned sites)\n", 
+			atomic.LoadInt64(&secHeaderCount), 
+			(float64(atomic.LoadInt64(&secHeaderCount))/float64(successCount))*100)
+		writeResult("CORS misconfigurations: %d (%.1f%% of scanned sites)\n", 
+			atomic.LoadInt64(&corsIssueCount), 
+			(float64(atomic.LoadInt64(&corsIssueCount))/float64(successCount))*100)
+		writeResult("Insecure cookie settings: %d (%.1f%% of scanned sites)\n", 
+			atomic.LoadInt64(&insecureCookieCount), 
+			(float64(atomic.LoadInt64(&insecureCookieCount))/float64(successCount))*100)
+		
+		// Calculate sites with at least one issue
+		sitesWithIssues := 0
+		if atomic.LoadInt64(&totalSecurityIssues) > 0 {
+			sitesWithIssues = int(atomic.LoadInt64(&totalSecurityIssues))
+		}
+		writeResult("Sites with at least one security issue: %d (%.1f%% of scanned sites)\n", 
+			sitesWithIssues, 
+			(float64(sitesWithIssues)/float64(successCount))*100)
 	}
 }
 
@@ -990,6 +1039,396 @@ func crawlForApache(currenturl string, writeResult func(string, ...interface{}),
 	}
 
 	return primaryUrlOkForSuccessCount
+}
+
+// crawlForSecurityIssues scans for common security issues including directory listings, 
+// XSS vulnerabilities, exposed git repositories, and sensitive config files.
+// Returns true if a valid (2xx) response was received, false otherwise.
+func crawlForSecurityIssues(currenturl string, maxdepth int, writeResult func(string, ...interface{}), proxyFunc colly.ProxyFunc, debug bool, statusCounts *sync.Map, status0Errors *sync.Map) bool {
+	c := newCollectorWithConfig(maxdepth, proxyFunc, debug, writeResult)
+	var gotValid bool
+	
+	// Track findings
+	var dirListings []string
+	var exposedGitRepos []string
+	var configFiles []string
+	var xssVulnerabilities []string
+	// Add security header misconfigurations tracking
+	var missingSecurityHeaders []string
+	var insecureCookies []string
+	var corsIssues []string
+	
+	// Parse the base URL for path manipulation
+	baseURL, err := url.Parse(currenturl)
+	if err != nil {
+		writeResult("Error parsing URL: %v\n", err)
+		return false
+	}
+	
+	// Security headers to check
+	securityHeaders := []struct {
+		name        string
+		description string
+		severity    string
+	}{
+		{"Strict-Transport-Security", "Missing HSTS header", "high"},
+		{"Content-Security-Policy", "Missing CSP header", "high"},
+		{"X-Content-Type-Options", "Missing X-Content-Type-Options header", "medium"},
+		{"X-Frame-Options", "Missing X-Frame-Options header", "medium"},
+		{"X-XSS-Protection", "Missing X-XSS-Protection header", "medium"},
+		{"Referrer-Policy", "Missing Referrer-Policy header", "low"},
+		{"Permissions-Policy", "Missing Permissions-Policy header", "low"},
+		{"Cache-Control", "Missing Cache-Control header", "low"},
+	}
+	
+	// Check response headers and status
+	c.OnResponse(func(r *colly.Response) {
+		status := r.StatusCode
+		if status >= 200 && status < 300 {
+			gotValid = true
+		}
+		
+		// Count status codes
+		val, _ := statusCounts.LoadOrStore(status, int64(0))
+		statusCounts.Store(status, val.(int64)+1)
+		
+		// Check for directory listing patterns in the response body
+		if strings.Contains(string(r.Body), "Index of /") || 
+		   strings.Contains(string(r.Body), "Directory Listing For") ||
+		   strings.Contains(string(r.Body), "<title>Index of") {
+			// Verify it's a real directory listing with common patterns
+			if strings.Contains(string(r.Body), "Parent Directory") ||
+			   strings.Contains(string(r.Body), "Name</a></th><th>") ||
+			   strings.Contains(string(r.Body), "Last modified</a>") {
+				dirListings = append(dirListings, r.Request.URL.String())
+			}
+		}
+		
+		// Check for Git repository indicators
+		if r.Request.URL.Path == "/.git/HEAD" && strings.Contains(string(r.Body), "ref:") {
+			exposedGitRepos = append(exposedGitRepos, r.Request.URL.String())
+		}
+		
+		// Check for config file content patterns
+		configPatterns := []string{
+			"DB_PASSWORD", "API_KEY", "SECRET_KEY", "database_password",
+			"<?php", "config", "private_key", "api_token", "password",
+		}
+		
+		for _, pattern := range configPatterns {
+			if strings.Contains(string(r.Body), pattern) {
+				// Only add if not already in the list
+				alreadyFound := false
+				for _, cf := range configFiles {
+					if cf == r.Request.URL.String() {
+						alreadyFound = true
+						break
+					}
+				}
+				if !alreadyFound {
+					configFiles = append(configFiles, r.Request.URL.String())
+					break
+				}
+			}
+		}
+		
+		// Add security header checks
+		if r.Request.URL.String() == currenturl {
+			// Only check the main page for security headers
+			
+			// Check for missing security headers
+			for _, header := range securityHeaders {
+				if r.Headers.Get(header.name) == "" {
+					missingSecurityHeaders = append(missingSecurityHeaders,
+						fmt.Sprintf("%s (%s)", header.name, header.severity))
+				}
+			}
+			
+			// Analyze HSTS header if present
+			if hsts := r.Headers.Get("Strict-Transport-Security"); hsts != "" {
+				// Check for weak HSTS configuration
+				hasMaxAge := strings.Contains(hsts, "max-age=")
+				hasIncludeSubDomains := strings.Contains(hsts, "includeSubDomains")
+				hasPreload := strings.Contains(hsts, "preload")
+				
+				// Extract max-age value
+				var maxAge int64 = 0
+				if hasMaxAge {
+					re := regexp.MustCompile(`max-age=(\d+)`)
+					if matches := re.FindStringSubmatch(hsts); len(matches) > 1 {
+						maxAge, _ = strconv.ParseInt(matches[1], 10, 64)
+					}
+				}
+				
+				// Check for weak HSTS configuration
+				if maxAge < 31536000 { // Less than 1 year
+					missingSecurityHeaders = append(missingSecurityHeaders,
+						fmt.Sprintf("Weak HSTS max-age: %d seconds (should be at least 31536000)", maxAge))
+				}
+				
+				if !hasIncludeSubDomains {
+					missingSecurityHeaders = append(missingSecurityHeaders,
+						"HSTS missing includeSubDomains directive")
+				}
+				
+				if !hasPreload {
+					missingSecurityHeaders = append(missingSecurityHeaders,
+						"HSTS missing preload directive")
+				}
+			}
+			
+			// Check for CORS issues
+			corsHeaders := []string{"Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"}
+			for _, corsHeader := range corsHeaders {
+				if value := r.Headers.Get(corsHeader); value != "" {
+					if corsHeader == "Access-Control-Allow-Origin" && value == "*" {
+						corsIssues = append(corsIssues, "Permissive CORS: Access-Control-Allow-Origin: *")
+					}
+					
+					if corsHeader == "Access-Control-Allow-Credentials" && value == "true" {
+						// Check if ACAO is also set to *
+						if r.Headers.Get("Access-Control-Allow-Origin") == "*" {
+							corsIssues = append(corsIssues, 
+								"Dangerous CORS combination: Allow-Origin: * with Allow-Credentials: true")
+						}
+					}
+				}
+			}
+			
+			// Check for cookies
+			cookies := r.Headers.Values("Set-Cookie")
+			for _, cookie := range cookies {
+				isSecure := strings.Contains(cookie, "Secure")
+				isHttpOnly := strings.Contains(cookie, "HttpOnly")
+				hasSameSite := strings.Contains(cookie, "SameSite=")
+				
+				// Extract cookie name
+				cookieName := cookie
+				if idx := strings.Index(cookie, "="); idx > 0 {
+					cookieName = cookie[:idx]
+				}
+				
+				// Check for insecure cookie settings
+				if !isSecure {
+					insecureCookies = append(insecureCookies, 
+						fmt.Sprintf("Cookie without Secure flag: %s", cookieName))
+				}
+				
+				if !isHttpOnly {
+					insecureCookies = append(insecureCookies, 
+						fmt.Sprintf("Cookie without HttpOnly flag: %s", cookieName))
+				}
+				
+				if !hasSameSite {
+					insecureCookies = append(insecureCookies, 
+						fmt.Sprintf("Cookie without SameSite attribute: %s", cookieName))
+				} else {
+					// Check for weak SameSite setting
+					if strings.Contains(cookie, "SameSite=None") {
+						insecureCookies = append(insecureCookies, 
+							fmt.Sprintf("Cookie with weak SameSite=None: %s", cookieName))
+					}
+				}
+			}
+		}
+	})
+	
+	// Check for potential XSS vulnerabilities
+	c.OnHTML("form", func(e *colly.HTMLElement) {
+		// Look for forms that might be vulnerable to XSS
+		isSearchForm := false
+		hasCsrfToken := false
+		
+		// Check if it's a search form
+		e.ForEach("input", func(_ int, el *colly.HTMLElement) {
+			inputType := strings.ToLower(el.Attr("type"))
+			inputName := strings.ToLower(el.Attr("name"))
+			
+			if (inputType == "text" || inputType == "search") && 
+			   (strings.Contains(inputName, "search") || strings.Contains(inputName, "query") || strings.Contains(inputName, "q")) {
+				isSearchForm = true
+			}
+			
+			// Check for CSRF token
+			if strings.Contains(inputName, "csrf") || strings.Contains(inputName, "token") || strings.Contains(inputName, "nonce") {
+				hasCsrfToken = true
+			}
+		})
+		
+		// If it's a search form without CSRF token, it might be vulnerable to XSS
+		if isSearchForm && !hasCsrfToken {
+			formAction := e.Attr("action")
+			if formAction == "" {
+				formAction = e.Request.URL.String()
+			}
+			xssVulnerabilities = append(xssVulnerabilities, formAction)
+		}
+	})
+	
+	// Check for reflected parameters in URL
+	c.OnHTML("body", func(e *colly.HTMLElement) {
+		// Get URL query parameters
+		queryParams := e.Request.URL.Query()
+		
+		// Check if any parameter values are reflected in the page
+		for param, values := range queryParams {
+			for _, value := range values {
+				// Skip empty values
+				if value == "" {
+					continue
+				}
+				
+				// Skip common tracking parameters
+				if param == "utm_source" || param == "utm_medium" || param == "utm_campaign" {
+					continue
+				}
+				
+				// Check if the value is reflected in the page content
+				if strings.Contains(e.Text, value) {
+					xssVulnerabilities = append(xssVulnerabilities, 
+						fmt.Sprintf("%s (parameter '%s' is reflected)", e.Request.URL.String(), param))
+					break
+				}
+			}
+		}
+	})
+	
+	// Add error handler
+	addErrorHandler(c, writeResult, statusCounts, status0Errors, debug)
+	
+	// Visit each sensitive path
+	sensitivePaths := []struct {
+		path        string
+		description string
+		category    string
+	}{
+		// Directory listings
+		{"/images/", "Images directory", "directory_listing"},
+		{"/uploads/", "Uploads directory", "directory_listing"},
+		{"/backup/", "Backup directory", "directory_listing"},
+		{"/files/", "Files directory", "directory_listing"},
+		{"/downloads/", "Downloads directory", "directory_listing"},
+		{"/temp/", "Temporary directory", "directory_listing"},
+		
+		// Git repositories
+		{"/.git/", "Git repository", "git_repo"},
+		{"/.git/HEAD", "Git HEAD file", "git_repo"},
+		{"/.git/config", "Git config file", "git_repo"},
+		{"/.git/index", "Git index file", "git_repo"},
+		
+		// Config files
+		{"/.env", "Environment file", "config_file"},
+		{"/config.php", "PHP config file", "config_file"},
+		{"/wp-config.php", "WordPress config file", "config_file"},
+		{"/config.js", "JavaScript config file", "config_file"},
+		{"/config.json", "JSON config file", "config_file"},
+		{"/config.xml", "XML config file", "config_file"},
+		{"/settings.xml", "Settings file", "config_file"},
+		{"/database.yml", "Database configuration", "config_file"},
+		{"/credentials.json", "Credentials file", "config_file"},
+		
+		// Backup files
+		{"/config.php.bak", "PHP config backup", "config_file"},
+		{"/config.php.old", "PHP config old version", "config_file"},
+		{"/config.php~", "PHP config temp file", "config_file"},
+		{"/wp-config.php.bak", "WordPress config backup", "config_file"},
+		{"/backup.sql", "SQL backup", "config_file"},
+		{"/dump.sql", "SQL dump", "config_file"},
+	}
+	
+	for _, path := range sensitivePaths {
+		// Create full URL
+		pathURL := *baseURL
+		pathURL.Path = path.path
+		
+		err := c.Visit(pathURL.String())
+		if err != nil && debug {
+			writeResult("Error visiting %s: %v\n", pathURL.String(), err)
+		}
+	}
+	
+	// Visit the main URL
+	err = c.Visit(currenturl)
+	if err != nil && debug {
+		writeResult("Error visiting main page: %v\n", err)
+	}
+	
+	c.Wait()
+	
+	// Print results
+	writeResult("\n=== SECURITY SCAN RESULTS FOR %s ===\n", currenturl)
+	
+	if len(dirListings) > 0 {
+		writeResult("\nDirectory Listings Found (%d):\n", len(dirListings))
+		for _, url := range dirListings {
+			writeResult("  - %s\n", url)
+		}
+		atomic.AddInt64(&dirListingCount, int64(len(dirListings)))
+		atomic.AddInt64(&totalSecurityIssues, int64(len(dirListings)))
+	}
+	
+	if len(exposedGitRepos) > 0 {
+		writeResult("\nExposed Git Repositories Found (%d):\n", len(exposedGitRepos))
+		for _, url := range exposedGitRepos {
+			writeResult("  - %s\n", url)
+		}
+		atomic.AddInt64(&gitRepoCount, int64(len(exposedGitRepos)))
+		atomic.AddInt64(&totalSecurityIssues, int64(len(exposedGitRepos)))
+	}
+	
+	if len(configFiles) > 0 {
+		writeResult("\nSensitive Config Files Found (%d):\n", len(configFiles))
+		for _, url := range configFiles {
+			writeResult("  - %s\n", url)
+		}
+		atomic.AddInt64(&configFileCount, int64(len(configFiles)))
+		atomic.AddInt64(&totalSecurityIssues, int64(len(configFiles)))
+	}
+	
+	if len(xssVulnerabilities) > 0 {
+		writeResult("\nPotential XSS Vulnerabilities Found (%d):\n", len(xssVulnerabilities))
+		for _, url := range xssVulnerabilities {
+			writeResult("  - %s\n", url)
+		}
+		atomic.AddInt64(&xssVulnCount, int64(len(xssVulnerabilities)))
+		atomic.AddInt64(&totalSecurityIssues, int64(len(xssVulnerabilities)))
+	}
+	
+	// Add security header issues output
+	if len(missingSecurityHeaders) > 0 {
+		writeResult("\nMissing or Misconfigured Security Headers (%d):\n", len(missingSecurityHeaders))
+		for _, header := range missingSecurityHeaders {
+			writeResult("  - %s\n", header)
+		}
+		atomic.AddInt64(&secHeaderCount, int64(len(missingSecurityHeaders)))
+		atomic.AddInt64(&totalSecurityIssues, int64(len(missingSecurityHeaders)))
+	}
+	
+	if len(corsIssues) > 0 {
+		writeResult("\nCORS Misconfigurations (%d):\n", len(corsIssues))
+		for _, issue := range corsIssues {
+			writeResult("  - %s\n", issue)
+		}
+		atomic.AddInt64(&corsIssueCount, int64(len(corsIssues)))
+		atomic.AddInt64(&totalSecurityIssues, int64(len(corsIssues)))
+	}
+	
+	if len(insecureCookies) > 0 {
+		writeResult("\nInsecure Cookie Settings (%d):\n", len(insecureCookies))
+		for _, cookie := range insecureCookies {
+			writeResult("  - %s\n", cookie)
+		}
+		atomic.AddInt64(&insecureCookieCount, int64(len(insecureCookies)))
+		atomic.AddInt64(&totalSecurityIssues, int64(len(insecureCookies)))
+	}
+	
+	if len(dirListings) == 0 && len(exposedGitRepos) == 0 && len(configFiles) == 0 && 
+	   len(xssVulnerabilities) == 0 && len(missingSecurityHeaders) == 0 && 
+	   len(corsIssues) == 0 && len(insecureCookies) == 0 {
+		writeResult("\nNo security issues found.\n")
+	}
+	
+	return gotValid
 }
 
 func crawlForWix(currenturl string, maxdepth int, writeResult func(string, ...interface{}), proxyFunc colly.ProxyFunc, debug bool, statusCounts *sync.Map, status0Errors *sync.Map) bool {

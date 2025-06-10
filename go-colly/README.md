@@ -9,6 +9,7 @@ It supports crawling for:
 - common security misconfigurations
 - Wix websites
 - Apache (Tomcat) servers
+- security vulnerabilities (directory listings, XSS, Git repos, config files)
 
 ## Installation
 
