@@ -1,0 +1,10 @@
+# Ignore the results and datasets folders
+results
+important-results
+python
+*.md
+*.csv
+*.log
+*.txt
+*.pyc
+__pycache__

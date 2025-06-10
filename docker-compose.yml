@@ -1,7 +1,0 @@
-services:
-  crawler:
-    build: .
-    volumes:
-      - ./output:/app/output
-    environment:
-      - GO111MODULE=on
