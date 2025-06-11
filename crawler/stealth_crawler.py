@@ -47,6 +47,23 @@ failCount = 0
 statusCounts = dict()
 status0Errors = dict()
 
+# Patterns for common Wix plugins
+common_wix_plugins = {
+    "wixblog":        { "name": "Wix Blog",                  "version_patterns": [r"wixblog[./-](\d+\.\d+\.\d+)"] },
+    "wixstores":      { "name": "Wix Stores",                "version_patterns": [r"wixstores[./-](\d+\.\d+\.\d+)"] },
+    "wixbooking":     { "name": "Wix Bookings",              "version_patterns": [r"wixbooking[./-](\d+\.\d+\.\d+)"] },
+    "wixrestaurants": { "name": "Wix Restaurants",           "version_patterns": [r"wixrestaurants[./-](\d+\.\d+\.\d+)"] },
+    "site-search":    { "name": "Wix Site Search",           "version_patterns": [r"site-search[./-](\d+\.\d+\.\d+)"] },
+}
+
+def extract_version(text: str, patterns: list[str]) -> str:
+    for pat in patterns:
+        m = re.search(pat, text, re.I)
+        if m:
+            return m.group(1)
+    return ""
+
+
 async def grab(url: str, outfile: str, mode: str, counters) -> None:
         async with AsyncCamoufox(
         headless=True,
@@ -349,6 +366,73 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
                         print("Not an Apache server or version could not be determined.")
                         print(f"Requests Made: {request_counter} in {duration:.2f}s ({rps:.2f} RPS)")
 
+                elif mode == "wix":
+                    is_wix_site = False
+                    wix_plugins = {}
+                    page_title = await page.title()
+
+                    if resp and resp.headers.get("x-wix-request-id"):
+                        is_wix_site = True
+                
+                    for tag in soup.find_all(True):
+                        for attr in ("data-hook", "data-wix", "class", "id"):
+                            x = tag.get(attr) or ""
+                            if x and ("wix-" in x or "_wix" in x or "wix" in x):
+                                is_wix_site = True
+
+                                for key, info in common_wix_plugins.items():
+                                    if key in x.lower():
+                                        version = extract_version(x, info["version_patterns"])
+                                        wix_plugins[info["name"]] = version or "detected"
+                    
+                    for sc in soup.find_all("script"):
+                        src = sc.get("src") or ""
+                        body = sc.string or ""
+                        for candidate in (src, body):
+                            if candidate and any(dom in candidate for dom in ("wix.com",
+                                                                               "wixstatic.com",
+                                                                               "wixsite.com")):
+                                is_wix_site = True
+
+                            for key, info in common_wix_plugins.items():
+                                if key in candidate.lower():
+                                    ver = extract_version(candidate, info["version_patterns"])
+                                    wix_plugins[info["name"]] = ver or "detected"
+
+                    # Check for common Wix domains in links
+                    for link in soup.find_all("link", href=True):
+                        href = link["href"]
+                        if any(dom in href for dom in ("wix.com", "wixstatic.com", "wixsite.com")):
+                            is_wix_site = True
+                        for key, info in common_wix_plugins.items():
+                            if key in href.lower():
+                                ver = extract_version(href, info["version_patterns"])
+                                wix_plugins[info["name"]] = ver or "detected"
+                    # Check for common Wix domains in meta tags
+                    for meta in soup.find_all("meta"):
+                        raw = " ".join([meta.get(a) or "" for a in ("name", "property", "content")])
+                        if "wix" in raw.lower():
+                            is_wix_site = True
+                        for key, info in common_wix_plugins.items():
+                            if key in raw.lower():
+                                ver = extract_version(raw, info["version_patterns"])
+                                wix_plugins[info["name"]] = ver or "detected"
+
+                    # Print results
+                    print(f"******* Page Title: {page_title} *******")
+                    print(f"Page URL: {url}")
+                    if is_wix_site:
+                        print("Platform: Wix")
+                        if wix_plugins:
+                            print("\nDetected Wix Plugins:")
+                            for plg, ver in sorted(wix_plugins.items()):
+                                print(f"  - {plg}: {ver}")
+                        else:
+                            print("\nNo specific Wix plugins detected")
+                    else:
+                        print("Platform: Not Wix")
+
+                    
             except Exception as e:
                 print(e)
                 print(f"Error processing {url}: {e}")
@@ -368,7 +452,7 @@ def main():
     os.makedirs(SCREENSHOT_DIR, exist_ok=True)
 
     curr_mode = sys.argv[1] if len(sys.argv) > 1 else "wordpress"
-    if curr_mode not in ["wordpress", "jssearch", "csp", "apache"]:
+    if curr_mode not in ["wordpress", "jssearch", "csp", "apache", "wix"]:
         print("Usage: python stealth_crawler.py <mode>")
         print("Modes: wordpress, jssearch, csp")
         return
