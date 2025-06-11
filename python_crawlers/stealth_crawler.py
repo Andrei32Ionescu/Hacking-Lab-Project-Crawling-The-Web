@@ -49,89 +49,11 @@ status0Errors = dict()
 
 # Patterns for common Wix plugins
 common_wix_plugins = {
-    "blog": { "name": "Wix Blog", "version_patterns": [
-        r"blog[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"wix[-_]blog[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"(?:blog|min|js|css)[^/]*[?&](?:v|ver|version|release|build)=(\d+\.\d+\.\d+)",
-    ]},
-
-    "forum": { "name": "Wix Forum", "version_patterns": [
-        r"forum[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"wix[-_]forum[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"(?:forum|min|js|css)[^/]*[?&](?:v|ver|version|release|build)=(\d+\.\d+\.\d+)",
-    ]},
-
-    "members": { "name": "Members Area", "version_patterns": [
-        r"members[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"wix[-_]members[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"(?:members|min|js|css)[^/]*[?&](?:v|ver|version|release|build)=(\d+\.\d+\.\d+)",
-    ]},
-
-    "store": { "name": "Wix Stores", "version_patterns": [
-        r"(?:store|ecommerce)[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"wix[-_]store[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"(?:store|min|js|css)[^/]*[?&](?:v|ver|version|release|build)=(\d+\.\d+\.\d+)",
-    ]},
-
-    "bookings": { "name": "Wix Bookings", "version_patterns": [
-        r"bookings[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"wix[-_]bookings[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"(?:bookings|min|js|css)[^/]*[?&](?:v|ver|version|release|build)=(\d+\.\d+\.\d+)",
-    ]},
-
-    "events": { "name": "Wix Events", "version_patterns": [
-        r"events[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"wix[-_]events[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"(?:events|min|js|css)[^/]*[?&](?:v|ver|version|release|build)=(\d+\.\d+\.\d+)",
-    ]},
-
-    "restaurants": { "name": "Wix Restaurants", "version_patterns": [
-        r"restaurants[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"wix[-_]restaurants[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"(?:restaurants|min|js|css)[^/]*[?&](?:v|ver|version|release|build)=(\d+\.\d+\.\d+)",
-    ]},
-
-    "hotels": { "name": "Wix Hotels", "version_patterns": [
-        r"hotels[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"wix[-_]hotels[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"(?:hotels|min|js|css)[^/]*[?&](?:v|ver|version|release|build)=(\d+\.\d+\.\d+)",
-    ]},
-
-    "music": { "name": "Wix Music", "version_patterns": [
-        r"music[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"wix[-_]music[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"(?:music|min|js|css)[^/]*[?&](?:v|ver|version|release|build)=(\d+\.\d+\.\d+)",
-    ]},
-
-    "video": { "name": "Wix Video", "version_patterns": [
-        r"video[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"wix[-_]video[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"(?:video|min|js|css)[^/]*[?&](?:v|ver|version|release|build)=(\d+\.\d+\.\d+)",
-    ]},
-
-    "chat": { "name": "Wix Chat", "version_patterns": [
-        r"chat[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"wix[-_]chat[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"(?:chat|min|js|css)[^/]*[?&](?:v|ver|version|release|build)=(\d+\.\d+\.\d+)",
-    ]},
-
-    "forms": { "name": "Wix Forms", "version_patterns": [
-        r"forms[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"wix[-_]forms[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"(?:forms|min|js|css)[^/]*[?&](?:v|ver|version|release|build)=(\d+\.\d+\.\d+)",
-    ]},
-
-    "shoutout": { "name": "Wix ShoutOut", "version_patterns": [
-        r"shoutout[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"wix[-_]shoutout[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"(?:shoutout|min|js|css)[^/]*[?&](?:v|ver|version|release|build)=(\d+\.\d+\.\d+)",
-    ]},
-
-    "ascend": { "name": "Wix Ascend", "version_patterns": [
-        r"ascend[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"wix[-_]ascend[-_.]version[:=]?(\d+\.\d+\.\d+)",
-        r"(?:ascend|min|js|css)[^/]*[?&](?:v|ver|version|release|build)=(\d+\.\d+\.\d+)",
-    ]},
+    "wixblog":        { "name": "Wix Blog",                  "version_patterns": [r"wixblog[./-](\d+\.\d+\.\d+)"] },
+    "wixstores":      { "name": "Wix Stores",                "version_patterns": [r"wixstores[./-](\d+\.\d+\.\d+)"] },
+    "wixbooking":     { "name": "Wix Bookings",              "version_patterns": [r"wixbooking[./-](\d+\.\d+\.\d+)"] },
+    "wixrestaurants": { "name": "Wix Restaurants",           "version_patterns": [r"wixrestaurants[./-](\d+\.\d+\.\d+)"] },
+    "site-search":    { "name": "Wix Site Search",           "version_patterns": [r"site-search[./-](\d+\.\d+\.\d+)"] },
 }
 
 def extract_version(text: str, patterns: list[str]) -> str:
