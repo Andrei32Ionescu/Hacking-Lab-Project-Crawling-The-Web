@@ -10,7 +10,7 @@ Currently, the three different crawler exist for testing purposes. The main craw
    git clone <url>
 2. Navigate to the project directory:
    ```bash
-   cd Hacking-Lab-Project-Crawling-The-Web/crawler
+   cd Hacking-Lab-Project-Crawling-The-Web/python_crawlers
    ```
 3. Install the required dependencies:
    ```bash

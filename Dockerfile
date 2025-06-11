@@ -36,7 +36,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 RUN pip install playwright && playwright install && playwright install-deps
 
-COPY crawler ./crawler
+COPY python_crawlers ./crawler
 COPY run.sh .
 
 RUN chmod +x run.sh
