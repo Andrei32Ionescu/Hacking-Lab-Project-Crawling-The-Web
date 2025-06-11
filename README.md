@@ -1,5 +1,9 @@
 # Hacking-Lab-Project-Crawling-The-Web
 
+## GO-Colly Crawler
+
+## Python-Stealth Crawler
+
 A Playwright-based crawler that aims to achieve 10-12 crawls per second. 
 
 Currently, the three different crawler exist for testing purposes. The main crawler implementation is located in:

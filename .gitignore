@@ -1,0 +1,9 @@
+storage
+
+node_modules
+
+dist
+
+coverage
+
+go-colly/python/Lib
