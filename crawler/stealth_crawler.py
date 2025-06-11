@@ -303,68 +303,82 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
                         f"SCRIPTS: {same_origin_scripts} same-origin, {cross_origin_scripts} cross-origin"
                     )
 
-                elif mode == "apache":
-                    start = time.time()
-                    request_counter = 0
+
+                elif mode in ("apache"):
+                    start_ts = time.time()
+                    request_count = 0
                     ctx_req = page.context.request
-                    
-                    async def fetch_once(u:str):
-                        nonlocal request_counter
+
+                    async def fetch_once(u: str):
+                        nonlocal request_count
                         try:
-                            resp = await ctx_req.get(u, timeout=15000)
-                            request_counter += 1
+                            resp = await ctx_req.get(u, timeout=15_000)
+                            request_count += 1
                             return resp
-                        except Exception as e:
-                            print(f"Error fetching {u}: {e}")
-                        return None
-                    
-                    is_apache = False
-                    apache_version = None
-                    apache_comment = None
-                    detection_source = None
+                        except Exception:
+                            return None
 
-                    #Probe root URL
-                    root_body = await fetch_once(url)
-                    if root_body:
-                        server_header = root_body.headers.get("server", "")
-                        matei = re.match(r"Apache(?:/([\d.]+))?(?:\s+\(([^)]+)\))?", server_header, re.I)
-                        if matei:
-                            is_apache = True
-                            apache_version = matei.group(1) or ""
-                            apache_comment = matei.group(2) or ""
-                            detection_source = "Server Header"
-
-                    if (not is_apache or not apache_version) and root_body:
-                        #Craft fake 404 URL
-                        fake_url = urljoin(url, f"/ThisPageShouldNotExist-{int(time.time()*1e6)}")
-                        err_resp = await fetch_once(fake_url)
-                        if err_resp and err_resp.status in (404,403,500):
-                            body = await err_resp.text()
-
-                            m = re.search(r"Apache(?:/([\d.]+))?(?:\s+\(([^)]+)\))?\s+Server at", body, re.I)
+                    found = {}
+                    root_resp = await fetch_once(url)
+                    if root_resp:
+                        sh = root_resp.headers.get("server", "")
+                        xpb = root_resp.headers.get("x-powered-by", "")
+                        m = re.match(r"Apache(?:/([\d.]+))?(?:\s+\(([^)]+)\))?", sh, re.I)
+                        if m:
+                            info = ensure_srv("Apache", found)
+                            info["version"] = m.group(1) or ""
+                            info["comment"] = m.group(2) or ""
+                            info["source"] = "Server header"
+                        if "Apache-Coyote" in sh or "Tomcat" in sh:
+                            info = ensure_srv("Tomcat", found)
+                            mver = re.search(r"Apache Tomcat/([\dA-Za-z.\-]+)", sh)
+                            info["version"] = mver.group(1) if mver else ""
+                            info["source"] = "Server header"
+                        if "Servlet" in xpb or "JSP" in xpb:
+                            info = ensure_srv("Tomcat", found)
+                            info["source"] = "X-Powered-By header"
+                    need_error_check = (
+                            not found or
+                            ("Apache" in found and not found["Apache"]["version"]) or
+                            ("Tomcat" in found and not found["Tomcat"]["version"])
+                    )
+                    if need_error_check:
+                        bogus = urljoin(url, f"/ThisPageShouldNotExist-{int(time.time() * 1e6)}")
+                        err = await fetch_once(bogus)
+                        if err and err.status in (404, 403, 500):
+                            body = await err.text()
+                            m = re.search(
+                                r"Apache(?:/([\d.]+))?(?:\s+\(([^)]+)\))?\s+Server at",
+                                body, re.I
+                            )
                             if m:
-                                is_apache = True
-                                detection_source = f"Error Page({err_resp.status})"
-                                if not apache_version and m.group(1):
-                                    apache_version = m.group(1)
-                                if not apache_comment and m.group(2):
-                                    apache_comment = m.group(2)
-                            elif not is_apache and "<address>Apache" in body:
-                                is_apache = True
-                                detection_source = "Error Page"
-                    
-                    duration = time.time() - start
-                    rps = request_counter / duration if duration > 0 else 0
-
-                    print(f"URL: {url}")
-                    if is_apache:
-                        print(f"Apache Version: {apache_version or 'Unknown'}")
-                        print(f"Apache Comment: {apache_comment or 'None'}")
-                        print(f"Detection Source: {detection_source}")
-                        print(f"Requests Made: {request_counter} in {duration:.2f}s ({rps:.2f} RPS)")
-                    else:
-                        print("Not an Apache server or version could not be determined.")
-                        print(f"Requests Made: {request_counter} in {duration:.2f}s ({rps:.2f} RPS)")
+                                info = ensure_srv("Apache", found)
+                                info["source"] = f"Error page ({err.status})"
+                                info["version"] = info["version"] or (m.group(1) or "")
+                                info["comment"] = info["comment"] or (m.group(2) or "")
+                            m = re.search(
+                                r"Apache Tomcat/(?:Version )?([\dA-Za-z.\-]+)",
+                                body, re.I
+                            )
+                            if m:
+                                info = ensure_srv("Tomcat", found)
+                                info["source"] = f"Error page ({err.status})"
+                                info["version"] = info["version"] or m.group(1)
+                            elif "Apache Tomcat" in body:
+                                ensure_srv("Tomcat", found)["source"] = f"Error page ({err.status})"
+                    if "Tomcat" in found and not found["Tomcat"]["version"]:
+                        rn_url = urljoin(url, "/RELEASE-NOTES.txt")
+                        rn_resp = await fetch_once(rn_url)
+                        if rn_resp and rn_resp.status == 200:
+                            txt = await rn_resp.text()
+                            m = re.search(
+                                r"Apache Tomcat Version ([\dA-Za-z.\-]+)",
+                                txt
+                            )
+                            if m:
+                                found["Tomcat"]["version"] = m.group(1)
+                                found["Tomcat"]["source"] = "RELEASE-NOTES.txt"
+                    show_results(start_ts, request_count, url, found)
 
                 elif mode == "wix":
                     is_wix_site = False
@@ -548,6 +562,26 @@ def sync_grab(full_url, counters):
     url = full_url.split("https://www.")[-1]
     # print(full_url)
     asyncio.run(grab(full_url, f"screenshots/{url}.png", sys.argv[1], counters))
+
+
+def ensure_srv(key, found):
+    return found.setdefault(
+        key,
+        {"version": "", "comment": "", "source": ""}
+    )
+
+def show_results(start_ts, request_count, url, found):
+    duration = time.time() - start_ts
+    rps = request_count / duration if duration else 0
+    print(f"URL: {url}")
+    if found:
+        for name, info in found.items():
+            ver = info["version"] or "Unknown"
+            comment = f" ({info['comment']})" if info["comment"] else ""
+            print(f"  {name}: {ver}{comment}  [source: {info['source']}]")
+    else:
+        print("  No Apache/Tomcat detected.")
+    print(f"  Requests: {request_count} in {duration:.2f}s  ({rps:.2f} RPS)")
 
 if __name__ == "__main__":
     timer = time.time()
