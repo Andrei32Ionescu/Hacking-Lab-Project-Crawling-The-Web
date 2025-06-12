@@ -1721,25 +1721,19 @@ func crawlForWix(currenturl string, maxdepth int, writeResult func(string, ...in
 	}
 	c.Wait()
 
-	// Print results
-	if gotValid {
-		writeResult("******* Page Title: %s *******\n", pageTitle)
-		writeResult("Page URL: %s\n", currenturl)
-		
-		if isWixSite {
-			writeResult("Platform: Wix\n")
+	// Only print results if it's a Wix site
+	if gotValid && isWixSite && len(wixPlugins) > 0 {
+			writeResult("******* Page Title: %s *******\n", pageTitle)
+			writeResult("Page URL: %s\n", currenturl)
 			
-			if len(wixPlugins) > 0 {
-				writeResult("\nDetected Wix Plugins:\n")
-				for plugin, version := range wixPlugins {
+			writeResult("Detected Wix Plugins:\n")
+			for plugin, version := range wixPlugins {
+				if version == "detected" {
+					writeResult("  - %s: %s\n", plugin, version)
+				} else {
 					writeResult("  - %s: %s\n", plugin, version)
 				}
-			} else {
-				writeResult("\nNo specific Wix plugins detected\n")
 			}
-		} else {
-			writeResult("Platform: Not Wix\n")
-		}
 	}
 
 	return gotValid
