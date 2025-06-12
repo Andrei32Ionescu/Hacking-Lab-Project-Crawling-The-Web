@@ -1,0 +1,14 @@
+
+services:
+  crawler:
+    build: .
+    volumes:
+      - ./output:/app/output        # same host-folder bind mount
+      - ./python_crawlers/urls.txt:/app/urls.txt
+      - ./screenshots:/app/screenshots        # same host-folder bind mount
+
+
+    environment:
+      - PYTHONUNBUFFERED=1          # keeps logs flushing in real time
+    # (optional) override command if you removed run.sh
+    # command: ["python", "main.py"]
