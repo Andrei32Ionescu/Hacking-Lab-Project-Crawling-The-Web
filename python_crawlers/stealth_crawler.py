@@ -46,7 +46,6 @@ successCount = 0
 failCount = 0
 statusCounts = dict()
 status0Errors = dict()
-
 # Patterns for common Wix plugins
 common_wix_plugins = {
     "wixblog":        { "name": "Wix Blog",                  "version_patterns": [r"wixblog[./-](\d+\.\d+\.\d+)"] },
@@ -103,10 +102,18 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
                             plugin_name = match_plugin.group(1)
                             ver = re.search(r"[?&]ver=([^&]+)", asset_url)
                             plugin.append(plugin_name + (f"@{ver.group(1)}" if ver else ""))
+                    if theme:
+                        #Write the theme and plugins to the output file immidiately
+                        WP_OUT = "wordpress_results.txt"         # one constant path
+                        file_lock = multiprocessing.Lock()
 
-                    print(f"URL: {url}")
-                    print(f"Theme: {theme}")
-                    print(f"Plugins: {', '.join(plugin)}")
+                        with file_lock:
+                            with open(WP_OUT, "a") as result_file:
+                                result_file.write(f"{url}\t{theme}\t{', '.join(plugin)}\n")
+
+                        print(f"URL: {url}")
+                        print(f"Theme: {theme}")
+                        print(f"Plugins: {', '.join(plugin)}")
 
                 elif mode == "jssearch":
                     keyword = sys.argv[2] if len(sys.argv) > 2 else None
@@ -484,9 +491,13 @@ def main():
             print("Usage: python stealth_crawler.py apache")
             return
 
+    # Create the output file, append the mode to the filename
+    global file_lock, result_file
+    manager = multiprocessing.Manager()
+    file_lock = manager.Lock()           # shared across processes
+    result_file = open(f"{curr_mode}_results_{time.time()}.txt", "a", buffering=1)
 
     num_cores = multiprocessing.cpu_count()
-    num_cores = 14
     print(f"Running on {num_cores} cores")
 
     manager = multiprocessing.Manager()
