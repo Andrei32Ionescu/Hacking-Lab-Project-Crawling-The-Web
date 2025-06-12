@@ -79,7 +79,15 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
                 print(f"Timeout error for site: {url}")
                 return
             # print("title:", await page.title())
-            await handle_cloudflare_challenge(page, url, options={"verbose": True})
+
+            try:
+                await asyncio.wait_for(
+                    handle_cloudflare_challenge(page, url, options={"verbose": True}),
+                    timeout=15
+                )
+            except (asyncio.TimeoutError, requests.Timeout) as e:
+                print("CF challenge not solved skipping", url)
+                return
             # await page.screenshot(path=outfile, full_page=True)
             try:
                 html = await page.content()
@@ -111,9 +119,9 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
                             with open(WP_OUT, "a") as result_file:
                                 result_file.write(f"{url}\t{theme}\t{', '.join(plugin)}\n")
 
-                        print(f"URL: {url}")
-                        print(f"Theme: {theme}")
-                        print(f"Plugins: {', '.join(plugin)}")
+                    print(f"URL: {url}")
+                        # print(f"Theme: {theme}")
+                        # print(f"Plugins: {', '.join(plugin)}")
 
                 elif mode == "jssearch":
                     keyword = sys.argv[2] if len(sys.argv) > 2 else None
@@ -498,6 +506,7 @@ def main():
     result_file = open(f"{curr_mode}_results_{time.time()}.txt", "a", buffering=1)
 
     num_cores = multiprocessing.cpu_count()
+    num_cores = 12
     print(f"Running on {num_cores} cores")
 
     manager = multiprocessing.Manager()
@@ -512,14 +521,14 @@ def main():
                              })
 
     tasks = []
-    with open("urls.txt", "r") as f:
+    with open("url4.txt", "r") as f:
         urls = f.readlines()
         for raw_url in urls:
             raw_url = raw_url.strip()
             full_url = "https://www." + raw_url
             tasks.append(full_url)
     with multiprocessing.Pool(num_cores) as pool:
-        pool.starmap(sync_grab, [(tasks, counters) for tasks in tasks])
+        pool.starmap(sync_grab, [(tasks, counters) for tasks in tasks], chunksize=1)
 
     if curr_mode == "csp":
         writeResult("\nCSP and XSS Protection Analysis over %d domains:\n", counters['totalCrawled'])
@@ -596,7 +605,7 @@ def show_results(start_ts, request_count, url, found):
 
 if __name__ == "__main__":
     timer = time.time()
-    with open("urls.txt", "r") as f:
+    with open("url4.txt", "r") as f:
         numlines = sum(1 for line in f)
     main()
     print(f"Total time: {time.time() - timer}")

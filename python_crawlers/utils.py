@@ -139,7 +139,7 @@ async def handle_cloudflare_challenge(
     # ------------------------------------------------------------------
     # 6)  Attempt to click up to 10 times (1× sec)
     # ------------------------------------------------------------------
-    for _ in range(100):
+    for _ in range(20):
         await asyncio.sleep(1)
 
         # Break early if page already solved itself
