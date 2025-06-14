@@ -1,0 +1,52 @@
+https://applywithlinkedin.myworkdaygadgets.com  Apache   Unknown  Error page (404)
+https://x.it-cg.group                           Apache   Unknown  Error page (404)
+https://dns3.officekeeper.co.kr                 Apache   Unknown  Server header
+https://e-journal.ar-rum.ac.id                  Apache   Unknown  Server header
+https://sun-cdn.advividnetwork.com              Apache   2.2.15   Error page (404)
+https://hyperlinked.wiki                        Apache   2.4.18   Error page (404)
+https://searchg2.crownpeak.net                  Apache   2.4.3    Server header
+https://dist.entityclouds.com                   Apache   2.4.63   Error page (404)
+https://forms.ksacms.com                        Tomcat   9.0.91   Error page (404)
+https://agoz.me                                 Apache   2.2.15   Error page (404)
+https://view.infinix-stream.pro                 Apache   2.4.41   Error page (404)
+https://odroid.com                              Apache   2.4.18   Error page (404)
+https://www.hyperlinked.wiki                    Apache   2.4.18   Error page (404)
+https://xn--qby37j.com                          Apache   2.4.52   Error page (404)
+https://fotobus.msk.ru                          Apache   2.4.25   Error page (404)
+https://hrsystems.azdoa.gov                     Apache   2.4.41   Error page (404)
+https://advividnetwork.com                      Apache   2.2.15   Error page (404)
+https://forums.dansdeals.com                    Apache   Unknown  Error page (404)
+https://www.jacurutu.com                        Apache   2.4.38   Error page (404)
+https://portal.kareo.com                        Tomcat   8.5.29   Error page (404)
+https://streamjs.investing.com                  Apache   2.4.6    Error page (404)
+https://chaski.org                              Apache   2.4.57   Error page (404)
+https://pluso.ru                                Apache   2.4.41   Error page (403)
+https://tppc.info                               Apache   2.2.22   Error page (404)
+https://cdn-master.it-cg.group                  Apache   Unknown  Error page (404)
+https://punchout.medline.com                    Tomcat   Unknown  X-Powered-By header
+https://ottrun.com                              Apache   2.4.29   Error page (404)
+https://medicareallowanceguide.info             Apache   2.4.63   Error page (404)
+https://imaps.sicurezzapostale.it               Apache   Unknown  Server header
+https://img.mykadri.click                       Apache   2.4.58   Error page (404)
+https://td2ec2in4mv1euwest.teamdrive.net        Apache   Unknown  Server header
+https://vcdn.iclouds.io                         Apache   2.4.41   Error page (404)
+https://trigpointing.uk                         Apache   2.2.22   Error page (404)
+https://checkout3.officekeeper.co.kr            Apache   Unknown  Server header
+https://ourproject.org                          Apache   2.4.10   Error page (404)
+https://www.ourproject.org                      Apache   2.4.10   Error page (404)
+https://maps.neighbor.report                    Apache   2.4.41   Error page (404)
+https://cms-feed.ucl.ac.uk                      Apache   2.4.37   Error page (404)
+https://sbcharts.investing.com                  Apache   2.4.6    Error page (404)
+https://ytlbroadband.my                         Apache   Unknown  Server header
+https://historicmapworks.com                    Apache   2.2.3    Error page (404)
+https://pops.sicurezzapostale.it                Apache   Unknown  Server header
+https://pococo.cc                               Apache   2.4.62   Server header
+https://static.bigideasmath.com                 Apache   2.4.52   Error page (404)
+https://67-72chevytrucks.com                    Apache   Unknown  Error page (404)
+https://trigpointinguk.com                      Apache   2.2.22   Error page (404)
+https://sun.advividnetwork.com                  Apache   2.2.15   Error page (404)
+https://www.67-72chevytrucks.com                Apache   Unknown  Error page (404)
+https://web3.21cineplex.com                     Apache   2.4.18   Error page (404)
+https://data.rec1.com                           Apache   2.4.58   Error page (404)
+https://hrsystems.azdoa.gov                     Apache   2.4.41   Error page (404)
+https://maps.neighbor.report                    Apache   2.4.41   Error page (404)
