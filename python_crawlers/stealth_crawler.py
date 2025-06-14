@@ -10,6 +10,7 @@ from urllib.parse import urljoin, urlparse
 import re
 import multiprocessing, time
 import requests
+from collections import Counter
 import threading
 from collections import defaultdict
 import aiohttp
@@ -55,6 +56,19 @@ common_wix_plugins = {
     "site-search":    { "name": "Wix Site Search",           "version_patterns": [r"site-search[./-](\d+\.\d+\.\d+)"] },
 }
 
+file_lock = multiprocessing.Lock()
+CSP_OUTFILE = "./csp_output.txt"
+APACHE_OUTFILE = "./apache_output.txt"
+
+manager = multiprocessing.Manager()
+status_codes = manager.list()
+net_err_msgs = manager.list()
+
+def _append(path: str, text: str) -> None:
+    with file_lock:
+        with open(path, "a", encoding="utf-8") as fh:
+            fh.write(text.rstrip() + "\n")
+
 def extract_version(text: str, patterns: list[str]) -> str:
     for pat in patterns:
         m = re.search(pat, text, re.I)
@@ -77,6 +91,8 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
 
             except Exception as e:
                 print(f"Timeout error for site: {url}")
+                status_codes.append(0)
+                net_err_msgs.append(str(e))
                 return
             # print("title:", await page.title())
 
@@ -90,7 +106,10 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
                 return
             # await page.screenshot(path=outfile, full_page=True)
             try:
-                html = await page.content()
+                html = await asyncio.wait_for(
+                    page.content(),
+                    timeout=13
+                )
                 soup = BeautifulSoup(html, "html.parser")
 
                 if mode == "wordpress":
@@ -153,173 +172,178 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
                     #     externalScriptCount, evalUsageCount, crossOriginScriptsCount, sameOriginScriptsCount, modernFrameworkCount, \
                     #     sensitiveFormsCount, hdrCTOCount, cookieHttpOnlyCount, outputEncodingCount, inputValidationCount, sandboxedIframesCount, unsafeInlineEventHandlersCount, \
                     #     jsonpEndpointsCount, postMessageUsageCount, riskHighCount, riskMediumCount, riskLowCount, riskMinimalCount, totalCrawled, successCount, failCount, statusCounts, status0Errors
-                    has_csp_hdr = bool(resp and resp.headers.get("content-security-policy"))
-                    has_xcto = resp and resp.headers.get("x-content-type-options", "").lower() == "nosniff"
+                    try:
+                        has_csp_hdr = bool(resp and resp.headers.get("content-security-policy"))
+                        has_xcto = resp and resp.headers.get("x-content-type-options", "").lower() == "nosniff"
 
-                    has_meta_csp = bool(soup.find("meta", attrs={"http-equiv": "Content-Security-Policy"}))
-                    inline_scripts = len(soup.find_all("script", src=False))
-                    inline_styles = len(soup.find_all("style")) + \
-                                    sum(bool(t.get("style")) for t in soup.find_all(attrs={"style": True}))
+                        has_meta_csp = bool(soup.find("meta", attrs={"http-equiv": "Content-Security-Policy"}))
+                        inline_scripts = len(soup.find_all("script", src=False))
+                        inline_styles = len(soup.find_all("style")) + \
+                                        sum(bool(t.get("style")) for t in soup.find_all(attrs={"style": True}))
 
-                    evt_attrs = ["onclick", "onload", "onerror", "onmouseover", "onmouseout",
-                                 "onchange", "onsubmit", "onfocus", "onblur", "onkeyup",
-                                 "onkeydown", "onkeypress"]
-                    inline_evt_handlers = sum(
-                        1 for t in soup.find_all(attrs=lambda attr: attr and any(a in attr for a in evt_attrs))
-                    )
+                        evt_attrs = ["onclick", "onload", "onerror", "onmouseover", "onmouseout",
+                                     "onchange", "onsubmit", "onfocus", "onblur", "onkeyup",
+                                     "onkeydown", "onkeypress"]
+                        inline_evt_handlers = sum(
+                            1 for t in soup.find_all(attrs=lambda attr: attr and any(a in attr for a in evt_attrs))
+                        )
 
-                    same_origin_scripts = 0
-                    cross_origin_scripts = 0
-                    current_host = urlparse(url).hostname
-                    eval_usage = False
-                    post_msg = False
-                    jsonp = False
-                    modern_fw = False
-                    sensitive_form = False
-                    sandbox_ifr = bool(soup.find("iframe", sandbox=True))
+                        same_origin_scripts = 0
+                        cross_origin_scripts = 0
+                        current_host = urlparse(url).hostname
+                        eval_usage = False
+                        post_msg = False
+                        jsonp = False
+                        modern_fw = False
+                        sensitive_form = False
+                        sandbox_ifr = bool(soup.find("iframe", sandbox=True))
 
-                    framework_re = re.compile(r"(react|angular|vue\.|svelte|ember|next\.js|nuxt)", re.I)
-                    eval_re = re.compile(r"\b(eval\s*\(|new\s+Function\s*\()", re.I)
-                    postmsg_re = re.compile(r"\bpostMessage\b", re.I)
-                    jsonp_re = re.compile(r"callback=", re.I)
+                        framework_re = re.compile(r"(react|angular|vue\.|svelte|ember|next\.js|nuxt)", re.I)
+                        eval_re = re.compile(r"\b(eval\s*\(|new\s+Function\s*\()", re.I)
+                        postmsg_re = re.compile(r"\bpostMessage\b", re.I)
+                        jsonp_re = re.compile(r"callback=", re.I)
 
-                    for tag in soup.find_all("script"):
-                        content = tag.string or ""
-                        if not tag.get("src"):
-                            if eval_re.search(content):
-                                eval_usage = True
-                            if framework_re.search(content):
-                                modern_fw = True
-                            if postmsg_re.search(content):
-                                post_msg = True
-                            if jsonp_re.search(content) and "jsonp" in content.lower():
-                                jsonp = True
-                        else:
-                            src = urljoin(url, tag["src"])
-                            host = urlparse(src).hostname
-                            if host == current_host:
-                                same_origin_scripts += 1
+                        for tag in soup.find_all("script"):
+                            content = tag.string or ""
+                            if not tag.get("src"):
+                                if eval_re.search(content):
+                                    eval_usage = True
+                                if framework_re.search(content):
+                                    modern_fw = True
+                                if postmsg_re.search(content):
+                                    post_msg = True
+                                if jsonp_re.search(content) and "jsonp" in content.lower():
+                                    jsonp = True
                             else:
-                                cross_origin_scripts += 1
+                                src = urljoin(url, tag["src"])
+                                host = urlparse(src).hostname
+                                if host == current_host:
+                                    same_origin_scripts += 1
+                                else:
+                                    cross_origin_scripts += 1
 
-                    for form in soup.find_all("form"):
-                        for inp in form.find_all("input"):
-                            tp = (inp.get("type") or "").lower()
-                            nm = (inp.get("name") or "").lower()
-                            fid = (inp.get("id") or "").lower()
-                            if tp in ("password", "email", "tel") or \
-                                    any(k in nm for k in ("pass", "card", "cvv", "ssn")) or \
-                                    any(k in fid for k in ("pass", "card", "cvv", "ssn")):
-                                sensitive_form = True
-                                break
+                        for form in soup.find_all("form"):
+                            for inp in form.find_all("input"):
+                                tp = (inp.get("type") or "").lower()
+                                nm = (inp.get("name") or "").lower()
+                                fid = (inp.get("id") or "").lower()
+                                if tp in ("password", "email", "tel") or \
+                                        any(k in nm for k in ("pass", "card", "cvv", "ssn")) or \
+                                        any(k in fid for k in ("pass", "card", "cvv", "ssn")):
+                                    sensitive_form = True
+                                    break
 
-                    risk = 0
-                    mitigation = 0
+                        risk = 0
+                        mitigation = 0
 
-                    risk += inline_scripts > 0
-                    risk += inline_evt_handlers > 0
-                    risk += inline_styles > 0
-                    risk += eval_usage
-                    risk += cross_origin_scripts > 0
-                    risk += sensitive_form
-                    risk += post_msg
-                    risk += jsonp
+                        risk += inline_scripts > 0
+                        risk += inline_evt_handlers > 0
+                        risk += inline_styles > 0
+                        risk += eval_usage
+                        risk += cross_origin_scripts > 0
+                        risk += sensitive_form
+                        risk += post_msg
+                        risk += jsonp
 
-                    mitigation += has_csp_hdr or has_meta_csp
-                    mitigation += modern_fw
-                    mitigation += has_xcto
-                    mitigation += sandbox_ifr
-                    mitigation += same_origin_scripts > cross_origin_scripts
+                        mitigation += has_csp_hdr or has_meta_csp
+                        mitigation += modern_fw
+                        mitigation += has_xcto
+                        mitigation += sandbox_ifr
+                        mitigation += same_origin_scripts > cross_origin_scripts
 
-                    net = risk - mitigation
-                    if net >= 4:
-                        risk_level = "High"
-                    elif net >= 3:
-                        risk_level = "Medium"
-                    elif net >= 2:
-                        risk_level = "Low"
-                    else:
-                        risk_level = "Minimal"
+                        net = risk - mitigation
+                        if net >= 4:
+                            risk_level = "High"
+                        elif net >= 3:
+                            risk_level = "Medium"
+                        elif net >= 2:
+                            risk_level = "Low"
+                        else:
+                            risk_level = "Minimal"
 
-                    # print(
-                    #     f"[CSP]\t{url}\t"
-                    #     f"CSP_Header={int(has_csp_hdr)}\tMeta_CSP={int(has_meta_csp)}\t"
-                    #     f"InlineJS={inline_scripts}\tInlineCSS={inline_styles}\tEvtAttr={inline_evt_handlers}\t"
-                    #     f"SameJS={same_origin_scripts}\tXSiteJS={cross_origin_scripts}\t"
-                    #     f"Eval={int(eval_usage)}\tpostMessage={int(post_msg)}\tJSONP={int(jsonp)}\t"
-                    #     f"ModernFW={int(modern_fw)}\tXCTO={int(has_xcto)}\tSandboxIFR={int(sandbox_ifr)}\t"
-                    #     f"SensitiveForm={int(sensitive_form)}\tRisk={risk_level}"
-                    # )
+                        # print(
+                        #     f"[CSP]\t{url}\t"
+                        #     f"CSP_Header={int(has_csp_hdr)}\tMeta_CSP={int(has_meta_csp)}\t"
+                        #     f"InlineJS={inline_scripts}\tInlineCSS={inline_styles}\tEvtAttr={inline_evt_handlers}\t"
+                        #     f"SameJS={same_origin_scripts}\tXSiteJS={cross_origin_scripts}\t"
+                        #     f"Eval={int(eval_usage)}\tpostMessage={int(post_msg)}\tJSONP={int(jsonp)}\t"
+                        #     f"ModernFW={int(modern_fw)}\tXCTO={int(has_xcto)}\tSandboxIFR={int(sandbox_ifr)}\t"
+                        #     f"SensitiveForm={int(sensitive_form)}\tRisk={risk_level}"
+                        # )
 
-                    counters['totalCrawled'] += 1
-                    counters['successCount'] += 1
+                        counters['totalCrawled'] += 1
+                        counters['successCount'] += 1
 
-                    counters['hasCSPHeaderCount'] += has_csp_hdr
-                    counters['hasMetaCSPCount'] += has_meta_csp
-                    counters['inlineScriptCount'] += inline_scripts
-                    counters['unsafeInlineEventHandlersCount'] += inline_evt_handlers
-                    counters['inlineStyleCount'] += inline_styles
-                    counters['evalUsageCount'] += int(eval_usage)
-                    counters['postMessageUsageCount'] += int(post_msg)
-                    counters['jsonpEndpointsCount'] += int(jsonp)
-                    counters['externalScriptCount'] += same_origin_scripts + cross_origin_scripts
-                    counters['sameOriginScriptsCount'] += same_origin_scripts
-                    counters['crossOriginScriptsCount'] += cross_origin_scripts
-                    counters['modernFrameworkCount'] += int(modern_fw)
-                    counters['hdrCTOCount'] += int(has_xcto)
-                    counters['sandboxedIframesCount'] += int(sandbox_ifr)
-                    counters['sensitiveFormsCount'] += int(sensitive_form)
-                    if not (has_csp_hdr or has_meta_csp):
-                        if risk_level == "High":
-                            counters['riskHighCount'] += 1
-                        elif risk_level == "Medium":
-                            counters['riskMediumCount'] += 1
-                        elif risk_level == "Low":
-                            counters['riskLowCount'] += 1
-                        elif risk_level == "Minimal":
-                            counters['riskMinimalCount'] += 1
+                        counters['hasCSPHeaderCount'] += has_csp_hdr
+                        counters['hasMetaCSPCount'] += has_meta_csp
+                        counters['inlineScriptCount'] += inline_scripts
+                        counters['unsafeInlineEventHandlersCount'] += inline_evt_handlers
+                        counters['inlineStyleCount'] += inline_styles
+                        counters['evalUsageCount'] += int(eval_usage)
+                        counters['postMessageUsageCount'] += int(post_msg)
+                        counters['jsonpEndpointsCount'] += int(jsonp)
+                        counters['externalScriptCount'] += same_origin_scripts + cross_origin_scripts
+                        counters['sameOriginScriptsCount'] += same_origin_scripts
+                        counters['crossOriginScriptsCount'] += cross_origin_scripts
+                        counters['modernFrameworkCount'] += int(modern_fw)
+                        counters['hdrCTOCount'] += int(has_xcto)
+                        counters['sandboxedIframesCount'] += int(sandbox_ifr)
+                        counters['sensitiveFormsCount'] += int(sensitive_form)
+                        if not (has_csp_hdr or has_meta_csp):
+                            if risk_level == "High":
+                                counters['riskHighCount'] += 1
+                            elif risk_level == "Medium":
+                                counters['riskMediumCount'] += 1
+                            elif risk_level == "Low":
+                                counters['riskLowCount'] += 1
+                            elif risk_level == "Minimal":
+                                counters['riskMinimalCount'] += 1
 
-                    protections = []
-                    if has_csp_hdr or has_meta_csp:
-                        protections.append("CSP")
-                    if has_xcto:
-                        protections.append("XCTO")
-                    if modern_fw:
-                        protections.append("Framework")
-                    if sandbox_ifr:
-                        protections.append("Sandbox")
+                        protections = []
+                        if has_csp_hdr or has_meta_csp:
+                            protections.append("CSP")
+                        if has_xcto:
+                            protections.append("XCTO")
+                        if modern_fw:
+                            protections.append("Framework")
+                        if sandbox_ifr:
+                            protections.append("Sandbox")
 
-                    risks = []
-                    if inline_scripts:
-                        risks.append("InlineJS")
-                    if inline_evt_handlers:
-                        risks.append("EventHandlers")
-                    if inline_styles:
-                        risks.append("InlineCSS")
-                    if eval_usage:
-                        risks.append("Eval")
-                    if cross_origin_scripts:
-                        risks.append(f"XOrigin({cross_origin_scripts})")
-                    if sensitive_form:
-                        risks.append("SensitiveForms")
-                    if post_msg:
-                        risks.append("PostMessage")
-                    if jsonp:
-                        risks.append("JSONP")
+                        risks = []
+                        if inline_scripts:
+                            risks.append("InlineJS")
+                        if inline_evt_handlers:
+                            risks.append("EventHandlers")
+                        if inline_styles:
+                            risks.append("InlineCSS")
+                        if eval_usage:
+                            risks.append("Eval")
+                        if cross_origin_scripts:
+                            risks.append(f"XOrigin({cross_origin_scripts})")
+                        if sensitive_form:
+                            risks.append("SensitiveForms")
+                        if post_msg:
+                            risks.append("PostMessage")
+                        if jsonp:
+                            risks.append("JSONP")
 
-                    prot_str = ", ".join(protections) if protections else "None"
-                    risk_str = ", ".join(risks) if risks else "None"
+                        prot_str = ", ".join(protections) if protections else "None"
+                        risk_str = ", ".join(risks) if risks else "None"
 
-                    print(
-                        f"SITE: {url} | "
-                        f"RISK LEVEL: {risk_level.upper()} | "
-                        f"PROTECTIONS: {prot_str} | "
-                        f"RISKS: {risk_str} | "
-                        f"SCRIPTS: {same_origin_scripts} same-origin, {cross_origin_scripts} cross-origin"
-                    )
+                        site_line = (
+                            f"SITE: {url} | "
+                            f"RISK LEVEL: {risk_level.upper()} | "
+                            f"PROTECTIONS: {','.join(protections) if protections else 'none'} | "
+                            f"RISKS: {','.join(risks) if risks else 'none'} | "
+                            f"SCRIPTS: {same_origin_scripts} same-origin, {cross_origin_scripts} cross-origin"
+                        )
+                        print(site_line)
+                        _append(CSP_OUTFILE, site_line)
+                    except:
+                        status_codes.pop(len(status_codes) - 1)
+                        return
 
-
-                elif mode in ("apache"):
+                elif mode == "apache":
                     start_ts = time.time()
                     request_count = 0
                     ctx_req = page.context.request
@@ -393,7 +417,8 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
                             if m:
                                 found["Tomcat"]["version"] = m.group(1)
                                 found["Tomcat"]["source"] = "RELEASE-NOTES.txt"
-                    show_results(start_ts, request_count, url, found)
+                    # show_results(start_ts, request_count, url, found)
+                    write_results(start_ts, request_count, url, found, APACHE_OUTFILE)
 
                 elif mode == "wix":
                     is_wix_site = False
@@ -474,8 +499,81 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
             # k = 1|000|000|000
 
 
+# def writeResult(fmt, *args):
+#     print(fmt % args)
+
 def writeResult(fmt, *args):
-    print(fmt % args)
+    line = fmt % args
+    print(line, end="")
+    _append(CSP_OUTFILE, line.rstrip())
+
+def _out(line: str = "") -> None:
+    print(line)
+    _append(CSP_OUTFILE, line)
+
+def write_footer(mode: str, root_domains: int, concurrency: int, counters):
+    valid   = counters['successCount']
+    failed  = counters['failedCount']
+    # pending = counters['pending']
+
+    _out("Scraped 0 urls")
+    _out(f"Scraped {root_domains} root domains")
+    _out("Scraped 0 urls per second")
+    _out(f"Concurrency: {concurrency}")
+    _out(f"Mode: {mode}")
+    _out("Depth: 1")
+    _out(f"Valid responses: {valid}")
+    _out(f"Failed responses: {failed}")
+    # _out(f"Pending (retry): {pending}")
+
+    sc_hist = Counter(status_codes)
+    _out("Status code breakdown:")
+    for code, n in sorted(sc_hist.items()):
+        _out(f"  {code:3}: {n}")
+
+    if net_err_msgs:
+        grp = Counter(m.split(":")[0][:60] for m in net_err_msgs)
+        _out("Status 0 error breakdown (grouped network errors):")
+        for msg, n in grp.most_common(10):
+            _out(f"  {msg}: {n}")
+        remaining = len(grp) - 10
+        if remaining > 0:
+            _out(f"  ...and {remaining} more")
+        _out(f"Total status 0 (network) errors: {len(net_err_msgs)}")
+        pct = 100 * len(net_err_msgs) / failed if failed else 0
+        _out(f"Status 0 errors: {len(net_err_msgs)} ({pct:.1f}% of all failed responses)")
+
+    if counters.get('cf403Count', 0):
+        _out(f"Cloudflare 403 Forbidden errors: {counters['cf403Count']}")
+
+def write_results(start_ts, request_count, url, found, outfile_path="./APACHE_OUTPUT.txt"):
+    duration = time.time() - start_ts
+    rps = request_count / duration if duration else 0
+    err_out = "./err_apache_output.txt"
+    lines = [f"URL: {url}"]
+    if "Tomcat" in found:
+        info = found["Tomcat"]
+        version = info["version"] or "Unknown"
+        source = info["source"]
+        lines.append("  Tomcat Detected: Yes")
+        lines.append(f"  Tomcat Version: {version} (Source: {source})")
+    elif "Apache" in found:
+        info = found["Apache"]
+        version = info["version"] or "Unknown"
+        source = info["source"]
+        lines.append("  Apache Detected: Yes")
+        lines.append(f"  Apache Version: {version} (Source: {source})\n")
+    else:
+        lines.append("  Nothing detected\n")
+
+    output = "\n".join(lines) + "\n"
+
+    output = "\n".join(lines)
+    print(output)
+    if outfile_path:
+        with open(outfile_path, "a") as f:
+            f.write(output + "\n\n")
+
 
 def main():
     os.makedirs(SCREENSHOT_DIR, exist_ok=True)
@@ -517,7 +615,7 @@ def main():
                              'crossOriginScriptsCount': 0, 'modernFrameworkCount': 0, 'hdrCTOCount': 0,
                              'outputEncodingCount': 0, 'inputValidationCount': 0, 'sandboxedIframesCount': 0,
                              'cookieHttpOnlyCount': 0, 'sensitiveFormsCount': 0, 'riskHighCount': 0, 'riskMediumCount': 0,
-                             'riskLowCount': 0, 'riskMinimalCount': 0, 'protections': []
+                             'riskLowCount': 0, 'riskMinimalCount': 0, 'protections': [], 'cf403Count': 0, 'failedCount': 0
                              })
 
     tasks = []
@@ -527,7 +625,8 @@ def main():
             raw_url = raw_url.strip()
             full_url = "https://www." + raw_url
             tasks.append(full_url)
-    with multiprocessing.Pool(num_cores) as pool:
+    lock = multiprocessing.Lock()
+    with multiprocessing.Pool(num_cores, initializer=_init_pool_process, initargs=(lock,)) as pool:
         pool.starmap(sync_grab, [(tasks, counters) for tasks in tasks], chunksize=1)
 
     if curr_mode == "csp":
@@ -578,6 +677,12 @@ def main():
         writeResult("  Minimal risk: %d (%.1f%%)\n", counters['riskMinimalCount'],
                     (counters['riskMinimalCount'] / counters['successCount']) * 100)
 
+        write_footer(
+            curr_mode,
+            len(tasks),
+            num_cores,
+            counters)
+
 def sync_grab(full_url, counters):
     url = full_url.split("https://www.")[-1]
     # print(full_url)
@@ -589,6 +694,10 @@ def ensure_srv(key, found):
         key,
         {"version": "", "comment": "", "source": ""}
     )
+
+def _init_pool_process(l):
+    global file_lock
+    file_lock = l
 
 def show_results(start_ts, request_count, url, found):
     duration = time.time() - start_ts
