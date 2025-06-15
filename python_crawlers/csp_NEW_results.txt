@@ -2526,15 +2526,15 @@ Scraped 0 urls per second
 Concurrency: 10
 Mode: csp
 Depth: 1
-Valid responses: 2489
-Failed responses: 7121
+Valid responses: 2492
+Failed responses: 7148
 Status code breakdown:
     0: 93
   200: 2489
   203: 3
   400: 26
   401: 6
-  403: 6715
+  403: 6802
   404: 179
   405: 4
   418: 1
