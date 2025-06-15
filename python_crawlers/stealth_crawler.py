@@ -400,6 +400,7 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
                         _append(CSP_OUTFILE, site_line)
                     except:
                         status_codes.pop(len(status_codes) - 1)
+                        counters['failedCount'] += 1
                         return
 
                 elif mode == "apache":
@@ -549,6 +550,7 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
             except Exception as e:
                 print(e)
                 print(f"Error processing {url}: {e}")
+                counters['failedCount'] += 1
                 return
 
             await page.close()
