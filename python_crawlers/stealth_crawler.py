@@ -87,12 +87,16 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
             theme = None
             try:
                 resp = await page.goto(url, wait_until="domcontentloaded", timeout=10000)
-                await asyncio.sleep(0.5)      
+                await asyncio.sleep(0.5)
+
+                if resp:
+                    status_codes.append(resp.status)
 
             except Exception as e:
                 print(f"Timeout error for site: {url}")
                 status_codes.append(0)
                 net_err_msgs.append(str(e))
+                counters['failedCount'] += 1
                 return
             # print("title:", await page.title())
 
@@ -103,6 +107,7 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
                 )
             except (asyncio.TimeoutError, requests.Timeout) as e:
                 print("CF challenge not solved skipping", url)
+                counters['failedCount'] += 1
                 return
             # await page.screenshot(path=outfile, full_page=True)
             try:
@@ -203,6 +208,18 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
                         postmsg_re = re.compile(r"\bpostMessage\b", re.I)
                         jsonp_re = re.compile(r"callback=", re.I)
 
+                        encoding_re = re.compile(
+                            r"(escapehtml|escape_html|htmlescape|encodeuricomponent|"
+                            r"_.escape|handlebars\.escapeexpression|dompurify|sanitize(?!r)|"
+                            r"textcontent|innertext|createtextnode|he\.encode|html-entities|"
+                            r"escape-html|sanitize-html|xss-filters)", re.I
+                        )
+                        validation_attrs = {"pattern", "required", "minlength", "maxlength"}
+
+                        has_output_encoding = False
+                        has_input_validation = False
+                        has_httponly_cookie = False
+
                         for tag in soup.find_all("script"):
                             content = tag.string or ""
                             if not tag.get("src"):
@@ -214,6 +231,8 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
                                     post_msg = True
                                 if jsonp_re.search(content) and "jsonp" in content.lower():
                                     jsonp = True
+                                if not has_output_encoding and encoding_re.search(content):
+                                    has_output_encoding = True
                             else:
                                 src = urljoin(url, tag["src"])
                                 host = urlparse(src).hostname
@@ -233,6 +252,11 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
                                     sensitive_form = True
                                     break
 
+                        for elt in soup.find_all(["input", "select", "textarea"]):
+                            if validation_attrs.intersection(elt.attrs):
+                                has_input_validation = True
+                                break
+
                         risk = 0
                         mitigation = 0
 
@@ -250,6 +274,8 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
                         mitigation += has_xcto
                         mitigation += sandbox_ifr
                         mitigation += same_origin_scripts > cross_origin_scripts
+                        mitigation += has_output_encoding
+                        mitigation += has_input_validation
 
                         net = risk - mitigation
                         if net >= 4:
@@ -272,7 +298,37 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
                         # )
 
                         counters['totalCrawled'] += 1
-                        counters['successCount'] += 1
+                        cloudflare_domains = manager.dict()
+                        if resp and resp.status == 403:
+                            try:
+                                body_text = await resp.text()
+                            except Exception:
+                                body_text = ""
+
+                            if body_text and ("cloudflare" in body_text.lower()
+                                              or "_cf_chl_opt" in body_text.lower()):
+                                counters['cf403Count'] += 1
+                                counters['failedCount'] += 1
+                                domain = urlparse(resp.url).hostname
+                                if domain:
+                                    cloudflare_domains[domain] = True
+                            return
+
+                        if resp and 200 <= resp.status < 300:
+                            counters['successCount'] += 1
+                        elif resp and resp.status != 0:
+                            counters['failedCount'] += 1
+                            return
+
+                        set_cookie_vals = []
+                        for k, v in (resp.headers or {}).items():
+                            if k.lower() == "set-cookie":
+                                set_cookie_vals.extend(v if isinstance(v, list) else [v])
+
+                        for ck in set_cookie_vals:
+                            if "httponly" in ck.lower():
+                                has_httponly_cookie = True
+                                break
 
                         counters['hasCSPHeaderCount'] += has_csp_hdr
                         counters['hasMetaCSPCount'] += has_meta_csp
@@ -289,6 +345,9 @@ async def grab(url: str, outfile: str, mode: str, counters) -> None:
                         counters['hdrCTOCount'] += int(has_xcto)
                         counters['sandboxedIframesCount'] += int(sandbox_ifr)
                         counters['sensitiveFormsCount'] += int(sensitive_form)
+                        counters['outputEncodingCount'] += int(has_output_encoding)
+                        counters['inputValidationCount'] += int(has_input_validation)
+                        counters['cookieHttpOnlyCount'] += int(has_httponly_cookie)
                         if not (has_csp_hdr or has_meta_csp):
                             if risk_level == "High":
                                 counters['riskHighCount'] += 1
@@ -514,7 +573,6 @@ def _out(line: str = "") -> None:
 def write_footer(mode: str, root_domains: int, concurrency: int, counters):
     valid   = counters['successCount']
     failed  = counters['failedCount']
-    # pending = counters['pending']
 
     _out("Scraped 0 urls")
     _out(f"Scraped {root_domains} root domains")
@@ -524,7 +582,6 @@ def write_footer(mode: str, root_domains: int, concurrency: int, counters):
     _out("Depth: 1")
     _out(f"Valid responses: {valid}")
     _out(f"Failed responses: {failed}")
-    # _out(f"Pending (retry): {pending}")
 
     sc_hist = Counter(status_codes)
     _out("Status code breakdown:")
